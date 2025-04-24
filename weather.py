@@ -5,8 +5,14 @@ from pyowm.owm import OWM
 from pyowm.utils.config import get_default_config
 from pyowm.commons.exceptions import PyOWMError
 
-# Load environment variables from .env file
-load_dotenv()
+# Load environment variables from .weather.env file
+# This file should contain the OWM_API_KEY and OWM_UNITS variables
+# Example:
+# OWM_API_KEY=your_api_key_here
+# OWM_UNITS=metric
+# Make sure to create a .weather.env file in the home directory
+# or the same directory as this script with the above content.
+load_dotenv(dotenv_path=".weather.env")
 
 WEATHER_EMOJI_MAP = {
     "clear": "☀️",
