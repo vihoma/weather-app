@@ -293,3 +293,6 @@ if __name__ == "__main__":
         print(f"Configuration error: {e}")
     except Exception as e:
         print(f"An unexpected error occurred while running WeatherApp: {e}")
+    except KeyboardInterrupt:
+        print("\n\nGoodbye!")
+        exit
