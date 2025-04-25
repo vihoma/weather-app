@@ -5,7 +5,7 @@
 
 ## Usage
 
-1. Install required packages: `pip install pyowm python-dotenv`
+1. Install required packages: `pip install -r requirements.txt`
 
 2. Create a `.weather.env` file in the home directory or the same directory
 as this script and add your OWM_API_KEY and OWM_UNITS variables.
