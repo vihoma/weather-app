@@ -1,4 +1,14 @@
 #!python
+# -*- coding: utf-8 -*-
+"""
+weather.py
+A simple weather application using the OpenWeatherMap API.
+This script fetches and displays current weather data for a specified city.
+It allows the user to set the API key and choose between metric, imperial,
+or default units.
+"""
+
+# Import necessary libraries
 import os
 from dotenv import load_dotenv
 from pyowm.owm import OWM
@@ -14,6 +24,13 @@ from pyowm.commons.exceptions import PyOWMError
 # or the same directory as this script with the above content.
 load_dotenv(dotenv_path=".weather.env")
 
+# Define a mapping of weather conditions to emojis
+# This mapping is used to display a corresponding emoji for each weather condition
+# The emojis are chosen to represent the weather conditions visually
+# The mapping is a dictionary where the keys are the weather conditions
+# and the values are the corresponding emojis.
+# The keys are in lowercase to ensure consistency and avoid case sensitivity issues
+# when comparing or using them in the application.
 WEATHER_EMOJI_MAP = {
     "clear": "☀️",
     "scattered clouds": "🌤️",
@@ -35,10 +52,13 @@ WEATHER_EMOJI_MAP = {
 }
 
 class WeatherApp:
+    """
+    A class to interact with the OpenWeatherMap API and fetch weather data.
+    """
     def __init__(self):
         """
-        Initialize the WeatherApp with the API key and units from environment variables.
-        Configures PyOWM to use SSL.
+        Initialize the WeatherApp with the API key and units from environment
+        variables. Configures PyOWM to use SSL.
         Raises ValueError if the API key is not found.
         """
         self._api_key = os.getenv("OWM_API_KEY")
@@ -47,11 +67,38 @@ class WeatherApp:
 
         self._units = os.getenv("OWM_UNITS")
         if not self._units:
-            print("No units from environment, initially using default units (°K, m/s & m).")
+            print("No units from environment, initially using default " +
+                  "units (°K, m/s & m).")
             self._units = "default"
-
+        # The city name is initially set to None
+        # and will be set later when the user provides it
+        self._city_name = None
+        # The config_dict is used to set the SSL configuration and other
+        # settings for the OWM instance
         config_dict = get_default_config()
+        # Set the use_ssl option to True for secure communication
+        # with the OpenWeatherMap API
+        # This is important for security reasons, as it ensures that the data
+        # transmitted between the client and server is encrypted
+        # and protected from eavesdropping or tampering.
+        # The config_dict is a dictionary that contains various configuration
+        # options for the OWM instance, such as the API key, language,
+        # and units of measurement.
+        # By default, the config_dict is set to use SSL, but it can be
+        # modified to use HTTP instead if needed.
+        # However, using HTTP is not recommended for production use,
+        # as it exposes the data to potential security risks.
         config_dict["use_ssl"] = True
+        # Initialize the OWM instance with the API key and config_dict
+        # The OWM instance is the main entry point for interacting with
+        # the OpenWeatherMap API and provides methods for fetching weather
+        # data, forecasts, and other information.
+        # The OWM instance is created with the API key and config_dict
+        # as parameters, which are used to authenticate the client
+        # and configure the settings for the API requests.
+        # The OWM instance is then used to create a WeatherManager instance,
+        # which is responsible for managing the weather data and providing
+        # methods for fetching and processing the weather information.
         self.owm = OWM(self._api_key, config_dict)
 
     def get_api_key(self):
@@ -88,25 +135,41 @@ class WeatherApp:
         :param new_units: The new units to set ('metric', 'imperial', or 'default').
         :raises ValueError: If the provided units are not valid.
         """
-        valid_units = ["metric", "imperial", "default"]
+        valid_units = ["m", "i", "d", "s"]
+        if not new_units:
+            raise ValueError("Units cannot be empty.")
         if new_units.lower() not in valid_units:
-            raise ValueError(f"Invalid units: '{new_units}'. Must be one of {valid_units}.")
-        self._units = new_units.lower()
-        print(f"Units updated to '{self.get_units()}'.")
+            raise ValueError(f"Invalid units: '{new_units}'. " +
+                             f"Must be one of {valid_units}.")
+        if new_units.lower() in ["d", "s"]:
+            self._units = "default"
+            print("Default units (°K, m/s & m) are set.")
+        elif new_units.lower() == "m":
+            self._units = "metric"
+            print("Metric units (°C, m/s & km) are set.")
+        elif new_units.lower() == "i":
+            self._units = "imperial"
+            print("Imperial units (°F, mph & mi) are set.")
+        # Set the new units
+        # The units are stored in lowercase to ensure consistency
+        # and avoid case sensitivity issues when comparing or using them
+        # in the application.
+        print(f"Units updated to '{self.get_units().capitalize()}'.")
 
-    def get_weather(self, city):
+    def fetch_weather(self):
         """
         Fetch the current weather data for a specified city.
-
-        :param city: The name of the city to fetch weather data for
         :return: A dictionary containing the weather data, or None if an error occurs
         """
+        city = self.get_city_name()
+
         try:
             weather_manager = self.owm.weather_manager()
             observation = weather_manager.weather_at_place(city)
             weather = observation.weather
         except PyOWMError as e:
-            print(f"An error occurred while fetching weather data for '{city}': {e}")
+            print("An error occurred while fetching weather data for " +
+                  f"'{city}': {e}")
             return None
 
         if not weather:
@@ -128,7 +191,8 @@ class WeatherApp:
                 dist_unit = "meters"
             else:
                 # Handle cases where self._units is not set or invalid
-                print(f"Warning: Invalid units '{self._units}'. Using default units.")
+                print(f"Warning: Invalid units '{self._units}'. " +
+                      "Using default units.")
                 self.set_units("default")
                 temp_unit = "kelvin"
                 speed_unit = "meters_sec"
@@ -140,7 +204,8 @@ class WeatherApp:
                 "temperature": weather.temperature(temp_unit).get("temp"),
                 "feels_like": weather.temperature(temp_unit).get("feels_like"),
                 "humidity": weather.humidity,
-                "wind_speed": round(weather.wind(speed_unit).get("speed", 0), 2),
+                "wind_speed":
+                    round(weather.wind(speed_unit).get("speed", 0), 2),
                 "wind_direction": weather.wind().get("deg"),
                 "detailed_status": weather.detailed_status,
                 "icon": weather.weather_icon_url(),
@@ -153,7 +218,7 @@ class WeatherApp:
             print(f"An error occurred while processing weather data: {e}")
             return None
 
-    def display_weather(self, city, weather_data):
+    def display_weather(self, weather_data):
         """
         Display the fetched weather data in a readable format.
 
@@ -167,10 +232,18 @@ class WeatherApp:
         units = weather_data.get("units", "unknown")
 
         emoji = self.get_weather_emoji(weather_data["detailed_status"])
-        wind_direction = self.get_wind_direction(weather_data["wind_direction"])
+        wind_direction = self.solve_wind_direction(
+            weather_data["wind_direction"]
+            )
         letters = wind_direction[0]
         arrow = wind_direction[1]
+        # Set default units for temperature, wind speed, and distance
+        temp_unit = "°K"
+        speed_unit = "m/s"
+        dist_unit = "m"
 
+        # Determine the units to display based on the user's choice
+        # and the environment variable
         if units == "metric":
             temp_unit = "°C"
             speed_unit = "m/s"
@@ -185,11 +258,9 @@ class WeatherApp:
             dist_unit = "m"
         elif units == "unknown":
             print("No units selected or found in environment, using default units.")
-            temp_unit = "°K"
-            speed_unit = "m/s"
-            dist_unit = "m"
 
-        print(f"{emoji} Weather in 🏙️ {city}:")
+        # Print the weather information
+        print(f"{emoji} Weather in 🏙️ {self._city_name}:")
         print(f"> Condition: {emoji} {weather_data['detailed_status'].capitalize()}")
         print(f"> Temperature:🌡️ {weather_data['temperature']}{temp_unit}")
         print(f"> Feels Like:🌡️ {weather_data['feels_like']}{temp_unit}")
@@ -214,85 +285,194 @@ class WeatherApp:
                 return emoji
         return "🌈"  # Default emoji
 
-    def get_wind_direction(self, wind_deg):
+    def solve_wind_direction(self, wind_deg):
         """
         Convert wind direction degrees to a cardinal direction.
 
         :param wind_deg: An integer representing the wind direction in degrees
-        :return: A string containing the formatted cardinal direction (e.g., SW) and an arrow.
+        :return: A string containing the formatted cardinal direction
+        (e.g., SW) and an Unicode arrow (e.g., ↘️)
         """
         if wind_deg is None:
             return ["?", "?"]
 
+        # Normalize the wind direction to a value between 0 and 360
+        wind_deg = wind_deg % 360
+        # Determine the cardinal direction based on the wind degree
+        # The wind direction is divided into 8 sectors (N, NE, E, SE, S, SW, W, NW)
+        # Each sector corresponds to a range of 45 degrees
         directions = ["N", "NE", "E", "SE", "S", "SW", "W", "NW"]
+        # Calculate the index of the direction based on the wind degree
+        # The index is calculated by dividing the wind degree by 45
+        # and taking the modulus with 8 to ensure it wraps around
         index = int((wind_deg + 22.5) / 45) % 8
-        #arrows = ["⬇️", "↙️", "⬅️", "↖️", "⬆️", "↗️", "➞ ", "↘️"]
+        # The index is used to get the corresponding direction from the list
+        # The index is also used to get the corresponding arrow from the list
+        # The arrows are chosen to represent the wind direction visually
         arrows = ["⬇️", "↙️", "⬅️", "↖️", "⬆️", "↗️", "➡️", "↘️"]
+
+        # Return the direction and the corresponding arrow
         return [directions[index], arrows[index]]
 
+    def read_city_name(self):
+        """
+        Get the name of the city from the user, validate and set it.
+        :raises ValueError: If the city name is invalid or empty.
+        """
+        city = input("Enter city name: ").strip()
+
+        # Check if the city name is empty
+        # and raise an error if it is
+        if not city:
+            raise ValueError("City name cannot be empty.")
+        # Check if the city name contains only letters and spaces
+        if not all(c.isalpha() or c.isspace() for c in city):
+            raise ValueError("City name can only contain letters and spaces.")
+        # Check if the city name is too long
+        if len(city) > 100:
+            raise ValueError("City name is too long. " +
+                             "Please enter a shorter name.")
+        # Check if the city name is too short
+        if len(city) < 2:
+            raise ValueError("City name is too short. " +
+                             "Please enter a longer name.")
+        # Check if the city name contains any special characters
+        if not city.replace(" ", "").isalnum():
+            raise ValueError("City name can only contain letters and spaces.")
+        # Check if the city name contains any numbers
+        if any(c.isdigit() for c in city):
+            raise ValueError("City name cannot contain numbers.")
+        # Check if the city name contains any special characters
+        if any(c in "!@#$%^&*()_+-=[]{}|;':\".<>?/" for c in city):
+            raise ValueError("City name cannot contain special characters " +
+                             "except a colon (,) before area.")
+        # Check if the city name contains any leading or trailing spaces
+        if city != city.strip():
+            raise ValueError("City name cannot contain leading or trailing spaces.")
+        # Check if the city name contains any extra spaces
+        if "  " in city:
+            raise ValueError("City name cannot contain extra spaces.")
+        # Check if the city name contains any non-ASCII characters
+        # (e.g., emojis, non-ASCII characters)
+        if not all(ord(c) < 128 for c in city):
+            raise ValueError("City name cannot contain non-ASCII characters.")
+        # Check if the city name contains any non-printable characters
+        if not all(c.isprintable() for c in city):
+            raise ValueError("City name cannot contain non-printable characters.")
+
+        self.set_city_name(city)
+
+    def set_city_name(self, city):
+        """
+        Set the name of the city.
+        :param city: The name of the city to set.
+        """
+        if not city:
+            raise ValueError("City name cannot be empty.")
+
+        self._city_name = city
+        print(f"City name updated to '{self._city_name}'.")
+
+    def read_unit(self):
+        """
+        Get the unit of measurement from the user and set it.
+        """
+        prompt = "Enter unit ([M]etric, [I]mperial, [D]efault/[S]cientific): "
+        # Prompt the user for the unit of measurement
+        unit = input(prompt).strip().lower()
+        # Check if the unit is one of the valid units
+        # and raise an error if it is not
+        valid_units = ["m", "i", "d", "s"]
+        unit_strings = {
+            "m": "metric",
+            "i": "imperial",
+            "d": "default",
+            "s": "scientific"
+        }
+
+        while True:
+            # Check if the unit is empty and raise an error if it is
+            if not unit:
+                raise ValueError("Unit cannot be empty, try again.")
+            # Check if the unit is too long and raise an error if it is
+            if len(unit) > 1:
+                raise ValueError("Unit is too long. " +
+                                 "Please enter a shorter name.")
+            # Check if the unit is too short and raise an error if it is
+            if len(unit) < 1:
+                raise ValueError("Unit is too short. " +
+                                 "Please enter a longer name.")
+            # Check if the unit is valid and raise an error if it is not
+            if unit not in valid_units:
+                raise ValueError(f"Invalid unit: '{unit}'. " +
+                                 f"Must be one of {unit_strings}.")
+            break
+
+        print(f"Unit '{unit}' selected (read_unit() complete).")
+        self.set_units(unit)
+
+    def get_city_name(self):
+        """
+        Getter method for the city name.
+        :return: The current city name.
+        """
+        return self._city_name
+
     def run(self):
+        """
+        Main method to run the weather application.
+        It prompts the user for a city name and unit choice, fetches the weather data,
+        and displays the weather information.
+        """
+        # Prompt the user for the city name
         while True:
-            city = input("Enter the name of the city: ").strip()
-            if city:
-                break
-            else:
-                print("City name cannot be empty. Please try again.")
+            try:
+                self.read_city_name()
+            except ValueError as e:
+                print(f"Error: {e}. Please try again.")
+            break
 
         while True:
-            unit_choice = input("Enter units ([M]etric/[I]mperial/[D]efault/[S]cientific): ").strip().lower()
-            if unit_choice == "m":
-                print("You chose metric units (°C, m/s & km)")
-                self.set_units("metric")
-                break
-            elif unit_choice == "i":
-                print("You chose imperial units (°F, mph & mi)")
-                self.set_units("imperial")
-                break
-            elif unit_choice == "d" or unit_choice == "s":
-                print("You chose default/scientific units (°K, m/s & m)")
-                self.set_units("default")
-                break
-            elif not unit_choice and self.get_units():
-                if self.get_units() == "metric":
-                    print("No unit chosen, using defaults from environment (Metric: °C, m/s & km).")
-                elif self.get_units() == "imperial":
-                    print("No unit chosen, using defaults from environment (Imperial: °F, mph & mi).")
-                elif self.get_units() == "default":
-                    print("No unit chosen, using defaults from environment (Default/Scientific: °K, m/s & m).")
-                break
-            elif not unit_choice and not self.get_units():
-                print("No unit chosen and no default in environment, using default units (Default/Scientific: °K, m/s & m).")
-                self.set_units("default")
-                break
-            else:
-                print("Invalid unit choice. Please enter 'M', 'I', or 'D'.")
+            # Prompt the user for the unit of measurement
+            try:
+                self.read_unit()
+            except ValueError as e:
+                print(f"Error: {e}. Please try again.")
+            break
 
-        weather_data = self.get_weather(city)
-
-        if not weather_data:
-            print(
-                "Failed to fetch weather data. Please check the city name and your API key (if the issue persists)."
-            )
-            return
-
-        self.display_weather(city, weather_data)
-
+        # Fetch the weather data for the specified city
+        weather_data = self.fetch_weather()
+        # Display the weather information
+        self.display_weather(weather_data)
 
 if __name__ == "__main__":
+    # This block is executed when the script is run directly
+    # It creates an instance of the WeatherApp class
+    # and calls the run method to start the application
+    # The run method is responsible for prompting the user for input,
+    # fetching the weather data, and displaying the results
+    # The try-except block is used to handle any exceptions that may occur
+    # during the execution of the application and to ensure that the
+    # application exits gracefully and cleans up any resources used during
+    # the execution of the script.
     try:
         app = WeatherApp()
-        # Example of using the getter and setter methods:
-        # print(f"Current API Key: {app.get_api_key()}")
-        # app.set_api_key("YOUR_NEW_API_KEY")
-        # print(f"New API Key: {app.get_api_key()}")
-        # print(f"Current Units: {app.get_units()}")
-        # app.set_units("imperial")
-        # print(f"New Units: {app.get_units()}")
         app.run()
     except ValueError as e:
         print(f"Configuration error: {e}")
-    except Exception as e:
-        print(f"An unexpected error occurred while running WeatherApp: {e}")
     except KeyboardInterrupt:
         print("\n\nGoodbye!")
-        exit
+    except EOFError:
+        print("\n\nGoodbye!")
+    except SystemExit:
+        print("\n\nGoodbye!")
+    except Exception as e:
+        print(f"An unexpected error occurred: {e}")
+        raise
+    finally:
+        print("Cleaning up resources...")
+        # Add any necessary cleanup code here
+        # For example, closing database connections, releasing file handles, etc.
+        # In this case, we don't have any specific cleanup to do
+        # but it's a good practice to include this in case of future modifications.
+        print("Cleanup complete.")
