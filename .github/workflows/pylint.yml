@@ -12,7 +12,7 @@ on:
 
 jobs:
   pylint:
-    name: PyLint on node ${{ matrix.python-version }} and ${{ matrix.os }}
+    name: PyLint on Python ${{ matrix.python-version }} and ${{ matrix.os }}
     runs-on: ${{ matrix.os }}
     strategy:
       matrix:
