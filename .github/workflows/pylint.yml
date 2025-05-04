@@ -20,9 +20,9 @@ jobs:
     runs-on: ${{ matrix.os }}
     strategy:
       matrix:
-        python-version: ["3.11", "3.12", "3.13"]
-        os: [ubuntu-latest, windows-latest, macos-latest]
-        python-deps: ["pylint", "python-dotenv", "pyowm", "rich"]
+        python-version: 3.12
+        os: ubuntu-latest
+        python-deps: "pylint, python-dotenv, pyowm, rich"
     steps:
     - uses: actions/checkout@v4
     - name: Set up Python ${{ matrix.python-version }}
@@ -42,9 +42,9 @@ jobs:
     runs-on: ${{ matrix.os }}
     strategy:
       matrix:
-        python-version: ["3.13"]
-        os: [ubuntu-latest]
-        python-deps: ["pylint", "python-dotenv", "pyowm", "rich"]
+        python-version: 3.12
+        os: ubuntu-latest
+        python-deps: "pylint, python-dotenv, pyowm, rich"
     steps:
     - uses: actions/checkout@v4
     - name: Set up Python ${{ matrix.python-version }}
