@@ -43,7 +43,7 @@ jobs:
     strategy:
       matrix:
         python-version: ["3.13"]
-        os: [windows-latest]
+        os: [ubuntu-latest]
         python-deps: ["pylint", "python-dotenv", "pyowm", "rich"]
     steps:
     - uses: actions/checkout@v4
