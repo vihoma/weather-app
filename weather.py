@@ -280,8 +280,8 @@ class WeatherApp:
         # Simplified logic for mapping degrees to direction index
         # Add N at end for easier indexing
         directions = ["N", "NE", "E", "SE", "S", "SW", "W", "NW", "N"]
-        # Add N's arrow at end
-        arrows = ["⬇️", "↙️", "⬅️", "↖️", "⬆️", "↗️", "➡️", "↘️", "⬇️"]
+        # Add N's arrow at end, use white arrows on a blue background
+        arrows = ["⬇️", "↙️", "⬅️", "↖️", "⬆️", "↗️", "➞ ", "↘️", "⬇️"]
 
         # Calculate index: Each section is 45 degrees wide. Offset by 22.5 for centering.
         index = int( (deg + 22.5) / 45 )
