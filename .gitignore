@@ -1,7 +1,6 @@
 /__pycache__/*
 /.vscode
 /.ruff_cache
-/DeepSeek-Chat-Refactoring-Weather.py-Modular-OO-Weather-Program-Response-001.md
 /Qwen3-14B-Q6K-Modular-Weather-Program-Response-001.md
 .env
 .*.env
