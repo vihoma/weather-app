@@ -1,4 +1,4 @@
-name: "Pylint"
+name: "Ruff"
 
 permissions:
   contents: read
@@ -14,9 +14,9 @@ on:
   workflow_dispatch:
 
 jobs:
-  gh-pylint:
+  gh-ruff:
     if: ${{ !github.event.act }} # skip during local actions testing
-    name: Pylint on Python 3.12 and ubuntu-latest
+    name: Ruff on Python 3.12 and ubuntu-latest
     runs-on: ubuntu-latest
     #strategy:
     #  matrix:
@@ -32,14 +32,15 @@ jobs:
     - name: Install dependencies
       run: |
         python -m pip install --upgrade pip
-        pip install pylint python-dotenv pyowm rich
-    - name: Analysing the code with Pylint
+        pip install python-dotenv pyowm rich
+        apt install ruff
+    - name: Analyzing the code with Ruff
       run: |
-        pylint $(git ls-files '*.py')
+        ruff check $(git ls-files '*.py')
   local-pylint:
-    if: ${{ github.event.act }} # skip during local actions testing
-    name: Pylint on Python 3.12 and ubuntu-latest
-    runs-on: ubuntu-latest
+    if: ${{ github.event.act }} # run during local actions testing
+    name: Ruff on Python 3.12 and windows-latest
+    runs-on: windows-latest
     #strategy:
     #  matrix:
     #    python-version: "3.12"
@@ -54,7 +55,8 @@ jobs:
     - name: Install dependencies
       run: |
         python -m pip install --upgrade pip
-        pip install pylint python-dotenv pyowm rich
-    - name: Analysing the code with Pylint
+        pip install python-dotenv pyowm rich
+        apt install ruff
+    - name: Analysing the code with Ruff
       run: |
-        pylint $(git ls-files '*.py')
+        ruff check $(git ls-files '*.py')
