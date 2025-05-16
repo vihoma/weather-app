@@ -44,20 +44,32 @@ class WeatherService:
             "imperial": "fahrenheit",
             "default": "kelvin"
         }.get(units, "kelvin")
-        
+
+        dist_unit = {
+            "metric": "kilometers",
+            "imperial": "miles",
+            "default": "meters"
+        }.get(units, "meters")
+
+        speed_unit = {
+            "metric": "meters_sec",
+            "imperial": "miles_hour",
+            "default": "meters_sec"
+        }.get(units, "meters_sec")
+
         return WeatherData(
             city=location,
             units=units,
             status=weather.status,
             detailed_status=weather.detailed_status.capitalize(),
-            temperature=weather.temperature(temp_unit).get("temp"),
-            feels_like=weather.temperature(temp_unit).get("feels_like"),
+            temperature=weather.temperature(temp_unit).get("temp", "N/A"),
+            feels_like=weather.temperature(temp_unit).get("feels_like", "N/A"),
             humidity=weather.humidity,
-            wind_speed=round(weather.wind().get("speed", 0), 2),
+            wind_speed=round(weather.wind(speed_unit).get("speed", 0), 2),
             wind_direction_deg=weather.wind().get("deg"),
             precipitation_probability=getattr(weather, 'precipitation_probability', None),
             clouds=weather.clouds,
-            visibility_distance=weather.visibility().get("distance"),
-            pressure_hpa=weather.pressure.get("press", 1013) if isinstance(weather.pressure, dict) else weather.pressure,
+            visibility_distance=weather.visibility(unit=dist_unit),
+            pressure_hpa=weather.pressure.get("press"),
             icon_code=weather.weather_code
         )
