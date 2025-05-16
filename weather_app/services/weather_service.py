@@ -58,6 +58,6 @@ class WeatherService:
             precipitation_probability=getattr(weather, 'precipitation_probability', None),
             clouds=weather.clouds,
             visibility_distance=weather.visibility().get("distance"),
-            pressure_hpa=weather.pressure.get("press"),
+            pressure_hpa=weather.pressure.get("press", 1013) if isinstance(weather.pressure, dict) else weather.pressure,
             icon_code=weather.weather_code
         )
