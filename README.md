@@ -1,6 +1,7 @@
 # Weather Query Python Program for the Command Line
 
 - Uses the OpenWeatherMap API with the PyOWM module
+- Rich for the rich UI ;) ...
 
 ## Usage
 
@@ -24,4 +25,4 @@ For example:
     New-Variable -Name OWM_API_KEY -Value your_api_key_here
     ```
 
-3. Run the program with `python weather.py`.
+3. Run the program with `python weather_app/main.py`.

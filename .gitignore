@@ -1,7 +1,6 @@
-/__pycache__/*
+**/**/__pycache__/*
 /.vscode
 /.ruff_cache
-/Qwen3-14B-Q6K-Modular-Weather-Program-Response-001.md
 .env
 .*.env
 .aider*
