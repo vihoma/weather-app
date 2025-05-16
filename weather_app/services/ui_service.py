@@ -25,11 +25,14 @@ class UIService:
         
         while True:
             location = self._prompt_location()
-            weather_data = self.weather_service.get_weather(location, self.current_units)
-            self._display_weather(weather_data)
-            
-            self._prompt_units() if Confirm.ask("\n🔄 Change units?") else None
-            
+            while True:  # Inner loop for unit changes
+                weather_data = self.weather_service.get_weather(location, self.current_units)
+                self._display_weather(weather_data)
+                
+                if not Confirm.ask("\n🔄 Change units?"):
+                    break
+                self._prompt_units()
+                
             if not self._prompt_continue():
                 break
 
@@ -135,6 +138,3 @@ class UIService:
         """Ask user if they want to continue."""
         return Confirm.ask("\n🔍 Check another location?", default=True)
 
-    def _prompt_units(self):
-        """Handle unit system selection."""
-        # Implementation omitted for brevity
