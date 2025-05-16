@@ -2,6 +2,7 @@
 """Main entry point for the Weather Application."""
 
 from rich.traceback import install
+from rich.console import Console
 from services.ui_service import UIService
 
 def main():
