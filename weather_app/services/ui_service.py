@@ -60,13 +60,17 @@ class UIService:
             self._add_table_row(table, "Precipitation", f"{data.precipitation_probability}% ☔")
             
         if data.wind_direction_deg:
-            # 16-point compass arrows (0°-360° in 22.5° increments)
+            # 16-point compass directions (0°-360° in 22.5° increments)
             wind_arrows = [
-                '↓', '↙', '←', '↖', '↑', '↗', '→', '↘',  # 180° offset from standard directions
+                '↓', '↙', '←', '↖', '↑', '↗', '→', '↘',
                 '↓', '↙', '←', '↖', '↑', '↗', '→', '↘'
             ]
+            wind_directions = [
+                'N', 'NNE', 'NE', 'ENE', 'E', 'ESE', 'SE', 'SSE',
+                'S', 'SSW', 'SW', 'WSW', 'W', 'WNW', 'NW', 'NNW'
+            ]
             dir_index = int((data.wind_direction_deg + 11.25) / 22.5) % 16
-            wind_info = f"{data.wind_speed} {self._speed_unit()} {wind_arrows[dir_index]}"
+            wind_info = f"{data.wind_speed} {self._speed_unit()} {wind_arrows[dir_index]} ({wind_directions[dir_index]})"
         else:
             wind_info = f"{data.wind_speed} {self._speed_unit()}"
         self._add_table_row(table, "Wind", wind_info)
