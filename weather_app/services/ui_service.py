@@ -6,6 +6,7 @@ from rich.table import Table
 from rich.text import Text
 from models.weather_data import WeatherData
 from config import Config
+from .weather_service import WeatherService
 
 class UIService:
     """Handles all user interaction and display."""
