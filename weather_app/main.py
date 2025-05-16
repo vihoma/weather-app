@@ -14,7 +14,13 @@ def main():
     except KeyboardInterrupt:
         print("\nOperation cancelled by user.")
     except Exception as e:
-        print(f"\nAn unexpected error occurred: {e}")
+        Console().print(
+            f"\n[red bold]⚠️ Critical Error:[/red bold] {e}\n"
+            "Please check:\n"
+            "1. Internet connection 🌐\n"
+            "2. API key validity 🔑\n"
+            "3. Location format (City,CC) 🏙️"
+        )
 
 if __name__ == "__main__":
     main()
