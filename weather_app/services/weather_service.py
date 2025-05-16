@@ -38,7 +38,12 @@ class WeatherService:
 
     def _parse_weather_data(self, location: str, weather, units: str) -> WeatherData:
         """Convert PyOWM weather object to our data model."""
-        temp_unit = units if units != "default" else "kelvin"
+        # Map our unit names to PyOWM's expected values
+        temp_unit = {
+            "metric": "celsius",
+            "imperial": "fahrenheit",
+            "default": "kelvin"
+        }.get(units, "kelvin")
         
         return WeatherData(
             city=location,
