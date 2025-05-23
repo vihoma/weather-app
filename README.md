@@ -1,4 +1,5 @@
 # Weather Query Python Program for the Command Line
+# Create a good and descriptive README.md AI!
 
 - Uses the OpenWeatherMap API with the PyOWM module
 - Rich for the rich UI ;) ...
