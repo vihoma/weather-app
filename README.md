@@ -61,7 +61,7 @@ python weather_app/main.py
 
 Follow the interactive prompts to:
 1. Enter your location
-2. Choose temperature units (Celsius/Fahrenheit)
+2. Choose temperature units (Celsius/Fahrenheit/Kelvin)
 3. View current weather conditions
 
 ## Screenshot
