@@ -70,4 +70,4 @@ Follow the interactive prompts to:
 
 ## License
 
-MIT - See [LICENSE.txt](LICENSE.txt) for details.
+BSD 3-Clause - See [LICENSE.txt](LICENSE.txt) for details.
