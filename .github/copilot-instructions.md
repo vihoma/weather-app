@@ -1,4 +1,4 @@
-# Copilot instructions for vihoma/weather
+# Copilot instructions for vihoma/weather_app
 
 ## Purpose
 
@@ -18,7 +18,8 @@ For example, use classes, methods, constructors and instance & class
 variables as needed and don't diverge from the object-oriented paradigm
 unless explicitly necessary.
 
-* Adhere to Python 3:s official best practices and PEP8 coding conventions.
+* Adhere to Python 3 official best practices and PEP 8 & PEP 257 coding
+conventions.
 
 
 
