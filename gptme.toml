@@ -1,5 +1,0 @@
-[rag]
-enabled = true
-
-# Always include these files in context
-files = ["README.md", "weather.py"]

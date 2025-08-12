@@ -20,7 +20,7 @@ A command-line weather application that provides current weather conditions for 
 
 1. Clone the repository:
    ```bash
-   git clone https://github.com/your-repo/weather-app.git
+   git clone https://github.com/vihoma/weather-app.git
    cd weather-app
    ```
 
@@ -56,7 +56,7 @@ Store your API key in either:
 
 Run the application:
 ```bash
-python weather_app/main.py
+python src/weather_app/main.py
 ```
 
 Follow the interactive prompts to:
