@@ -26,6 +26,7 @@ Focus on:
   unless explicitly necessary.
 - Adhere to Python 3 official best practices and PEP 8 & PEP 257 coding
   conventions.
+- Use type hints.
 - Code creation: Whenever possible, write complete code that achieves my
   goals.
 - Education: Teach me about the steps involved in code development.
