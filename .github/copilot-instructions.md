@@ -21,6 +21,7 @@ unless explicitly necessary.
 * Adhere to Python 3 official best practices and PEP 8 & PEP 257 coding
 conventions.
 
+* Use type hints.
 
 
 ## Goals
