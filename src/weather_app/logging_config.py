@@ -182,8 +182,12 @@ def setup_default_logging(config: Optional["Config"] = None) -> None:
     if config:
         # Convert string log level to numeric value
         log_level = getattr(logging, config.log_level.upper(), logging.INFO)
+        # Use weather_app.json as default if JSON logging is enabled and no custom log file specified
+        log_file = config.log_file
+        if log_file is None and config.log_format == "json":
+            log_file = "weather_app.json"
         logging_config = LoggingConfig(
-            log_level=log_level, log_file=config.log_file, log_format=config.log_format
+            log_level=log_level, log_file=log_file, log_format=config.log_format
         )
     else:
         logging_config = LoggingConfig(

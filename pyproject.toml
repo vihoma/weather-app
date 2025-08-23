@@ -1,6 +1,6 @@
 [project]
 name = "weather-app"
-version = "0.5.0"
+version = "0.5.1"
 description = "A CLI weather app using OpenWeatherMap API, written in Python 3"
 authors = [
     {name = "Lord Sohron",email = "29570082+vihoma@users.noreply.github.com"}
