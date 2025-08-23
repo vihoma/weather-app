@@ -20,5 +20,6 @@
 ## Project Structure
 - Source code in `src/weather_app/` with package structure
 - Models in `models/`, services in `services/`
+- Tests in `tests/` with pytest structure
 - Configuration handled via environment variables (.weather.env)
 - Uses Rich for terminal UI, PyOWM for weather data

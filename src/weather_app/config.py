@@ -1,9 +1,11 @@
 """Configuration handling for the Weather Application."""
 
 import os
+import logging
 from pathlib import Path
 from typing import Optional, List
 from dotenv import load_dotenv
+from .security import SecureConfig, KeyringUnavailableError
 from .exceptions import APIKeyError, ConfigurationError
 
 

@@ -4,6 +4,7 @@ import logging
 import logging.handlers
 from pathlib import Path
 from typing import Optional, TYPE_CHECKING
+from .security import setup_secure_logging
 
 if TYPE_CHECKING:
     from .config import Config
@@ -108,3 +109,6 @@ def setup_default_logging(config: Optional["Config"] = None) -> None:
         )
 
     logging_config.setup_logging()
+
+    # Set up secure logging with sensitive data filtering
+    setup_secure_logging()

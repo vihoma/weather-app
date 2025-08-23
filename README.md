@@ -45,12 +45,23 @@ A command-line weather application that provides current weather conditions for 
 
 You need an OpenWeatherMap API key. Get one for free at [https://openweathermap.org/api](https://openweathermap.org/api).
 
-Store your API key in any of these locations (checked in order):
+#### Secure Storage Options (Recommended)
 
-1. `.weather.env` file in the project root
-2. `~/.weather.env` in your home directory  
-3. `/etc/weather_app/.env` for system-wide configuration
-4. Environment variables (highest precedence)
+The application supports secure API key storage using your system's keyring:
+
+1. **System Keyring (Most Secure)**: API keys are stored encrypted in your system's credential store
+2. **Environment Variables**: `OWM_API_KEY` environment variable
+3. **Configuration Files**: `.weather.env` file in project root, home directory, or system-wide
+
+#### Priority Order
+
+API keys are checked in this order (first match wins):
+
+1. Environment variable `OWM_API_KEY` (will be moved to keyring if available)
+2. System keyring secure storage
+3. `.weather.env` file in project root
+4. `~/.weather.env` in your home directory  
+5. `/etc/weather_app/.env` for system-wide configuration
 
 Example `.weather.env` file:
 ```ini
@@ -63,7 +74,8 @@ LOG_FILE=weather_app.log
 
 ### Environment Variables
 
-- `OWM_API_KEY`: Your OpenWeatherMap API key (required)
+- `OWM_API_KEY`: Your OpenWeatherMap API key (required). If keyring is available, this will be securely stored and removed from environment.
+- `USE_KEYRING`: Enable secure keyring storage (`true`/`false`) - default: `true`
 - `OWM_UNITS`: Measurement units (`metric`, `imperial`, `default`) - default: `metric`
 - `CACHE_TTL`: Cache time-to-live in seconds - default: `600` (10 minutes)
 - `REQUEST_TIMEOUT`: API request timeout in seconds - default: `30`
@@ -73,11 +85,12 @@ LOG_FILE=weather_app.log
 
 ### Configuration Precedence
 
-1. Environment variables
-2. `.weather.env` in project root
-3. `~/.weather.env` in home directory
-4. `/etc/weather_app/.env` system-wide
-5. Default values
+1. Environment variables (API keys are moved to secure storage if available)
+2. System keyring secure storage
+3. `.weather.env` in project root
+4. `~/.weather.env` in home directory
+5. `/etc/weather_app/.env` system-wide
+6. Default values
 
 ## Usage
 
@@ -121,6 +134,15 @@ poetry run isort src/
 poetry build
 ```
 
+### Security Features
+
+The application includes several security enhancements:
+
+- **Secure API Key Storage**: API keys are stored using the system's keyring service when available
+- **Sensitive Data Masking**: Logs automatically mask API keys, passwords, and other sensitive information
+- **Environment Variable Protection**: API keys provided via environment variables are automatically moved to secure storage
+- **Error Handling**: Secure error messages that don't expose sensitive information
+
 ### Project Structure
 
 ```
@@ -130,6 +152,7 @@ src/weather_app/
 ├── exceptions.py     # Custom exceptions
 ├── config.py         # Configuration handling
 ├── logging_config.py # Logging configuration
+├── security.py       # Security utilities (keyring, data masking)
 └── main.py          # Application entry point
 
 tests/
