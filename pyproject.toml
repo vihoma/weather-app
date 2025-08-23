@@ -1,6 +1,6 @@
 [project]
 name = "weather-app"
-version = "0.1.0"
+version = "0.2.0"
 description = "A CLI weather app using OpenWeatherMap API, written in Python 3"
 authors = [
     {name = "Lord Sohron",email = "29570082+vihoma@users.noreply.github.com"}
@@ -11,7 +11,10 @@ requires-python = ">=3.13"
 dependencies = [
     "pyowm (>=3.4.0,<4.0.0)",
     "rich (>=14.1.0,<15.0.0)",
-    "python-dotenv (>=1.1.1,<2.0.0)"
+    "python-dotenv (>=1.1.1,<2.0.0)",
+    "cachetools (>=5.3.0,<6.0.0)",
+    "geopy (>=2.4.0,<3.0.0)",
+    "setuptools (>=69.5.1,<70.0.0)"
 ]
 
 [tool.poetry]
@@ -21,6 +24,9 @@ pylint = "^3.3.8"
 isort = "^6.0.1"
 flake8 = "^7.3.0"
 ruff = "^0.12.10"
+pytest = "^8.3.4"
+pytest-asyncio = "^0.25.1"
+pytest-mock = "^3.14.0"
 
 [build-system]
 requires = ["poetry-core>=2.0.0,<3.0.0"]

@@ -1,38 +1,82 @@
 """Configuration handling for the Weather Application."""
 
 import os
+from pathlib import Path
+from typing import Optional, List
 from dotenv import load_dotenv
+from .exceptions import APIKeyError, ConfigurationError
+
 
 class Config:
     """Handles application configuration and environment variables."""
-    
+
     def __init__(self):
-        """Initialize configuration with default values."""
-        load_dotenv(dotenv_path=".weather.env")
+        """Initialize configuration with multiple config file support."""
+        self._load_environment_variables()
         self._api_key = os.getenv("OWM_API_KEY")
         self._units = os.getenv("OWM_UNITS", "metric")
-        
-    @property 
-    def api_key(self):
+        self._cache_ttl = int(os.getenv("CACHE_TTL", "600"))  # Default 10 minutes
+        self._log_level = os.getenv("LOG_LEVEL", "INFO")
+        self._log_file = os.getenv("LOG_FILE")
+
+    def _load_environment_variables(self) -> None:
+        """Load environment variables from multiple potential config files."""
+        config_locations = [
+            ".weather.env",  # Project directory
+            "~/.weather.env",  # User home directory
+            "/etc/weather_app/.env",  # System-wide configuration
+        ]
+
+        loaded = False
+        for location in config_locations:
+            try:
+                config_path = Path(location).expanduser()
+                if config_path.exists():
+                    load_dotenv(dotenv_path=config_path, override=False)
+                    loaded = True
+                    break
+            except (IOError, PermissionError):
+                continue
+
+        # Also load from environment variables (they take precedence)
+        load_dotenv(override=True)
+
+    @property
+    def api_key(self) -> Optional[str]:
         """Get the API key."""
         return self._api_key
-        
+
     @api_key.setter
-    def api_key(self, value):
+    def api_key(self, value: str) -> None:
         """Set the API key with validation."""
         if not value or not isinstance(value, str):
             raise ValueError("API key must be a non-empty string")
         self._api_key = value
 
     @property
-    def units(self):
+    def units(self) -> str:
         """Get the measurement units."""
         return self._units
-        
-    def validate(self):
+
+    @property
+    def cache_ttl(self) -> int:
+        """Get the cache TTL in seconds."""
+        return self._cache_ttl
+
+    @property
+    def log_level(self) -> str:
+        """Get the log level."""
+        return self._log_level
+
+    @property
+    def log_file(self) -> Optional[str]:
+        """Get the log file path."""
+        return self._log_file
+
+    def validate(self) -> None:
         """Validate required configuration."""
         if not self.api_key:
-            raise ValueError(
+            raise APIKeyError(
                 "API key (OWM_API_KEY) not found in environment variables "
-                "or .weather.env file."
+                "or .weather.env file. Please set OWM_API_KEY environment variable."
             )

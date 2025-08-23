@@ -5,11 +5,15 @@ A command-line weather application that provides current weather conditions for 
 ## Features
 
 - 🌦️ Get current weather conditions including temperature, humidity, wind speed, and more
-- 🌍 Search by city name or coordinates
+- 🌍 Search by city name or coordinates with automatic validation
 - 🎨 Beautiful terminal UI using Rich for formatting and colors
-- ⚙️ Configurable units (metric/imperal)
+- ⚙️ Configurable units (metric/imperial/kelvin)
 - 📊 View weather history comparisons
 - 🔐 Secure API key management via environment variables
+- 💾 Response caching with configurable TTL
+- 📝 Structured logging with file and console output
+- 🎯 Comprehensive error handling with helpful messages
+- 🔧 Multiple configuration file support
 
 ## Requirements
 
@@ -24,9 +28,14 @@ A command-line weather application that provides current weather conditions for 
    cd weather-app
    ```
 
-2. Install dependencies:
+2. Install dependencies using Poetry (recommended):
    ```bash
-   pip install -r requirements.txt
+   poetry install
+   ```
+
+   Or using pip:
+   ```bash
+   pip install -e .
    ```
 
 ## Configuration
@@ -35,28 +44,48 @@ A command-line weather application that provides current weather conditions for 
 
 You need an OpenWeatherMap API key. Get one for free at [https://openweathermap.org/api](https://openweathermap.org/api).
 
-Store your API key in either:
+Store your API key in any of these locations (checked in order):
 
-1. `.weather.env` file in the project root or your home directory:
-   ```ini
-   OWM_API_KEY=your_api_key_here
-   ```
+1. `.weather.env` file in the project root
+2. `~/.weather.env` in your home directory  
+3. `/etc/weather_app/.env` for system-wide configuration
+4. Environment variables (highest precedence)
 
-2. Or set as environment variable:
-   - Linux/macOS:
-     ```bash
-     export OWM_API_KEY=your_api_key_here
-     ```
-   - Windows:
-     ```powershell
-     $env:OWM_API_KEY="your_api_key_here"
-     ```
+Example `.weather.env` file:
+```ini
+OWM_API_KEY=your_api_key_here
+OWM_UNITS=metric
+CACHE_TTL=600
+LOG_LEVEL=INFO
+LOG_FILE=weather_app.log
+```
+
+### Environment Variables
+
+- `OWM_API_KEY`: Your OpenWeatherMap API key (required)
+- `OWM_UNITS`: Measurement units (`metric`, `imperial`, `default`) - default: `metric`
+- `CACHE_TTL`: Cache time-to-live in seconds - default: `600` (10 minutes)
+- `LOG_LEVEL`: Logging level (`DEBUG`, `INFO`, `WARNING`, `ERROR`) - default: `INFO`
+- `LOG_FILE`: Path to log file - default: `weather_app.log`
+
+### Configuration Precedence
+
+1. Environment variables
+2. `.weather.env` in project root
+3. `~/.weather.env` in home directory
+4. `/etc/weather_app/.env` system-wide
+5. Default values
 
 ## Usage
 
-Run the application:
+Run the application with Poetry:
 ```bash
-python src/weather_app/main.py
+poetry run python -m src.weather_app.main
+```
+
+Or directly:
+```bash
+python -m src.weather_app.main
 ```
 
 Follow the interactive prompts to:
@@ -67,6 +96,44 @@ Follow the interactive prompts to:
 ## Screenshot
 
 [Insert screenshot of the application in action here]
+
+## Development
+
+### Running Tests
+
+```bash
+poetry run pytest tests/ -v
+```
+
+### Code Quality
+
+```bash
+# Linting
+poetry run ruff check src/
+
+# Formatting imports  
+poetry run isort src/
+
+# Building package
+poetry build
+```
+
+### Project Structure
+
+```
+src/weather_app/
+├── models/           # Data models
+├── services/         # Business logic services
+├── exceptions.py     # Custom exceptions
+├── config.py         # Configuration handling
+├── logging_config.py # Logging configuration
+└── main.py          # Application entry point
+
+tests/
+├── unit/            # Unit tests
+├── integration/     # Integration tests
+└── functional/      # Functional tests
+```
 
 ## License
 
