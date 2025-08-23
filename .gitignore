@@ -8,3 +8,4 @@
 desktop.ini
 weather_app.json
 **/**/venv/**
+**/**/.venv/**
