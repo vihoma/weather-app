@@ -23,6 +23,8 @@ class Config:
         self._log_level = os.getenv("LOG_LEVEL", "INFO")
         self._log_file = os.getenv("LOG_FILE")
         self._log_format = os.getenv("LOG_FORMAT", "text").lower()
+        self._cache_persist = os.getenv("CACHE_PERSIST", "false").lower() == "true"
+        self._cache_file = os.getenv("CACHE_FILE", "~/.weather_app_cache.json")
 
     def _load_environment_variables(self) -> None:
         """Load environment variables from multiple potential config files."""
@@ -91,6 +93,16 @@ class Config:
     def log_format(self) -> str:
         """Get the log format (text or json)."""
         return self._log_format
+
+    @property
+    def cache_persist(self) -> bool:
+        """Get whether to persist cache to disk."""
+        return self._cache_persist
+
+    @property
+    def cache_file(self) -> str:
+        """Get the cache file path."""
+        return self._cache_file
 
     def validate(self) -> None:
         """Validate required configuration."""

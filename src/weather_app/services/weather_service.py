@@ -1,7 +1,9 @@
 """Core weather data operations using PyOWM."""
 
+import json
 import logging
-from typing import Any
+from pathlib import Path
+from typing import Any, Dict
 from pyowm.owm import OWM
 from pyowm.utils.config import get_default_config
 from pyowm.commons.exceptions import PyOWMError, NotFoundError
@@ -31,9 +33,16 @@ class WeatherService:
         self.owm = OWM(config.api_key, self.config_dict)
         self.weather_manager = self.owm.weather_manager()
 
+        # Store config reference for cache persistence
+        self.config = config
+
         # Initialize cache with configurable TTL and max 100 items
         self.cache = TTLCache(maxsize=100, ttl=config.cache_ttl)
         logger.debug("WeatherService initialized successfully with caching")
+
+        # Load cache from disk if persistence is enabled
+        if config.cache_persist:
+            self._load_cache_from_disk(config.cache_file)
 
     def get_weather(self, location: str, units: str) -> WeatherData:
         """
@@ -124,3 +133,47 @@ class WeatherService:
             pressure_hpa=weather.pressure.get("press"),
             icon_code=weather.weather_code,
         )
+
+    def _load_cache_from_disk(self, cache_file_path: str) -> None:
+        """Load cache from JSON file."""
+        try:
+            cache_path = Path(cache_file_path).expanduser()
+            if cache_path.exists():
+                with open(cache_path, "r", encoding="utf-8") as f:
+                    cache_data = json.load(f)
+
+                # Convert loaded data back to WeatherData objects
+                for cache_key, weather_dict in cache_data.items():
+                    weather_data = WeatherData(**weather_dict)
+                    self.cache[cache_key] = weather_data
+
+                logger.info(
+                    "Loaded %d cache items from %s", len(cache_data), cache_path
+                )
+            else:
+                logger.debug("Cache file does not exist: %s", cache_path)
+        except (json.JSONDecodeError, IOError, PermissionError) as e:
+            logger.warning("Failed to load cache from %s: %s", cache_file_path, e)
+
+    def _save_cache_to_disk(self, cache_file_path: str) -> None:
+        """Save cache to JSON file."""
+        try:
+            cache_path = Path(cache_file_path).expanduser()
+            cache_path.parent.mkdir(parents=True, exist_ok=True)
+
+            # Convert cache to serializable format
+            cache_data = {}
+            for cache_key, weather_data in self.cache.items():
+                cache_data[cache_key] = weather_data.__dict__
+
+            with open(cache_path, "w", encoding="utf-8") as f:
+                json.dump(cache_data, f, indent=2)
+
+            logger.debug("Saved %d cache items to %s", len(cache_data), cache_path)
+        except (IOError, PermissionError) as e:
+            logger.warning("Failed to save cache to %s: %s", cache_file_path, e)
+
+    def __del__(self):
+        """Save cache to disk when service is destroyed."""
+        if hasattr(self, "config") and self.config.cache_persist:
+            self._save_cache_to_disk(self.config.cache_file)
