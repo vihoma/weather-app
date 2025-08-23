@@ -16,6 +16,10 @@ class Config:
         self._api_key = os.getenv("OWM_API_KEY")
         self._units = os.getenv("OWM_UNITS", "metric")
         self._cache_ttl = int(os.getenv("CACHE_TTL", "600"))  # Default 10 minutes
+        self._request_timeout = int(
+            os.getenv("REQUEST_TIMEOUT", "30")
+        )  # Default 30 seconds
+        self._use_async = os.getenv("USE_ASYNC", "true").lower() == "true"
         self._log_level = os.getenv("LOG_LEVEL", "INFO")
         self._log_file = os.getenv("LOG_FILE")
 
@@ -62,6 +66,16 @@ class Config:
     def cache_ttl(self) -> int:
         """Get the cache TTL in seconds."""
         return self._cache_ttl
+
+    @property
+    def request_timeout(self) -> int:
+        """Get the request timeout in seconds."""
+        return self._request_timeout
+
+    @property
+    def use_async(self) -> bool:
+        """Get whether to use async mode."""
+        return self._use_async
 
     @property
     def log_level(self) -> str:

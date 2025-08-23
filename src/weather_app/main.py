@@ -6,6 +6,7 @@ This module initializes the application and handles top-level exceptions.
 Uses Rich for enhanced terminal output and structured logging.
 """
 
+import asyncio
 import logging
 from rich.traceback import install
 from rich.console import Console
@@ -26,15 +27,19 @@ setup_default_logging(config)
 logger = LoggingConfig.get_logger(__name__)
 
 
-def main() -> None:
-    """Initialize and run the weather application."""
+async def main_async() -> None:
+    """Initialize and run the weather application in async mode."""
     install(show_locals=True)  # Rich traceback handler
 
-    logger.info("Starting Weather Application")
-
     try:
-        ui = UIService()
-        ui.run()
+        if config.use_async:
+            logger.info("Starting Weather Application (Async Mode)")
+            ui = UIService(use_async=True)
+            await ui.run_async()
+        else:
+            logger.info("Starting Weather Application (Sync Mode)")
+            ui = UIService(use_async=False)
+            ui.run()
         logger.info("Weather Application completed successfully")
     except KeyboardInterrupt:
         logger.info("Application cancelled by user")
@@ -86,6 +91,11 @@ def main() -> None:
             "[blue]https://github.com/vihoma/weather-app/issues[/blue] 🐛",
             sep="\n",
         )
+
+
+def main() -> None:
+    """Initialize and run the weather application (sync wrapper)."""
+    asyncio.run(main_async())
 
 
 if __name__ == "__main__":

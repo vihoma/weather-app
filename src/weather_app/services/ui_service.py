@@ -1,12 +1,15 @@
-"""Rich-based user interface components."""
+"""Rich-based user interface components with async support."""
 
+import asyncio
 from rich.prompt import Prompt, Confirm
 from rich.console import Console
 from rich.table import Table
 from rich.text import Text
+from rich.progress import Progress, SpinnerColumn, TextColumn
 from ..models.weather_data import WeatherData
 from ..config import Config
 from .weather_service import WeatherService
+from .async_weather_service import AsyncWeatherService
 from .location_service import LocationService
 from ..exceptions import InvalidLocationError
 
@@ -14,25 +17,31 @@ from ..exceptions import InvalidLocationError
 class UIService:
     """Handles all user interaction and display."""
 
-    def __init__(self):
+    def __init__(self, use_async: bool = True):
         self.console = Console()
         self.config = Config()
         self.config.validate()
-        self.weather_service = WeatherService(self.config)
+        self.use_async = use_async
+
+        if use_async:
+            self.weather_service = AsyncWeatherService(self.config)
+        else:
+            self.weather_service = WeatherService(self.config)
+
         self.location_service = LocationService()
         self.current_units = self.config.units
         self.query_history = []
 
-    def run(self) -> None:
-        """Main application loop."""
-        self.console.print("[bold green]🌦️ Welcome to Weather App![/bold green]")
+    async def run_async(self) -> None:
+        """Main async application loop."""
+        self.console.print(
+            "[bold green]🌦️ Welcome to Weather App! (Async Mode)[/bold green]"
+        )
 
         while True:
             location = self._prompt_location()
             while True:  # Inner loop for unit changes
-                weather_data = self.weather_service.get_weather(
-                    location, self.current_units
-                )
+                weather_data = await self._get_weather_with_progress(location)
                 self._display_weather(weather_data)
 
                 if not Confirm.ask("\n🔄 Change units?"):
@@ -41,6 +50,52 @@ class UIService:
 
             if not self._prompt_continue():
                 break
+
+    def run(self) -> None:
+        """Main synchronous application loop."""
+        if self.use_async:
+            asyncio.run(self.run_async())
+        else:
+            self.console.print(
+                "[bold green]🌦️ Welcome to Weather App! (Sync Mode)[/bold green]"
+            )
+            while True:
+                location = self._prompt_location()
+                while True:  # Inner loop for unit changes
+                    weather_data = self.weather_service.get_weather(
+                        location, self.current_units
+                    )
+                    self._display_weather(weather_data)
+
+                    if not Confirm.ask("\n🔄 Change units?"):
+                        break
+                    self._prompt_units()
+
+                if not self._prompt_continue():
+                    break
+
+    async def _get_weather_with_progress(self, location: str) -> WeatherData:
+        """Get weather data with progress indicator."""
+        with Progress(
+            SpinnerColumn(),
+            TextColumn("[progress.description]{task.description}"),
+            transient=True,
+        ) as progress:
+            task = progress.add_task(
+                f"[cyan]Fetching weather for {location}...", total=None
+            )
+
+            try:
+                weather_data = await self.weather_service.get_weather(
+                    location, self.current_units
+                )
+                progress.update(
+                    task, completed=True, description="[green]Data received!"
+                )
+                return weather_data
+            except Exception as e:
+                progress.update(task, completed=True, description=f"[red]Error: {e}")
+                raise
 
     def _prompt_location(self) -> str:
         """Get validated location input."""

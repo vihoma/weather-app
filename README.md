@@ -7,6 +7,7 @@ A command-line weather application that provides current weather conditions for 
 - 🌦️ Get current weather conditions including temperature, humidity, wind speed, and more
 - 🌍 Search by city name or coordinates with automatic validation
 - 🎨 Beautiful terminal UI using Rich for formatting and colors
+- ⚡ **Async operations** for faster API calls with progress indicators
 - ⚙️ Configurable units (metric/imperial/kelvin)
 - 📊 View weather history comparisons
 - 🔐 Secure API key management via environment variables
@@ -65,6 +66,8 @@ LOG_FILE=weather_app.log
 - `OWM_API_KEY`: Your OpenWeatherMap API key (required)
 - `OWM_UNITS`: Measurement units (`metric`, `imperial`, `default`) - default: `metric`
 - `CACHE_TTL`: Cache time-to-live in seconds - default: `600` (10 minutes)
+- `REQUEST_TIMEOUT`: API request timeout in seconds - default: `30`
+- `USE_ASYNC`: Enable async mode (`true`/`false`) - default: `true`
 - `LOG_LEVEL`: Logging level (`DEBUG`, `INFO`, `WARNING`, `ERROR`) - default: `INFO`
 - `LOG_FILE`: Path to log file - default: `weather_app.log`
 
