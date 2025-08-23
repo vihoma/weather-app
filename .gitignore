@@ -4,5 +4,4 @@
 .env
 .*.env
 .aider*
-weather_sohrons.py
 desktop.ini
