@@ -6,3 +6,5 @@
 .*.env
 .aider*
 desktop.ini
+weather_app.json
+**/**/venv/**
