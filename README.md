@@ -69,7 +69,7 @@ OWM_API_KEY=your_api_key_here
 OWM_UNITS=metric
 CACHE_TTL=600
 LOG_LEVEL=INFO
-LOG_FILE=weather_app.log
+LOG_FORMAT=json # default = text
 ```
 
 ### Environment Variables
@@ -81,7 +81,8 @@ LOG_FILE=weather_app.log
 - `REQUEST_TIMEOUT`: API request timeout in seconds - default: `30`
 - `USE_ASYNC`: Enable async mode (`true`/`false`) - default: `true`
 - `LOG_LEVEL`: Logging level (`DEBUG`, `INFO`, `WARNING`, `ERROR`) - default: `INFO`
-- `LOG_FILE`: Path to log file - default: `weather_app.log`
+- `LOG_FILE`: Path to log file - default: `weather_app.log` or `weather_app.json` (depends on `LOG_FORMAT`)
+- `LOG_FORMAT`: Format of logs (`text` or `json`) - default : `text`
 
 ### Configuration Precedence
 
