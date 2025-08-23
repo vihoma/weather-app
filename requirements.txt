@@ -1,3 +1,10 @@
+aiohttp
+async-timeout
+cachetools
+geopy
+keyring
 python-dotenv
+python-json-logger
 pyowm
 rich
+setuptools
