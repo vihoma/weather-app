@@ -1,8 +1,7 @@
 """Core weather data operations using PyOWM."""
 
 import logging
-from typing import Dict, Any, Optional
-from datetime import datetime, timedelta
+from typing import Any
 from pyowm.owm import OWM
 from pyowm.utils.config import get_default_config
 from pyowm.commons.exceptions import PyOWMError, NotFoundError
@@ -12,9 +11,6 @@ from ..config import Config
 from ..exceptions import (
     LocationNotFoundError,
     APIRequestError,
-    NetworkError,
-    RateLimitError,
-    DataParsingError,
 )
 
 logger = logging.getLogger(__name__)

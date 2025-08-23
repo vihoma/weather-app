@@ -2,8 +2,7 @@
 
 import asyncio
 import logging
-from typing import Dict, Any, Optional
-from datetime import datetime
+from typing import Dict, Any
 import aiohttp
 from async_timeout import timeout
 from cachetools import TTLCache
@@ -147,17 +146,10 @@ class AsyncWeatherService:
             main = data["main"]
             wind = data.get("wind", {})
             clouds = data.get("clouds", {})
-            sys = data.get("sys", {})
 
             # Get temperature unit symbol
-            temp_symbol = {"metric": "°C", "imperial": "°F", "standard": "K"}.get(
-                units, "K"
-            )
 
             # Get speed unit
-            speed_unit = {"metric": "m/s", "imperial": "mph", "standard": "m/s"}.get(
-                units, "m/s"
-            )
 
             return WeatherData(
                 city=location,

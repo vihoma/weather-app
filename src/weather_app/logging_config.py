@@ -2,10 +2,8 @@
 
 import logging
 import logging.handlers
-import os
-import json
 from pathlib import Path
-from typing import Optional, Dict, Any, TYPE_CHECKING
+from typing import Optional, Any, TYPE_CHECKING
 from .security import setup_secure_logging
 
 if TYPE_CHECKING:

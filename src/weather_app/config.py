@@ -1,12 +1,10 @@
 """Configuration handling for the Weather Application."""
 
 import os
-import logging
 from pathlib import Path
-from typing import Optional, List
+from typing import Optional
 from dotenv import load_dotenv
-from .security import SecureConfig, KeyringUnavailableError
-from .exceptions import APIKeyError, ConfigurationError
+from .exceptions import APIKeyError
 
 
 class Config:
@@ -34,13 +32,12 @@ class Config:
             "/etc/weather_app/.env",  # System-wide configuration
         ]
 
-        loaded = False
         for location in config_locations:
             try:
                 config_path = Path(location).expanduser()
                 if config_path.exists():
                     load_dotenv(dotenv_path=config_path, override=False)
-                    loaded = True
+
                     break
             except (IOError, PermissionError):
                 continue
