@@ -3,7 +3,7 @@
 import json
 import logging
 from pathlib import Path
-from typing import Any, Dict
+from typing import Any
 from pyowm.owm import OWM
 from pyowm.utils.config import get_default_config
 from pyowm.commons.exceptions import PyOWMError, NotFoundError
