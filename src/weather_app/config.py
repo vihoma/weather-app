@@ -24,6 +24,7 @@ class Config:
         self._use_async = os.getenv("USE_ASYNC", "true").lower() == "true"
         self._log_level = os.getenv("LOG_LEVEL", "INFO")
         self._log_file = os.getenv("LOG_FILE")
+        self._log_format = os.getenv("LOG_FORMAT", "text").lower()
 
     def _load_environment_variables(self) -> None:
         """Load environment variables from multiple potential config files."""
@@ -88,6 +89,11 @@ class Config:
     def log_file(self) -> Optional[str]:
         """Get the log file path."""
         return self._log_file
+
+    @property
+    def log_format(self) -> str:
+        """Get the log format (text or json)."""
+        return self._log_format
 
     def validate(self) -> None:
         """Validate required configuration."""

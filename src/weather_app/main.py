@@ -11,7 +11,7 @@ import logging
 from rich.traceback import install
 from rich.console import Console
 from .services.ui_service import UIService
-from .logging_config import setup_default_logging, LoggingConfig
+from .logging_config import setup_default_logging, LoggingConfig, log_with_context
 from .config import Config
 from .exceptions import (
     WeatherAppError,
@@ -33,19 +33,36 @@ async def main_async() -> None:
 
     try:
         if config.use_async:
-            logger.info("Starting Weather Application (Async Mode)")
+            log_with_context(
+                logger, logging.INFO, "Starting Weather Application", mode="async"
+            )
             ui = UIService(use_async=True)
             await ui.run_async()
         else:
-            logger.info("Starting Weather Application (Sync Mode)")
+            log_with_context(
+                logger, logging.INFO, "Starting Weather Application", mode="sync"
+            )
             ui = UIService(use_async=False)
             ui.run()
-        logger.info("Weather Application completed successfully")
+        log_with_context(
+            logger, logging.INFO, "Weather Application completed successfully"
+        )
     except KeyboardInterrupt:
-        logger.info("Application cancelled by user")
+        log_with_context(
+            logger,
+            logging.INFO,
+            "Application cancelled by user",
+            reason="keyboard_interrupt",
+        )
         print("\n[bold yellow]Operation cancelled by user.[/bold yellow]")
     except ConfigurationError as e:
-        logger.error("Configuration error: %s", e)
+        log_with_context(
+            logger,
+            logging.ERROR,
+            "Configuration error",
+            error_type="configuration",
+            error_message=str(e),
+        )
         Console().print(
             "\n[red bold]⚙️  Configuration Error ⚙️[/red bold]",
             f"\n[bold]Error details:[/bold] {e}",
@@ -55,7 +72,13 @@ async def main_async() -> None:
             sep="\n",
         )
     except LocationNotFoundError as e:
-        logger.warning("Location not found: %s", e)
+        log_with_context(
+            logger,
+            logging.WARNING,
+            "Location not found",
+            error_type="location_not_found",
+            location=str(e),
+        )
         Console().print(
             "\n[yellow bold]📍 Location Not Found 📍[/yellow bold]",
             f"\n[bold]Error details:[/bold] {e}",
@@ -65,7 +88,14 @@ async def main_async() -> None:
             sep="\n",
         )
     except APIRequestError as e:
-        logger.error("API request failed: %s", e, exc_info=True)
+        log_with_context(
+            logger,
+            logging.ERROR,
+            "API request failed",
+            error_type="api_request",
+            error_message=str(e),
+            exc_info=True,
+        )
         Console().print(
             "\n[red bold]🌐 API Error 🌐[/red bold]",
             f"\n[bold]Error details:[/bold] {e}",
@@ -76,14 +106,28 @@ async def main_async() -> None:
             sep="\n",
         )
     except WeatherAppError as e:
-        logger.error("Application error: %s", e, exc_info=True)
+        log_with_context(
+            logger,
+            logging.ERROR,
+            "Application error",
+            error_type="application",
+            error_message=str(e),
+            exc_info=True,
+        )
         Console().print(
             "\n[red bold]⚠️  Application Error ⚠️[/red bold]",
             f"\n[bold]Error details:[/bold] {e}",
             sep="\n",
         )
     except Exception as e:
-        logger.error("Unexpected error: %s", e, exc_info=True)
+        log_with_context(
+            logger,
+            logging.ERROR,
+            "Unexpected error",
+            error_type="unexpected",
+            error_message=str(e),
+            exc_info=True,
+        )
         Console().print(
             "\n[red bold]❌ Unexpected Error ❌[/red bold]",
             f"\n[bold]Error details:[/bold] {e}",
