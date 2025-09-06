@@ -1,4 +1,4 @@
-# Copilot instructions for vihoma/weather_app
+# Copilot instructions for vihoma/weather-app
 
 ## Purpose
 
