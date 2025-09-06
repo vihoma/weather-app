@@ -1,3 +1,6 @@
+"""
+models package initialization
+"""
 # Models package initialization
 from .weather_data import WeatherData
 

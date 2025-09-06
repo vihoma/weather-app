@@ -6,20 +6,20 @@ from typing import Optional
 @dataclass
 class WeatherData:
     """Structured weather data container."""
-    
+
     city: str
     units: str
-    status: str               
-    detailed_status: str      
-    temperature: float        
-    feels_like: float         
-    humidity: int             
-    wind_speed: float         
+    status: str
+    detailed_status: str
+    temperature: float
+    feels_like: float
+    humidity: int
+    wind_speed: float
     wind_direction_deg: Optional[float]
-    precipitation_probability: Optional[int] 
-    clouds: Optional[int]     
+    precipitation_probability: Optional[int]
+    clouds: Optional[int]
     visibility_distance: Optional[float]
-    pressure_hpa: float       
+    pressure_hpa: float
     icon_code: Optional[int] = None
 
     WEATHER_EMOJI_MAP = {
