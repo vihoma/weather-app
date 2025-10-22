@@ -10,6 +10,7 @@ from async_timeout import timeout
 from cachetools import TTLCache
 from weather_app.models.weather_data import WeatherData
 from weather_app.config import Config
+from weather_app.utils import sanitize_string_for_logging
 from weather_app.exceptions import (
     LocationNotFoundError,
     APIRequestError,
@@ -64,7 +65,10 @@ class AsyncWeatherService:
 
         # Check cache first
         if cache_key in self.cache:
-            logger.info("Returning cached weather data for: %s", location)
+            logger.info(
+                "Returning cached weather data for: %s",
+                sanitize_string_for_logging(location),
+            )
             return self.cache[cache_key]
 
         logger.info(
@@ -78,15 +82,30 @@ class AsyncWeatherService:
 
             # Cache the result
             self.cache[cache_key] = weather_data
-            logger.info("Weather data cached successfully for %s", location)
+            logger.info(
+                "Weather data cached successfully for %s",
+                sanitize_string_for_logging(location),
+            )
 
             return weather_data
 
+        except (
+            LocationNotFoundError,
+            APIRequestError,
+            NetworkError,
+            RateLimitError,
+            DataParsingError,
+        ):
+            # Re-raise specific exceptions that we already handle
+            raise
         except Exception as e:
             logger.error(
-                "Failed to fetch weather data for %s: %s", location, e, exc_info=True
+                "Unexpected error fetching weather data for %s: %s",
+                sanitize_string_for_logging(location),
+                e,
+                exc_info=True,
             )
-            raise
+            raise APIRequestError(f"Unexpected error fetching weather data: {e}") from e
 
     async def _fetch_weather_data(self, location: str, units: str) -> WeatherData:
         """Fetch weather data from OpenWeatherMap API."""
@@ -102,7 +121,10 @@ class AsyncWeatherService:
             async with timeout(self.timeout):
                 async with session.get(url) as response:
                     if response.status == 404:
-                        logger.warning("Location not found: %s", location)
+                        logger.warning(
+                            "Location not found: %s",
+                            sanitize_string_for_logging(location),
+                        )
                         raise LocationNotFoundError(
                             f"Location '{location}' not found. Please check the spelling and format (City,CC)."
                         )
@@ -131,12 +153,19 @@ class AsyncWeatherService:
                     return self._parse_weather_data(location, data, units)
 
         except asyncio.TimeoutError:
-            logger.error("Request timeout for location: %s", location)
+            logger.error(
+                "Request timeout for location: %s",
+                sanitize_string_for_logging(location),
+            )
             raise NetworkError(
                 "Request timeout. Please check your internet connection."
             )
         except (aiohttp.ClientError, ConnectionError) as e:
-            logger.error("Network error for location %s: %s", location, e)
+            logger.error(
+                "Network error for location %s: %s",
+                sanitize_string_for_logging(location),
+                e,
+            )
             raise NetworkError(f"Network error: {e}")
 
     def _is_coordinates(self, location: str) -> bool:
@@ -242,7 +271,13 @@ class AsyncWeatherService:
         except (IOError, PermissionError) as e:
             logger.warning("Failed to save cache to %s: %s", cache_file_path, e)
 
-    def __del__(self):
-        """Save cache to disk when service is destroyed."""
+    def save_cache(self) -> None:
+        """Explicitly save cache to disk."""
         if hasattr(self, "config") and self.config.cache_persist:
             self._save_cache_to_disk(self.config.cache_file)
+
+    def __del__(self):
+        """Save cache to disk when service is destroyed."""
+        # Note: __del__ methods are unreliable for persistence
+        # Use save_cache() method explicitly instead
+        pass

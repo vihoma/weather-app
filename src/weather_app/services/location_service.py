@@ -4,7 +4,7 @@ import logging
 import re
 from typing import Optional, Tuple
 from geopy.geocoders import Nominatim
-from geopy.exc import GeocoderUnavailable, GeocoderServiceError
+from geopy.exc import GeocoderUnavailable, GeocoderServiceError, GeocoderTimedOut
 from weather_app.exceptions import InvalidLocationError, NetworkError
 
 logger = logging.getLogger(__name__)
@@ -13,9 +13,15 @@ logger = logging.getLogger(__name__)
 class LocationService:
     """Handles location validation and geocoding operations."""
 
-    def __init__(self):
-        """Initialize the location service with geocoder."""
-        self.geolocator = Nominatim(user_agent="weather_app")
+    def __init__(self, timeout: int = 10):
+        """
+        Initialize the location service with geocoder.
+
+        Args:
+            timeout: Timeout in seconds for geocoding requests (default: 10)
+        """
+        self.geolocator = Nominatim(user_agent="weather_app", timeout=timeout)
+        self.timeout = timeout
 
     def validate_location_format(self, location: str) -> bool:
         """
@@ -51,6 +57,38 @@ class LocationService:
         city, country = parts
         return bool(city.strip() and country.strip() and len(country.strip()) == 2)
 
+    def _sanitize_location_for_logging(self, location: str) -> str:
+        """
+        Sanitize location string for safe logging.
+
+        Removes or escapes potentially dangerous characters that could be used
+        in log injection attacks or cause log parsing issues.
+
+        Args:
+            location: Raw location string
+
+        Returns:
+            str: Sanitized location string safe for logging
+        """
+        if not location:
+            return "[empty]"
+
+        # Remove or escape problematic characters
+        sanitized = location.strip()
+
+        # Replace newlines and carriage returns to prevent log injection
+        sanitized = sanitized.replace("\n", "\\n").replace("\r", "\\r")
+
+        # Replace tabs
+        sanitized = sanitized.replace("\t", "\\t")
+
+        # Truncate very long strings to prevent log flooding
+        max_length = 100
+        if len(sanitized) > max_length:
+            sanitized = sanitized[:max_length] + "..."
+
+        return sanitized
+
     def geocode_location(self, location: str) -> Optional[Tuple[float, float]]:
         """
         Geocode a location string to coordinates.
@@ -62,7 +100,9 @@ class LocationService:
             Optional[Tuple[float, float]]: (latitude, longitude) or None
         """
         try:
-            logger.debug("Geocoding location: %s", location)
+            logger.debug(
+                "Geocoding location: %s", self._sanitize_location_for_logging(location)
+            )
 
             if self._is_coordinate_format(location):
                 # Already coordinates, just parse them
@@ -75,20 +115,36 @@ class LocationService:
             if location_obj:
                 logger.debug(
                     "Geocoded %s to coordinates: (%s, %s)",
-                    location,
+                    self._sanitize_location_for_logging(location),
                     location_obj.latitude,
                     location_obj.longitude,
                 )
                 return (location_obj.latitude, location_obj.longitude)
 
-            logger.warning("Could not geocode location: %s", location)
+            logger.warning(
+                "Could not geocode location: %s",
+                self._sanitize_location_for_logging(location),
+            )
             return None
 
+        except GeocoderTimedOut as e:
+            logger.warning(
+                "Geocoding request timed out after %d seconds: %s", self.timeout, e
+            )
+            raise NetworkError(
+                f"Geocoding request timed out after {self.timeout} seconds. "
+                "Please try again or check your internet connection."
+            ) from e
         except (GeocoderUnavailable, GeocoderServiceError) as e:
             logger.warning("Geocoding service unavailable: %s", e)
             raise NetworkError(
                 "Geocoding service unavailable. Please check your internet connection."
             ) from e
+        except (ValueError, TypeError) as e:
+            logger.error(
+                "Invalid coordinate format during geocoding: %s", e, exc_info=True
+            )
+            return None
         except Exception as e:
             logger.error("Unexpected error during geocoding: %s", e, exc_info=True)
             return None
@@ -136,9 +192,19 @@ class LocationService:
         try:
             location = self.geolocator.reverse((latitude, longitude), exactly_one=True)
             return location.address if location else None
+        except GeocoderTimedOut:
+            logger.warning(
+                "Reverse geocoding request timed out after %d seconds", self.timeout
+            )
+            return None
         except (GeocoderUnavailable, GeocoderServiceError):
             logger.warning("Reverse geocoding service unavailable")
             return None
+        except (ValueError, TypeError) as e:
+            logger.error(
+                "Invalid coordinate format in reverse geocoding: %s", e, exc_info=True
+            )
+            return None
         except Exception as e:
-            logger.error("Error in reverse geocoding: %s", e, exc_info=True)
+            logger.error("Unexpected error in reverse geocoding: %s", e, exc_info=True)
             return None

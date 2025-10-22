@@ -11,7 +11,14 @@ from weather_app.config import Config
 from weather_app.services.weather_service import WeatherService
 from weather_app.services.async_weather_service import AsyncWeatherService
 from weather_app.services.location_service import LocationService
-from weather_app.exceptions import InvalidLocationError
+from weather_app.exceptions import (
+    InvalidLocationError,
+    LocationNotFoundError,
+    APIRequestError,
+    NetworkError,
+    RateLimitError,
+    DataParsingError,
+)
 
 
 class UIService:
@@ -55,30 +62,34 @@ class UIService:
             await self._cleanup()
 
     def run(self) -> None:
-        """Main synchronous application loop."""
+        """Main application loop."""
         if self.use_async:
+            # Run async version using asyncio.run()
             asyncio.run(self.run_async())
         else:
-            self.console.print(
-                "[bold green]🌦️ Welcome to Weather App! (Sync Mode)[/bold green]"
-            )
-            while True:
-                location = self._prompt_location()
-                while True:  # Inner loop for unit changes
-                    weather_data = self.weather_service.get_weather(
-                        location, self.current_units
-                    )
-                    self._display_weather(weather_data)
+            # Run sync version directly
+            self._run_sync()
 
-                    if not Confirm.ask("\n🔄 Change units?"):
-                        break
-                    self._prompt_units()
+    def _run_sync(self) -> None:
+        """Main synchronous application loop."""
+        self.console.print(
+            "[bold green]🌦️ Welcome to Weather App! (Sync Mode)[/bold green]"
+        )
+        while True:
+            location = self._prompt_location()
+            while True:  # Inner loop for unit changes
+                weather_data = self._get_weather_sync_with_progress(location)
+                self._display_weather(weather_data)
 
-                if not self._prompt_continue():
+                if not Confirm.ask("\n🔄 Change units?"):
                     break
+                self._prompt_units()
+
+            if not self._prompt_continue():
+                break
 
     async def _get_weather_with_progress(self, location: str) -> WeatherData:
-        """Get weather data with progress indicator."""
+        """Get weather data with progress indicator (async version)."""
         with Progress(
             SpinnerColumn(),
             TextColumn("[progress.description]{task.description}"),
@@ -96,8 +107,53 @@ class UIService:
                     task, completed=True, description="[green]Data received!"
                 )
                 return weather_data
-            except Exception as e:
+            except (
+                LocationNotFoundError,
+                APIRequestError,
+                NetworkError,
+                RateLimitError,
+                DataParsingError,
+            ) as e:
                 progress.update(task, completed=True, description=f"[red]Error: {e}")
+                raise
+            except Exception as e:
+                progress.update(
+                    task, completed=True, description=f"[red]Unexpected error: {e}"
+                )
+                raise
+
+    def _get_weather_sync_with_progress(self, location: str) -> WeatherData:
+        """Get weather data with progress indicator (sync version)."""
+        with Progress(
+            SpinnerColumn(),
+            TextColumn("[progress.description]{task.description}"),
+            transient=True,
+        ) as progress:
+            task = progress.add_task(
+                f"[cyan]Fetching weather for {location}...", total=None
+            )
+
+            try:
+                weather_data = self.weather_service.get_weather(
+                    location, self.current_units
+                )
+                progress.update(
+                    task, completed=True, description="[green]Data received!"
+                )
+                return weather_data
+            except (
+                LocationNotFoundError,
+                APIRequestError,
+                NetworkError,
+                RateLimitError,
+                DataParsingError,
+            ) as e:
+                progress.update(task, completed=True, description=f"[red]Error: {e}")
+                raise
+            except Exception as e:
+                progress.update(
+                    task, completed=True, description=f"[red]Unexpected error: {e}"
+                )
                 raise
 
     def _prompt_location(self) -> str:

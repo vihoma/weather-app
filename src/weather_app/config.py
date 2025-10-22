@@ -5,6 +5,7 @@ from pathlib import Path
 from typing import Optional
 from dotenv import load_dotenv
 from weather_app.exceptions import APIKeyError
+from weather_app.security import SecureConfig, KeyringUnavailableError
 
 
 class Config:
@@ -13,7 +14,20 @@ class Config:
     def __init__(self):
         """Initialize configuration with multiple config file support."""
         self._load_environment_variables()
-        self._api_key = os.getenv("OWM_API_KEY")
+
+        # Initialize secure config for API key storage
+        self._secure = SecureConfig()
+
+        # Try keyring first, fall back to environment variable
+        try:
+            self._api_key = self._secure.get_api_key()
+            if self._api_key:
+                print("🔑 API key loaded from secure keyring storage")
+            else:
+                self._api_key = os.getenv("OWM_API_KEY")
+        except KeyringUnavailableError:
+            self._api_key = os.getenv("OWM_API_KEY")
+
         self._units = os.getenv("OWM_UNITS", "metric")
         self._cache_ttl = int(os.getenv("CACHE_TTL", "600"))  # Default 10 minutes
         self._request_timeout = int(
@@ -104,10 +118,42 @@ class Config:
         """Get the cache file path."""
         return self._cache_file
 
+    def store_api_key(self, api_key: str) -> None:
+        """
+        Store API key securely in keyring.
+
+        Args:
+            api_key: The API key to store
+
+        Raises:
+            KeyringUnavailableError: If keyring is not available
+            ValueError: If API key is empty or invalid
+        """
+        if not api_key or not isinstance(api_key, str):
+            raise ValueError("API key must be a non-empty string")
+
+        self._secure.store_api_key(api_key)
+        self._api_key = api_key
+        print("🔑 API key stored securely in keyring")
+
+    def is_keyring_available(self) -> bool:
+        """Check if keyring storage is available on this system."""
+        return self._secure.is_keyring_available()
+
     def validate(self) -> None:
         """Validate required configuration."""
         if not self.api_key:
-            raise APIKeyError(
-                "API key (OWM_API_KEY) not found in environment variables "
-                "or .weather.env file. Please set OWM_API_KEY environment variable."
+            keyring_available = self.is_keyring_available()
+            error_message = (
+                "API key not found. Please set OWM_API_KEY environment variable."
             )
+            if keyring_available:
+                error_message += (
+                    "\nAlternatively, you can store your API key securely in keyring "
+                    "using the store_api_key() method."
+                )
+            else:
+                error_message += (
+                    "\nNote: Secure keyring storage is not available on this system."
+                )
+            raise APIKeyError(error_message)

@@ -10,6 +10,7 @@ from pyowm.commons.exceptions import PyOWMError, NotFoundError
 from cachetools import TTLCache
 from weather_app.models.weather_data import WeatherData
 from weather_app.config import Config
+from weather_app.utils import sanitize_string_for_logging
 from weather_app.exceptions import (
     LocationNotFoundError,
     APIRequestError,
@@ -60,7 +61,10 @@ class WeatherService:
 
         # Check cache first
         if cache_key in self.cache:
-            logger.info("Returning cached weather data for: %s", location)
+            logger.info(
+                "Returning cached weather data for: %s",
+                sanitize_string_for_logging(location),
+            )
             return self.cache[cache_key]
 
         logger.info(
@@ -70,26 +74,42 @@ class WeatherService:
         )
 
         try:
-            logger.debug("Calling weather_at_place for location: %s", location)
+            logger.debug(
+                "Calling weather_at_place for location: %s",
+                sanitize_string_for_logging(location),
+            )
             observation = self.weather_manager.weather_at_place(location)
             weather = observation.weather
-            logger.debug("Successfully retrieved weather data for %s", location)
+            logger.debug(
+                "Successfully retrieved weather data for %s",
+                sanitize_string_for_logging(location),
+            )
 
             parsed_data = self._parse_weather_data(location, weather, units)
 
             # Cache the result
             self.cache[cache_key] = parsed_data
-            logger.info("Weather data cached successfully for %s", location)
+            logger.info(
+                "Weather data cached successfully for %s",
+                sanitize_string_for_logging(location),
+            )
 
             return parsed_data
 
         except NotFoundError as e:
-            logger.warning("Location not found: %s", location)
+            logger.warning(
+                "Location not found: %s", sanitize_string_for_logging(location)
+            )
             raise LocationNotFoundError(
                 f"Location '{location}' not found. Please check the spelling and format (City,CC)."
             ) from e
         except PyOWMError as e:
-            logger.error("API request failed for %s: %s", location, e, exc_info=True)
+            logger.error(
+                "API request failed for %s: %s",
+                sanitize_string_for_logging(location),
+                e,
+                exc_info=True,
+            )
             raise APIRequestError(f"Failed to fetch weather data: {e}") from e
 
     def _parse_weather_data(
@@ -173,7 +193,13 @@ class WeatherService:
         except (IOError, PermissionError) as e:
             logger.warning("Failed to save cache to %s: %s", cache_file_path, e)
 
-    def __del__(self):
-        """Save cache to disk when service is destroyed."""
+    def save_cache(self) -> None:
+        """Explicitly save cache to disk."""
         if hasattr(self, "config") and self.config.cache_persist:
             self._save_cache_to_disk(self.config.cache_file)
+
+    def __del__(self):
+        """Save cache to disk when service is destroyed."""
+        # Note: __del__ methods are unreliable for persistence
+        # Use save_cache() method explicitly instead
+        pass

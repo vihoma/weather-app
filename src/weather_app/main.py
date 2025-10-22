@@ -11,7 +11,11 @@ import logging
 from rich.traceback import install
 from rich.console import Console
 from weather_app.services.ui_service import UIService
-from weather_app.logging_config import setup_default_logging, LoggingConfig, log_with_context
+from weather_app.logging_config import (
+    setup_default_logging,
+    LoggingConfig,
+    log_with_context,
+)
 from weather_app.config import Config
 from weather_app.exceptions import (
     WeatherAppError,
@@ -31,6 +35,7 @@ async def main_async() -> None:
     """Initialize and run the weather application in async mode."""
     install(show_locals=True)  # Rich traceback handler
 
+    ui = None
     try:
         if config.use_async:
             log_with_context(
@@ -47,6 +52,21 @@ async def main_async() -> None:
         log_with_context(
             logger, logging.INFO, "Weather Application completed successfully"
         )
+    finally:
+        # Ensure cache is saved on application exit
+        if ui and hasattr(ui, 'weather_service') and ui.weather_service:
+            try:
+                if config.use_async:
+                    ui.weather_service.save_cache()
+                else:
+                    ui.weather_service.save_cache()
+                log_with_context(
+                    logger, logging.DEBUG, "Cache saved successfully"
+                )
+            except Exception as e:
+                log_with_context(
+                    logger, logging.WARNING, "Failed to save cache", error=str(e)
+                )
     except KeyboardInterrupt:
         log_with_context(
             logger,
@@ -117,6 +137,22 @@ async def main_async() -> None:
         Console().print(
             "\n[red bold]⚠️  Application Error ⚠️[/red bold]",
             f"\n[bold]Error details:[/bold] {e}",
+            sep="\n",
+        )
+    except (OSError, MemoryError, ImportError, SystemError) as e:
+        log_with_context(
+            logger,
+            logging.CRITICAL,
+            "System-level error",
+            error_type="system",
+            error_message=str(e),
+            exc_info=True,
+        )
+        Console().print(
+            "\n[red bold]💥 System Error 💥[/red bold]",
+            f"\n[bold]Error details:[/bold] {e}",
+            "\n[bold]This is a system-level issue:[/bold]",
+            "[blue]Please check system resources and dependencies[/blue] ⚙️",
             sep="\n",
         )
     except Exception as e:

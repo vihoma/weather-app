@@ -16,6 +16,8 @@ class TestWeatherService:
         config = Mock()
         config.api_key = "test_api_key"
         config.cache_ttl = 600  # 10 minutes
+        config.cache_persist = False  # Disable cache persistence for tests
+        config.cache_file = "~/.weather_app_cache.json"  # Valid cache file path
         return config
 
     @pytest.fixture

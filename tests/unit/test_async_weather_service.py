@@ -3,9 +3,9 @@
 import pytest
 import asyncio
 from unittest.mock import AsyncMock, patch, MagicMock
-from src.weather_app.services.async_weather_service import AsyncWeatherService
-from src.weather_app.config import Config
-from src.weather_app.exceptions import (
+from weather_app.services.async_weather_service import AsyncWeatherService
+from weather_app.config import Config
+from weather_app.exceptions import (
     LocationNotFoundError,
     APIRequestError,
     NetworkError,

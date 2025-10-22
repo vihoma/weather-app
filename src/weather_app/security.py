@@ -111,7 +111,7 @@ class SecureConfig:
             retrieved = keyring.get_password(self.SERVICE_NAME, test_key)
             keyring.delete_password(self.SERVICE_NAME, test_key)
             return retrieved == test_value
-        except (KeyringError, Exception):
+        except (KeyringError, PermissionError, OSError, ImportError):
             return False
 
     def is_keyring_available(self) -> bool:
@@ -161,7 +161,7 @@ class SecureConfig:
 
         try:
             return keyring.get_password(self.SERVICE_NAME, service_name)
-        except Exception as e:
+        except (KeyringError, PermissionError, OSError) as e:
             raise SecurityError(f"Failed to retrieve API key: {e}") from e
 
     def delete_api_key(self, service_name: str = "openweathermap") -> None:
@@ -179,7 +179,7 @@ class SecureConfig:
 
         try:
             keyring.delete_password(self.SERVICE_NAME, service_name)
-        except Exception as e:
+        except (KeyringError, PermissionError, OSError) as e:
             raise SecurityError(f"Failed to delete API key: {e}") from e
 
     def list_stored_keys(self) -> Dict[str, str]:

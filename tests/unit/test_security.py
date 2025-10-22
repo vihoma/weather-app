@@ -108,7 +108,7 @@ class TestSecureConfig:
     def test_keyring_unavailable(self):
         """Test behavior when keyring is unavailable."""
         with patch("src.weather_app.security.keyring.set_password") as mock_set:
-            mock_set.side_effect = Exception("Keyring error")
+            mock_set.side_effect = OSError("Keyring error")
 
             secure_config = SecureConfig()
             assert secure_config.is_keyring_available() is False
@@ -180,7 +180,7 @@ class TestSecureConfig:
         """Test API key deletion failure."""
         mock_keyring.set_password.return_value = None
         mock_keyring.get_password.return_value = "test_value"
-        mock_keyring.delete_password.side_effect = Exception("Deletion failed")
+        mock_keyring.delete_password.side_effect = OSError("Deletion failed")
 
         secure_config = SecureConfig()
 
