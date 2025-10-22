@@ -21,7 +21,14 @@ dependencies = [
     "python-json-logger (>=2.0.0,<3.0.0)"
 ]
 
+[project.scripts]
+# This is the main script entry point for the weather app
+weather = "weather_app.main:main"
+
 [tool.poetry]
+packages = [
+    {include = "weather_app", from = "src"}
+]
 
 [tool.poetry.group.dev.dependencies]
 pylint = "^4.0.2"
