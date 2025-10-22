@@ -4,7 +4,7 @@ import asyncio
 import json
 import logging
 from pathlib import Path
-from typing import Dict, Any
+from typing import Dict, Any, Optional
 import aiohttp
 from async_timeout import timeout
 from cachetools import TTLCache
@@ -38,6 +38,10 @@ class AsyncWeatherService:
 
         # Initialize cache with configurable TTL and max 100 items
         self.cache = TTLCache(maxsize=100, ttl=config.cache_ttl)
+
+        # Shared aiohttp session for connection reuse
+        self._session: Optional[aiohttp.ClientSession] = None
+
         logger.debug("AsyncWeatherService initialized successfully with caching")
 
         # Load cache from disk if persistence is enabled
@@ -94,37 +98,37 @@ class AsyncWeatherService:
             url = f"{self.base_url}/weather?q={location}&appid={self.api_key}&units={units}"
 
         try:
-            async with aiohttp.ClientSession() as session:
-                async with timeout(self.timeout):
-                    async with session.get(url) as response:
-                        if response.status == 404:
-                            logger.warning("Location not found: %s", location)
-                            raise LocationNotFoundError(
-                                f"Location '{location}' not found. Please check the spelling and format (City,CC)."
-                            )
+            session = await self._ensure_session()
+            async with timeout(self.timeout):
+                async with session.get(url) as response:
+                    if response.status == 404:
+                        logger.warning("Location not found: %s", location)
+                        raise LocationNotFoundError(
+                            f"Location '{location}' not found. Please check the spelling and format (City,CC)."
+                        )
 
-                        if response.status == 401:
-                            logger.error("Invalid API key")
-                            raise APIRequestError(
-                                "Invalid API key. Please check your OpenWeatherMap API key."
-                            )
+                    if response.status == 401:
+                        logger.error("Invalid API key")
+                        raise APIRequestError(
+                            "Invalid API key. Please check your OpenWeatherMap API key."
+                        )
 
-                        if response.status == 429:
-                            logger.warning("Rate limit exceeded")
-                            raise RateLimitError(
-                                "Rate limit exceeded. Please wait before making more requests."
-                            )
+                    if response.status == 429:
+                        logger.warning("Rate limit exceeded")
+                        raise RateLimitError(
+                            "Rate limit exceeded. Please wait before making more requests."
+                        )
 
-                        if response.status != 200:
-                            logger.error(
-                                "API request failed with status %d", response.status
-                            )
-                            raise APIRequestError(
-                                f"API request failed with status {response.status}"
-                            )
+                    if response.status != 200:
+                        logger.error(
+                            "API request failed with status %d", response.status
+                        )
+                        raise APIRequestError(
+                            f"API request failed with status {response.status}"
+                        )
 
-                        data = await response.json()
-                        return self._parse_weather_data(location, data, units)
+                    data = await response.json()
+                    return self._parse_weather_data(location, data, units)
 
         except asyncio.TimeoutError:
             logger.error("Request timeout for location: %s", location)
@@ -183,11 +187,21 @@ class AsyncWeatherService:
             logger.error("Failed to parse weather data: %s", e, exc_info=True)
             raise DataParsingError(f"Failed to parse weather data: {e}")
 
-    async def close(self):
+    async def _ensure_session(self) -> aiohttp.ClientSession:
+        """Get or create a shared aiohttp session."""
+        if self._session is None or self._session.closed:
+            self._session = aiohttp.ClientSession()
+            logger.debug("Created new aiohttp session")
+        return self._session
+
+    async def close(self) -> None:
         """Close any open connections and save cache if persistence is enabled."""
+        if self._session and not self._session.closed:
+            await self._session.close()
+            logger.debug("Closed aiohttp session")
+
         if hasattr(self, "config") and self.config.cache_persist:
             self._save_cache_to_disk(self.config.cache_file)
-        # aiohttp sessions are context managers, but this provides explicit cleanup
 
     def _load_cache_from_disk(self, cache_file_path: str) -> None:
         """Load cache from JSON file."""

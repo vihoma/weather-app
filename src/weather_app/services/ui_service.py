@@ -38,18 +38,21 @@ class UIService:
             "[bold green]🌦️ Welcome to Weather App! (Async Mode)[/bold green]"
         )
 
-        while True:
-            location = self._prompt_location()
-            while True:  # Inner loop for unit changes
-                weather_data = await self._get_weather_with_progress(location)
-                self._display_weather(weather_data)
+        try:
+            while True:
+                location = self._prompt_location()
+                while True:  # Inner loop for unit changes
+                    weather_data = await self._get_weather_with_progress(location)
+                    self._display_weather(weather_data)
 
-                if not Confirm.ask("\n🔄 Change units?"):
+                    if not Confirm.ask("\n🔄 Change units?"):
+                        break
+                    self._prompt_units()
+
+                if not self._prompt_continue():
                     break
-                self._prompt_units()
-
-            if not self._prompt_continue():
-                break
+        finally:
+            await self._cleanup()
 
     def run(self) -> None:
         """Main synchronous application loop."""
@@ -247,3 +250,13 @@ class UIService:
     def _prompt_continue(self) -> bool:
         """Ask user if they want to continue."""
         return Confirm.ask("\n🔍 Check another location?", default=True)
+
+    async def _cleanup(self) -> None:
+        """Clean up resources when the application exits."""
+        if hasattr(self, "weather_service") and hasattr(self.weather_service, "close"):
+            if self.use_async:
+                await self.weather_service.close()
+            else:
+                # For sync service, we might need to handle cleanup differently
+                # but WeatherService doesn't have a close method currently
+                pass
