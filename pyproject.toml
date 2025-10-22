@@ -1,6 +1,6 @@
 [project]
 name = "weather-app"
-version = "0.5.3"
+version = "0.5.4"
 description = "A CLI weather app using OpenWeatherMap API, written in Python 3"
 authors = [
     {name = "Lord Sohron",email = "29570082+vihoma@users.noreply.github.com"}
@@ -24,13 +24,13 @@ dependencies = [
 [tool.poetry]
 
 [tool.poetry.group.dev.dependencies]
-pylint = "^3.3.8"
-isort = "^6.0.1"
+pylint = "^4.0.2"
+isort = "^7.0.0"
 flake8 = "^7.3.0"
-ruff = "^0.12.10"
-pytest = "^8.3.4"
-pytest-asyncio = "^0.25.1"
-pytest-mock = "^3.14.0"
+ruff = "^0.14.1"
+pytest = "^8.4.2"
+pytest-asyncio = "^1.2.0"
+pytest-mock = "^3.15.1"
 
 [build-system]
 requires = ["poetry-core>=2.0.0,<3.0.0"]
