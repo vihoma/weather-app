@@ -4,7 +4,7 @@ import os
 from pathlib import Path
 from typing import Optional
 from dotenv import load_dotenv
-from .exceptions import APIKeyError
+from weather_app.exceptions import APIKeyError
 
 
 class Config:

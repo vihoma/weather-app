@@ -10,10 +10,10 @@ import asyncio
 import logging
 from rich.traceback import install
 from rich.console import Console
-from .services.ui_service import UIService
-from .logging_config import setup_default_logging, LoggingConfig, log_with_context
-from .config import Config
-from .exceptions import (
+from weather_app.services.ui_service import UIService
+from weather_app.logging_config import setup_default_logging, LoggingConfig, log_with_context
+from weather_app.config import Config
+from weather_app.exceptions import (
     WeatherAppError,
     ConfigurationError,
     LocationNotFoundError,

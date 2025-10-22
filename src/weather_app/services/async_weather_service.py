@@ -8,9 +8,9 @@ from typing import Dict, Any
 import aiohttp
 from async_timeout import timeout
 from cachetools import TTLCache
-from ..models.weather_data import WeatherData
-from ..config import Config
-from ..exceptions import (
+from weather_app.models.weather_data import WeatherData
+from weather_app.config import Config
+from weather_app.exceptions import (
     LocationNotFoundError,
     APIRequestError,
     NetworkError,

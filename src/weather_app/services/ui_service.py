@@ -6,12 +6,12 @@ from rich.console import Console
 from rich.table import Table
 from rich.text import Text
 from rich.progress import Progress, SpinnerColumn, TextColumn
-from ..models.weather_data import WeatherData
-from ..config import Config
-from .weather_service import WeatherService
-from .async_weather_service import AsyncWeatherService
-from .location_service import LocationService
-from ..exceptions import InvalidLocationError
+from weather_app.models.weather_data import WeatherData
+from weather_app.config import Config
+from weather_app.services.weather_service import WeatherService
+from weather_app.services.async_weather_service import AsyncWeatherService
+from weather_app.services.location_service import LocationService
+from weather_app.exceptions import InvalidLocationError
 
 
 class UIService:
@@ -146,19 +146,19 @@ class UIService:
                 "↓",  # N    (0°)
                 "↙",  # NNE  (22.5°)
                 "←",  # NE   (45°)
-                "↖",  # ENE  (67.5°)
+                "↙",  # ENE  (67.5°)
                 "←",  # E    (90°)
                 "↖",  # ESE  (112.5°)
                 "↑",  # SE   (135°)
-                "↗",  # SSE  (157.5°)
+                "↖",  # SSE  (157.5°)
                 "↑",  # S    (180°)
                 "↗",  # SSW  (202.5°)
                 "→",  # SW   (225°)
-                "↘",  # WSW  (247.5°)
+                "↗",  # WSW  (247.5°)
                 "→",  # W    (270°)
                 "↘",  # WNW  (292.5°)
                 "↓",  # NW   (315°)
-                "↙",  # NNW  (337.5°)
+                "↘",  # NNW  (337.5°)
             ]
             wind_directions = [
                 "N",
@@ -184,7 +184,7 @@ class UIService:
             wind_info = f"{data.wind_speed} {self._speed_unit()}"
         self._add_table_row(table, "Wind", wind_info)
 
-        pressure_bar = "█" * int(data.pressure_hpa / 10)  # Simple bar visualization
+        pressure_bar = "█" * int(data.pressure_hpa / 100)  # Simple bar visualization
         self._add_table_row(
             table, "Pressure", f"{data.pressure_hpa} hPa {pressure_bar}"
         )

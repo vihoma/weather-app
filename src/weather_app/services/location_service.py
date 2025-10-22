@@ -5,7 +5,7 @@ import re
 from typing import Optional, Tuple
 from geopy.geocoders import Nominatim
 from geopy.exc import GeocoderUnavailable, GeocoderServiceError
-from ..exceptions import InvalidLocationError, NetworkError
+from weather_app.exceptions import InvalidLocationError, NetworkError
 
 logger = logging.getLogger(__name__)
 

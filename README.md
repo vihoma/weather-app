@@ -43,7 +43,8 @@ A command-line weather application that provides current weather conditions for 
 
 ### API Key Setup
 
-You need an OpenWeatherMap API key. Get one for free at [https://openweathermap.org/api](https://openweathermap.org/api).
+You need an OpenWeatherMap API key. Get one for free at
+[https://openweathermap.org/api](https://openweathermap.org/api).
 
 #### Secure Storage Options (Recommended)
 
@@ -97,12 +98,7 @@ LOG_FORMAT=json # default = text
 
 Run the application with Poetry:
 ```bash
-poetry run python -m src.weather_app.main
-```
-
-Or directly:
-```bash
-python -m src.weather_app.main
+poetry run weather
 ```
 
 Follow the interactive prompts to:

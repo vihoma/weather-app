@@ -1,7 +1,7 @@
 # Agent Guidelines for Weather App
 
 ## Build/Lint/Test Commands
-- **Run application**: `poetry run python -m src.weather_app.main`
+- **Run application**: `poetry run weather`
 - **Lint with ruff**: `poetry run ruff check src/`
 - **Format imports**: `poetry run isort src/`
 - **Build package**: `poetry build`
@@ -11,7 +11,10 @@
 - **Python version**: 3.13+
 - **Design**: Object-oriented with classes and type hints
 - **Formatting**: PEP 8 compliance, enforced by ruff
-- **Imports**: Absolute imports within src/ (e.g., `from src.weather_app.models import WeatherData`)
+- **Imports**: Absolute imports within src/, e.g.:
+  ```python
+    from weather_app.models.weather_data import WeatherData
+  ```
 - **Naming**: snake_case for vars/functions, PascalCase for classes
 - **Error handling**: Specific exceptions with validation
 - **Documentation**: Google-style docstrings for public methods

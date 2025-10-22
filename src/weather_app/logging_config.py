@@ -4,10 +4,10 @@ import logging
 import logging.handlers
 from pathlib import Path
 from typing import Optional, Any, TYPE_CHECKING
-from .security import setup_secure_logging
+from weather_app.security import setup_secure_logging
 
 if TYPE_CHECKING:
-    from .config import Config
+    from weather_app.config import Config
 
 # Try to import python-json-logger, fallback to standard logging if not available
 try:
