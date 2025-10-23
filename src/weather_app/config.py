@@ -6,6 +6,9 @@ from typing import Optional
 from dotenv import load_dotenv
 from .exceptions import APIKeyError
 from .security import SecureConfig, KeyringUnavailableError
+import logging
+
+logger = logging.getLogger(__name__)
 
 
 class Config:
@@ -22,7 +25,7 @@ class Config:
         try:
             self._api_key = self._secure.get_api_key()
             if self._api_key:
-                print("🔑 API key loaded from secure keyring storage")
+                logger.info("🔑 API key loaded from secure keyring storage")
             else:
                 self._api_key = os.getenv("OWM_API_KEY")
         except KeyringUnavailableError:
@@ -118,6 +121,11 @@ class Config:
         """Get the cache file path."""
         return self._cache_file
 
+    @cache_file.setter
+    def cache_file(self, value: str) -> None:
+        """Set cache file path."""
+        self._cache_file = value
+
     def store_api_key(self, api_key: str) -> None:
         """Store API key securely in keyring.
 
@@ -134,7 +142,7 @@ class Config:
 
         self._secure.store_api_key(api_key)
         self._api_key = api_key
-        print("🔑 API key stored securely in keyring")
+        logger.info("🔑 API key stored securely in keyring")
 
     def is_keyring_available(self) -> bool:
         """Check if keyring storage is available on this system."""
