@@ -1,5 +1,5 @@
 **/**/__pycache__/*
-/.vscode
+.vscode/
 **/**/.ruff_cache
 **/**/*.log
 .env
@@ -8,6 +8,7 @@
 .coverage
 conversation-*.md
 desktop.ini
+weather.env
 weather_app.json
 **/**/venv/**
 **/**/.venv/**
