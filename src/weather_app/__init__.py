@@ -1,1 +1,1 @@
-# Package initialization file
+"""Weather Application package."""

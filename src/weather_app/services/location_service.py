@@ -5,7 +5,7 @@ import re
 from typing import Optional, Tuple
 from geopy.geocoders import Nominatim
 from geopy.exc import GeocoderUnavailable, GeocoderServiceError, GeocoderTimedOut
-from weather_app.exceptions import InvalidLocationError, NetworkError
+from ..exceptions import InvalidLocationError, NetworkError, GeocodingError
 
 logger = logging.getLogger(__name__)
 
@@ -14,24 +14,24 @@ class LocationService:
     """Handles location validation and geocoding operations."""
 
     def __init__(self, timeout: int = 10):
-        """
-        Initialize the location service with geocoder.
+        """Initialize the location service with geocoder.
 
         Args:
             timeout: Timeout in seconds for geocoding requests (default: 10)
+
         """
         self.geolocator = Nominatim(user_agent="weather_app", timeout=timeout)
         self.timeout = timeout
 
     def validate_location_format(self, location: str) -> bool:
-        """
-        Validate the basic format of a location string.
+        """Validate the basic format of a location string.
 
         Args:
             location: Location string in format "City,CC" or coordinates
 
         Returns:
             bool: True if format is valid
+
         """
         # Check for coordinate format (latitude,longitude)
         if self._is_coordinate_format(location):
@@ -58,8 +58,7 @@ class LocationService:
         return bool(city.strip() and country.strip() and len(country.strip()) == 2)
 
     def _sanitize_location_for_logging(self, location: str) -> str:
-        """
-        Sanitize location string for safe logging.
+        """Sanitize location string for safe logging.
 
         Removes or escapes potentially dangerous characters that could be used
         in log injection attacks or cause log parsing issues.
@@ -69,8 +68,9 @@ class LocationService:
 
         Returns:
             str: Sanitized location string safe for logging
+
         """
-        if not location:
+        if not location or not location.strip():
             return "[empty]"
 
         # Remove or escape problematic characters
@@ -90,14 +90,14 @@ class LocationService:
         return sanitized
 
     def geocode_location(self, location: str) -> Optional[Tuple[float, float]]:
-        """
-        Geocode a location string to coordinates.
+        """Geocode a location string to coordinates.
 
         Args:
             location: Location string to geocode
 
         Returns:
             Optional[Tuple[float, float]]: (latitude, longitude) or None
+
         """
         try:
             logger.debug(
@@ -147,11 +147,10 @@ class LocationService:
             return None
         except Exception as e:
             logger.error("Unexpected error during geocoding: %s", e, exc_info=True)
-            return None
+            raise GeocodingError(f"Unexpected error during geocoding: {e}") from e
 
     def normalize_location(self, location: str) -> str:
-        """
-        Normalize location input and validate format.
+        """Normalize location input and validate format.
 
         Args:
             location: Raw location input
@@ -161,6 +160,7 @@ class LocationService:
 
         Raises:
             InvalidLocationError: If location format is invalid
+
         """
         location = location.strip()
 
@@ -179,8 +179,7 @@ class LocationService:
     def get_location_display_name(
         self, latitude: float, longitude: float
     ) -> Optional[str]:
-        """
-        Reverse geocode coordinates to get display name.
+        """Reverse geocode coordinates to get display name.
 
         Args:
             latitude: Latitude coordinate
@@ -188,6 +187,7 @@ class LocationService:
 
         Returns:
             Optional[str]: Display name or None
+
         """
         try:
             location = self.geolocator.reverse((latitude, longitude), exactly_one=True)
@@ -207,4 +207,6 @@ class LocationService:
             return None
         except Exception as e:
             logger.error("Unexpected error in reverse geocoding: %s", e, exc_info=True)
-            return None
+            raise GeocodingError(
+                f"Unexpected error during reverse geocoding: {e}"
+            ) from e

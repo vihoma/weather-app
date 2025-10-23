@@ -4,8 +4,7 @@ import re
 
 
 def sanitize_string_for_logging(text: str, max_length: int = 100) -> str:
-    """
-    Sanitize string for safe logging.
+    """Sanitize string for safe logging.
 
     Removes or escapes potentially dangerous characters that could be used
     in log injection attacks or cause log parsing issues.
@@ -16,6 +15,7 @@ def sanitize_string_for_logging(text: str, max_length: int = 100) -> str:
 
     Returns:
         str: Sanitized string safe for logging
+
     """
     if not text:
         return "[empty]"
@@ -37,14 +37,14 @@ def sanitize_string_for_logging(text: str, max_length: int = 100) -> str:
 
 
 def validate_api_key_format(api_key: str) -> bool:
-    """
-    Validate the basic format of an OpenWeatherMap API key.
+    """Validate the basic format of an OpenWeatherMap API key.
 
     Args:
         api_key: API key string to validate
 
     Returns:
         bool: True if format appears valid
+
     """
     if not api_key or not isinstance(api_key, str):
         return False

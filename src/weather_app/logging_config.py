@@ -16,7 +16,7 @@ try:
     JSON_LOGGER_AVAILABLE = True
 except ImportError:
     JSON_LOGGER_AVAILABLE = False
-    jsonlogger = None
+    jsonlogger = None  # type: ignore
 
 
 class LoggingConfig:
@@ -28,13 +28,13 @@ class LoggingConfig:
         log_file: Optional[str] = None,
         log_format: str = "text",
     ):
-        """
-        Initialize logging configuration.
+        """Initialize logging configuration.
 
         Args:
             log_level: Logging level (e.g., logging.INFO, logging.DEBUG)
             log_file: Optional path to log file
             log_format: Log format ("text" or "json")
+
         """
         self.log_level = log_level
         self.log_file = log_file
@@ -129,14 +129,14 @@ class LoggingConfig:
 
     @classmethod
     def get_logger(cls, name: str) -> logging.Logger:
-        """
-        Get a named logger with proper configuration.
+        """Get a named logger with proper configuration.
 
         Args:
             name: Logger name (typically __name__)
 
         Returns:
             Configured logger instance
+
         """
         return logging.getLogger(name)
 
@@ -148,8 +148,7 @@ def log_with_context(
     exc_info: bool = False,
     **context: Any,
 ) -> None:
-    """
-    Log a message with structured context data.
+    """Log a message with structured context data.
 
     Args:
         logger: Logger instance
@@ -157,6 +156,7 @@ def log_with_context(
         message: Log message
         exc_info: Whether to include exception info
         **context: Additional context data to include in log
+
     """
     if JSON_LOGGER_AVAILABLE and logger.isEnabledFor(level):
         # For JSON logging, include context as extra data
@@ -171,11 +171,11 @@ def log_with_context(
 
 
 def setup_default_logging(config: Optional["Config"] = None) -> None:
-    """
-    Set up logging configuration for the application.
+    """Set up logging configuration for the application.
 
     Args:
         config: Optional Config object for custom logging settings
+
     """
     if config:
         # Convert string log level to numeric value

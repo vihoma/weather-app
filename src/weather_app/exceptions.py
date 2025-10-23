@@ -59,3 +59,15 @@ class DataParsingError(WeatherServiceError):
     """Raised when there are issues parsing weather data."""
 
     pass
+
+
+class LocationServiceError(WeatherAppError):
+    """Base exception for location service errors."""
+
+    pass
+
+
+class GeocodingError(LocationServiceError):
+    """Raised when there are issues with geocoding operations."""
+
+    pass

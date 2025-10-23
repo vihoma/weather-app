@@ -1,7 +1,6 @@
-"""
-models package initialization
-"""
-# Models package initialization
-from weather_app.models.weather_data import WeatherData
+"""Models package for weather data structures."""
 
-__all__ = ['WeatherData']
+# Models package initialization
+from .weather_data import WeatherData
+
+__all__ = ["WeatherData"]

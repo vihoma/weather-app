@@ -1,6 +1,5 @@
 #!/usr/bin/env python3
-"""
-Main entry point for the Weather Application.
+"""Main entry point for the Weather Application.
 
 This module initializes the application and handles top-level exceptions.
 Uses Rich for enhanced terminal output and structured logging.
@@ -24,16 +23,20 @@ from weather_app.exceptions import (
     APIRequestError,
 )
 
-# Set up configuration and logging
-config = Config()
-config.validate()
-setup_default_logging(config)
-logger = LoggingConfig.get_logger(__name__)
+# Global logger instance
+logger = None
 
 
 async def main_async() -> None:
     """Initialize and run the weather application in async mode."""
     install(show_locals=True)  # Rich traceback handler
+
+    # Set up configuration and logging
+    config = Config()
+    config.validate()
+    setup_default_logging(config)
+    global logger
+    logger = LoggingConfig.get_logger(__name__)
 
     ui = None
     try:
@@ -52,21 +55,6 @@ async def main_async() -> None:
         log_with_context(
             logger, logging.INFO, "Weather Application completed successfully"
         )
-    finally:
-        # Ensure cache is saved on application exit
-        if ui and hasattr(ui, 'weather_service') and ui.weather_service:
-            try:
-                if config.use_async:
-                    ui.weather_service.save_cache()
-                else:
-                    ui.weather_service.save_cache()
-                log_with_context(
-                    logger, logging.DEBUG, "Cache saved successfully"
-                )
-            except Exception as e:
-                log_with_context(
-                    logger, logging.WARNING, "Failed to save cache", error=str(e)
-                )
     except KeyboardInterrupt:
         log_with_context(
             logger,
@@ -171,6 +159,16 @@ async def main_async() -> None:
             "[blue]https://github.com/vihoma/weather-app/issues[/blue] 🐛",
             sep="\n",
         )
+    finally:
+        # Ensure cache is saved on application exit
+        if ui and hasattr(ui, "weather_service") and ui.weather_service:
+            try:
+                ui.weather_service.save_cache()
+                log_with_context(logger, logging.DEBUG, "Cache saved successfully")
+            except Exception as e:
+                log_with_context(
+                    logger, logging.WARNING, "Failed to save cache", error=str(e)
+                )
 
 
 def main() -> None:

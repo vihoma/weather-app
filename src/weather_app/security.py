@@ -1,5 +1,4 @@
-"""
-Security utilities for the Weather Application.
+"""Security utilities for the Weather Application.
 
 This module provides secure storage for API keys using the system's keyring
 and sensitive data masking for logging.
@@ -25,13 +24,18 @@ class KeyringUnavailableError(SecurityError):
 
 
 class SensitiveDataFilter(logging.Filter):
-    """
-    Logging filter that masks sensitive information.
+    """Logging filter that masks sensitive information.
 
     Masks API keys, passwords, and other sensitive data in log messages.
     """
 
     def __init__(self, name: str = ""):
+        """Initialize the sensitive data filter.
+
+        Args:
+            name: Filter name
+
+        """
         super().__init__(name)
         # Patterns to match sensitive data
         self.sensitive_patterns = [
@@ -51,7 +55,7 @@ class SensitiveDataFilter(logging.Filter):
 
         if hasattr(record, "args") and record.args:
             # Convert args to string and mask sensitive data
-            masked_args = []
+            masked_args: list[object] = []
             for arg in record.args:
                 if isinstance(arg, str):
                     masked_args.append(self._mask_sensitive_data(arg))
@@ -92,13 +96,12 @@ class SensitiveDataFilter(logging.Filter):
 
 
 class SecureConfig:
-    """
-    Secure configuration manager that uses keyring for sensitive data.
-    """
+    """Secure configuration manager that uses keyring for sensitive data."""
 
     SERVICE_NAME = "weather-app"
 
     def __init__(self):
+        """Initialize the secure configuration manager."""
         self._keyring_available = self._check_keyring_availability()
 
     def _check_keyring_availability(self) -> bool:
@@ -119,8 +122,7 @@ class SecureConfig:
         return self._keyring_available
 
     def store_api_key(self, api_key: str, service_name: str = "openweathermap") -> None:
-        """
-        Store an API key securely using keyring.
+        """Store an API key securely using keyring.
 
         Args:
             api_key: The API key to store
@@ -129,6 +131,7 @@ class SecureConfig:
         Raises:
             KeyringUnavailableError: If keyring is not available
             ValueError: If API key is empty or invalid
+
         """
         if not api_key or not isinstance(api_key, str):
             raise ValueError("API key must be a non-empty string")
@@ -144,8 +147,7 @@ class SecureConfig:
             raise SecurityError(f"Failed to store API key: {e}") from e
 
     def get_api_key(self, service_name: str = "openweathermap") -> Optional[str]:
-        """
-        Retrieve an API key from secure storage.
+        """Retrieve an API key from secure storage.
 
         Args:
             service_name: Name of the service to retrieve key for
@@ -155,6 +157,7 @@ class SecureConfig:
 
         Raises:
             KeyringUnavailableError: If keyring is not available
+
         """
         if not self._keyring_available:
             raise KeyringUnavailableError("System keyring is not available")
@@ -165,14 +168,14 @@ class SecureConfig:
             raise SecurityError(f"Failed to retrieve API key: {e}") from e
 
     def delete_api_key(self, service_name: str = "openweathermap") -> None:
-        """
-        Delete an API key from secure storage.
+        """Delete an API key from secure storage.
 
         Args:
             service_name: Name of the service to delete key for
 
         Raises:
             KeyringUnavailableError: If keyring is not available
+
         """
         if not self._keyring_available:
             raise KeyringUnavailableError("System keyring is not available")
@@ -183,14 +186,14 @@ class SecureConfig:
             raise SecurityError(f"Failed to delete API key: {e}") from e
 
     def list_stored_keys(self) -> Dict[str, str]:
-        """
-        List all stored API keys (returns masked versions for security).
+        """List all stored API keys (returns masked versions for security).
 
         Returns:
             Dictionary of service names to masked API keys
 
         Raises:
             KeyringUnavailableError: If keyring is not available
+
         """
         if not self._keyring_available:
             raise KeyringUnavailableError("System keyring is not available")
@@ -201,8 +204,7 @@ class SecureConfig:
 
 
 def setup_secure_logging() -> None:
-    """
-    Set up secure logging with sensitive data filtering.
+    """Set up secure logging with sensitive data filtering.
 
     This should be called early in the application startup.
     """
@@ -222,14 +224,14 @@ def setup_secure_logging() -> None:
 
 
 def mask_sensitive_string(text: str) -> str:
-    """
-    Mask sensitive information in a string for safe display.
+    """Mask sensitive information in a string for safe display.
 
     Args:
         text: The text containing potentially sensitive information
 
     Returns:
         Text with sensitive information masked
+
     """
     filter = SensitiveDataFilter()
     return filter._mask_sensitive_data(text)

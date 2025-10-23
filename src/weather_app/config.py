@@ -4,8 +4,8 @@ import os
 from pathlib import Path
 from typing import Optional
 from dotenv import load_dotenv
-from weather_app.exceptions import APIKeyError
-from weather_app.security import SecureConfig, KeyringUnavailableError
+from .exceptions import APIKeyError
+from .security import SecureConfig, KeyringUnavailableError
 
 
 class Config:
@@ -119,8 +119,7 @@ class Config:
         return self._cache_file
 
     def store_api_key(self, api_key: str) -> None:
-        """
-        Store API key securely in keyring.
+        """Store API key securely in keyring.
 
         Args:
             api_key: The API key to store
@@ -128,6 +127,7 @@ class Config:
         Raises:
             KeyringUnavailableError: If keyring is not available
             ValueError: If API key is empty or invalid
+
         """
         if not api_key or not isinstance(api_key, str):
             raise ValueError("API key must be a non-empty string")

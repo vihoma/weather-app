@@ -1,17 +1,18 @@
 """Rich-based user interface components with async support."""
 
 import asyncio
+from typing import Union
 from rich.prompt import Prompt, Confirm
 from rich.console import Console
 from rich.table import Table
 from rich.text import Text
 from rich.progress import Progress, SpinnerColumn, TextColumn
-from weather_app.models.weather_data import WeatherData
-from weather_app.config import Config
-from weather_app.services.weather_service import WeatherService
-from weather_app.services.async_weather_service import AsyncWeatherService
-from weather_app.services.location_service import LocationService
-from weather_app.exceptions import (
+from ..models.weather_data import WeatherData
+from ..config import Config
+from .weather_service import WeatherService
+from .async_weather_service import AsyncWeatherService
+from .location_service import LocationService
+from ..exceptions import (
     InvalidLocationError,
     LocationNotFoundError,
     APIRequestError,
@@ -25,22 +26,30 @@ class UIService:
     """Handles all user interaction and display."""
 
     def __init__(self, use_async: bool = True):
+        """Initialize the UI service.
+
+        Args:
+            use_async: Whether to use async mode for weather service
+        """
         self.console = Console()
         self.config = Config()
         self.config.validate()
         self.use_async = use_async
 
+        # Initialize weather service with proper type annotation
         if use_async:
-            self.weather_service = AsyncWeatherService(self.config)
+            self.weather_service: Union[AsyncWeatherService, WeatherService] = (
+                AsyncWeatherService(self.config)
+            )
         else:
             self.weather_service = WeatherService(self.config)
 
         self.location_service = LocationService()
         self.current_units = self.config.units
-        self.query_history = []
+        self.query_history: list[WeatherData] = []
 
     async def run_async(self) -> None:
-        """Main async application loop."""
+        """Run the main async application loop."""
         self.console.print(
             "[bold green]🌦️ Welcome to Weather App! (Async Mode)[/bold green]"
         )
@@ -62,7 +71,7 @@ class UIService:
             await self._cleanup()
 
     def run(self) -> None:
-        """Main application loop."""
+        """Run the main application loop."""
         if self.use_async:
             # Run async version using asyncio.run()
             asyncio.run(self.run_async())
@@ -71,7 +80,7 @@ class UIService:
             self._run_sync()
 
     def _run_sync(self) -> None:
-        """Main synchronous application loop."""
+        """Run the main synchronous application loop."""
         self.console.print(
             "[bold green]🌦️ Welcome to Weather App! (Sync Mode)[/bold green]"
         )
@@ -100,9 +109,16 @@ class UIService:
             )
 
             try:
-                weather_data = await self.weather_service.get_weather(
-                    location, self.current_units
-                )
+                if self.use_async:
+                    # In async mode, we should have an async service
+                    weather_data = await self.weather_service.get_weather(
+                        location, self.current_units
+                    )
+                else:
+                    # In sync mode, we should have a sync service
+                    weather_data = self.weather_service.get_weather(
+                        location, self.current_units
+                    )
                 progress.update(
                     task, completed=True, description="[green]Data received!"
                 )
@@ -134,9 +150,16 @@ class UIService:
             )
 
             try:
-                weather_data = self.weather_service.get_weather(
-                    location, self.current_units
-                )
+                if self.use_async:
+                    # For async service, we need to run the coroutine
+                    weather_data = asyncio.run(
+                        self.weather_service.get_weather(location, self.current_units)
+                    )
+                else:
+                    # In sync mode, we should have a sync service
+                    weather_data = self.weather_service.get_weather(
+                        location, self.current_units
+                    )
                 progress.update(
                     task, completed=True, description="[green]Data received!"
                 )
@@ -277,7 +300,7 @@ class UIService:
         self.console.print(comp_table)
 
     def _add_table_row(self, table: Table, metric: str, value: str) -> None:
-        """Helper to add styled rows to table."""
+        """Add styled rows to table."""
         table.add_row(Text(metric, style="bold cyan"), Text(value))
 
     def _temp_unit(self) -> str:

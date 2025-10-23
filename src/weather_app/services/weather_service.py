@@ -4,14 +4,14 @@ import json
 import logging
 from pathlib import Path
 from typing import Any
+from cachetools import TTLCache
 from pyowm.owm import OWM
 from pyowm.utils.config import get_default_config
 from pyowm.commons.exceptions import PyOWMError, NotFoundError
-from cachetools import TTLCache
-from weather_app.models.weather_data import WeatherData
-from weather_app.config import Config
-from weather_app.utils import sanitize_string_for_logging
-from weather_app.exceptions import (
+from ..models.weather_data import WeatherData
+from ..config import Config
+from ..utils import sanitize_string_for_logging
+from ..exceptions import (
     LocationNotFoundError,
     APIRequestError,
 )
@@ -23,6 +23,15 @@ class WeatherService:
     """Handles all interactions with OpenWeatherMap API."""
 
     def __init__(self, config: Config):
+        """Initialize the weather service.
+
+        Args:
+            config: Configuration object containing API settings
+
+        Raises:
+            ValueError: If API key is not provided
+
+        """
         self.config_dict = get_default_config()
         self.config_dict["use_ssl"] = True
 
@@ -38,7 +47,7 @@ class WeatherService:
         self.config = config
 
         # Initialize cache with configurable TTL and max 100 items
-        self.cache = TTLCache(maxsize=100, ttl=config.cache_ttl)
+        self.cache: TTLCache = TTLCache(maxsize=100, ttl=config.cache_ttl)
         logger.debug("WeatherService initialized successfully with caching")
 
         # Load cache from disk if persistence is enabled
@@ -46,8 +55,7 @@ class WeatherService:
             self._load_cache_from_disk(config.cache_file)
 
     def get_weather(self, location: str, units: str) -> WeatherData:
-        """
-        Get current weather data for a location with caching.
+        """Get current weather data for a location with caching.
 
         Args:
             location: City name and country code (e.g., "London,GB")
@@ -55,6 +63,7 @@ class WeatherService:
 
         Returns:
             WeatherData: Parsed weather data
+
         """
         # Create cache key
         cache_key = f"{location}:{units}"
