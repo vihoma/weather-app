@@ -35,7 +35,7 @@ class TestConfig:
                     assert config.log_file is None
                     assert config.log_format == "text"
                     assert config.cache_persist is False
-                    assert config.cache_file == "~/.weather_app_cache.json"
+                    assert config.cache_file == "E:\\Temp\\.weather_app_cache.json"
 
     def test_config_initialization_with_environment_variables(self):
         """Test that Config reads environment variables correctly."""
@@ -46,10 +46,10 @@ class TestConfig:
             "REQUEST_TIMEOUT": "15",
             "USE_ASYNC": "false",
             "LOG_LEVEL": "DEBUG",
-            "LOG_FILE": "/var/log/weather.log",
+            "LOG_FILE": "E:\\Temp\\weather.log",
             "LOG_FORMAT": "json",
             "CACHE_PERSIST": "true",
-            "CACHE_FILE": "/tmp/cache.json"
+            "CACHE_FILE": "E:\\Temp\\cache.json"
         }):
             config = Config()
             
@@ -59,10 +59,10 @@ class TestConfig:
             assert config.request_timeout == 15
             assert config.use_async is False
             assert config.log_level == "DEBUG"
-            assert config.log_file == "/var/log/weather.log"
+            assert config.log_file == "E:\\Temp\\weather.log"
             assert config.log_format == "json"
             assert config.cache_persist is True
-            assert config.cache_file == "/tmp/cache.json"
+            assert config.cache_file == "E:\\Temp\\cache.json"
 
     def test_config_environment_variable_loading_order(self):
         """Test that environment variables take precedence over config files."""

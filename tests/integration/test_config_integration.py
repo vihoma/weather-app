@@ -31,7 +31,7 @@ class TestConfigIntegration:
             f.write("LOG_LEVEL=DEBUG\n")
             f.write("LOG_FORMAT=json\n")
             f.write("CACHE_PERSIST=true\n")
-            f.write("CACHE_FILE=/tmp/test_cache.json\n")
+            f.write("CACHE_FILE=E:\\Temp\\test_cache.json\n")
             temp_file = f.name
         
         yield temp_file
@@ -62,7 +62,7 @@ class TestConfigIntegration:
             assert config.log_level == "DEBUG"
             assert config.log_format == "json"
             assert config.cache_persist is True
-            assert config.cache_file == "/tmp/test_cache.json"
+            assert config.cache_file == "E:\\Temp\\test_cache.json"
 
     def test_config_environment_precedence(self):
         """Test that environment variables take precedence over config files."""

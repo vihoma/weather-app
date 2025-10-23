@@ -27,7 +27,7 @@ class TestUIService:
             mock_config = Mock()
             mock_config.validate.return_value = None
             mock_config.units = "metric"
-            mock_config.cache_file = "/tmp/test_cache.json"  # Add cache_file
+            mock_config.cache_file = "E:\\Temp\\test_cache.json"  # Add cache_file
             MockConfig.return_value = mock_config
             
             mock_weather_service = Mock()
@@ -49,7 +49,7 @@ class TestUIService:
             mock_config = Mock()
             mock_config.validate.return_value = None
             mock_config.units = "metric"
-            mock_config.cache_file = "/tmp/test_cache.json"  # Add cache_file
+            mock_config.cache_file = "E:\\Temp\\test_cache.json"  # Add cache_file
             MockConfig.return_value = mock_config
             
             mock_async_weather_service = Mock()
@@ -71,7 +71,7 @@ class TestUIService:
             mock_config = Mock()
             mock_config.validate.return_value = None
             mock_config.units = "metric"
-            mock_config.cache_file = "/tmp/test_cache.json"
+            mock_config.cache_file = "E:\\Temp\\test_cache.json"
             MockConfig.return_value = mock_config
             
             mock_weather_service = Mock()
@@ -103,7 +103,7 @@ class TestUIService:
             mock_config = Mock()
             mock_config.validate.return_value = None
             mock_config.units = "metric"
-            mock_config.cache_file = "/tmp/test_cache.json"
+            mock_config.cache_file = "E:\\Temp\\test_cache.json"
             MockConfig.return_value = mock_config
             
             mock_weather_service = Mock()
@@ -130,7 +130,7 @@ class TestUIService:
             
             mock_config = Mock()
             mock_config.validate.return_value = None
-            mock_config.cache_file = "/tmp/test_cache.json"
+            mock_config.cache_file = "E:\\Temp\\test_cache.json"
             MockConfig.return_value = mock_config
             
             mock_weather_service = Mock()
@@ -160,7 +160,7 @@ class TestUIService:
             
             mock_config = Mock()
             mock_config.validate.return_value = None
-            mock_config.cache_file = "/tmp/test_cache.json"
+            mock_config.cache_file = "E:\\Temp\\test_cache.json"
             MockConfig.return_value = mock_config
             
             mock_weather_service = Mock()
@@ -200,7 +200,7 @@ class TestUIService:
             
             mock_config = Mock()
             mock_config.validate.return_value = None
-            mock_config.cache_file = "/tmp/test_cache.json"
+            mock_config.cache_file = "E:\\Temp\\test_cache.json"
             MockConfig.return_value = mock_config
             
             mock_weather_service = Mock()
@@ -228,7 +228,7 @@ class TestUIService:
             
             mock_config = Mock()
             mock_config.validate.return_value = None
-            mock_config.cache_file = "/tmp/test_cache.json"
+            mock_config.cache_file = "E:\\Temp\\test_cache.json"
             MockConfig.return_value = mock_config
             
             mock_weather_service = Mock()
@@ -260,7 +260,7 @@ class TestUIService:
             
             mock_config = Mock()
             mock_config.validate.return_value = None
-            mock_config.cache_file = "/tmp/test_cache.json"
+            mock_config.cache_file = "E:\\Temp\\test_cache.json"
             MockConfig.return_value = mock_config
             
             mock_weather_service = Mock()
@@ -293,7 +293,7 @@ class TestUIService:
             
             mock_config = Mock()
             mock_config.validate.return_value = None
-            mock_config.cache_file = "/tmp/test_cache.json"
+            mock_config.cache_file = "E:\\Temp\\test_cache.json"
             MockConfig.return_value = mock_config
             
             mock_weather_service = Mock()
@@ -330,7 +330,7 @@ class TestUIService:
             
             mock_config = Mock()
             mock_config.validate.return_value = None
-            mock_config.cache_file = "/tmp/test_cache.json"
+            mock_config.cache_file = "E:\\Temp\\test_cache.json"
             MockConfig.return_value = mock_config
             
             mock_weather_service = Mock()
@@ -378,7 +378,7 @@ class TestUIService:
             
             mock_config = Mock()
             mock_config.validate.return_value = None
-            mock_config.cache_file = "/tmp/test_cache.json"
+            mock_config.cache_file = "E:\\Temp\\test_cache.json"
             MockConfig.return_value = mock_config
             
             mock_weather_service = Mock()
@@ -421,7 +421,7 @@ class TestUIService:
             mock_config = Mock()
             mock_config.validate.return_value = None
             mock_config.units = "metric"
-            mock_config.cache_file = "/tmp/test_cache.json"
+            mock_config.cache_file = "E:\\Temp\\test_cache.json"
             MockConfig.return_value = mock_config
     
             # Create a proper mock that can pass isinstance checks
@@ -458,7 +458,7 @@ class TestUIService:
             
             mock_config = Mock()
             mock_config.validate.return_value = None
-            mock_config.cache_file = "/tmp/test_cache.json"
+            mock_config.cache_file = "E:\\Temp\\test_cache.json"
             MockConfig.return_value = mock_config
             
             # Create a proper mock that can pass isinstance checks
@@ -493,7 +493,7 @@ class TestUIService:
             mock_config = Mock()
             mock_config.validate.return_value = None
             mock_config.units = "metric"
-            mock_config.cache_file = "/tmp/test_cache.json"
+            mock_config.cache_file = "E:\\Temp\\test_cache.json"
             MockConfig.return_value = mock_config
     
             # Create a proper mock that can pass isinstance checks
@@ -529,7 +529,7 @@ class TestUIService:
             
             mock_config = Mock()
             mock_config.validate.return_value = None
-            mock_config.cache_file = "/tmp/test_cache.json"
+            mock_config.cache_file = "E:\\Temp\\test_cache.json"
             MockConfig.return_value = mock_config
             
             mock_async_weather_service = Mock()
@@ -554,7 +554,7 @@ class TestUIService:
             
             mock_config = Mock()
             mock_config.validate.return_value = None
-            mock_config.cache_file = "/tmp/test_cache.json"
+            mock_config.cache_file = "E:\\Temp\\test_cache.json"
             MockConfig.return_value = mock_config
             
             mock_weather_service = Mock()
