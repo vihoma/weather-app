@@ -24,12 +24,23 @@ class WeatherData:
     icon_code: Optional[int] = None
 
     WEATHER_EMOJI_MAP = {
-        "clear": "☀️", "scattered clouds": "🌤️", "broken clouds": "🌥️",
-        "few clouds": "🌥️", "overcast clouds": "☁️", "light rain": "🌦️",
-        "rain": "🌧️", "drizzle": "💧",
-        "snow": "❄️", "sleet": "🌨️",
-        "mist": "🌫️", "haze": "🌫️", "fog": "🌫️", "thunderstorm": "⛈️",
-        "windy": "💨", "sunny": "☀️", "clouds": "☁️",
+        "clear": "☀️",
+        "scattered clouds": "🌤️",
+        "broken clouds": "🌥️",
+        "few clouds": "🌥️",
+        "overcast clouds": "☁️",
+        "light rain": "🌦️",
+        "rain": "🌧️",
+        "drizzle": "💧",
+        "snow": "❄️",
+        "sleet": "🌨️",
+        "mist": "🌫️",
+        "haze": "🌫️",
+        "fog": "🌫️",
+        "thunderstorm": "⛈️",
+        "windy": "💨",
+        "sunny": "☀️",
+        "clouds": "☁️",
     }
 
     def get_emoji(self) -> str:
