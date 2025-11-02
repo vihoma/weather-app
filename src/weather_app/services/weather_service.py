@@ -4,17 +4,16 @@ import json
 import logging
 from pathlib import Path
 from typing import Any
+
 from cachetools import TTLCache
+from pyowm.commons.exceptions import NotFoundError, PyOWMError
 from pyowm.owm import OWM
 from pyowm.utils.config import get_default_config
-from pyowm.commons.exceptions import PyOWMError, NotFoundError
-from ..models.weather_data import WeatherData
+
 from ..config import Config
+from ..exceptions import APIRequestError, LocationNotFoundError
+from ..models.weather_data import WeatherData
 from ..utils import sanitize_string_for_logging
-from ..exceptions import (
-    LocationNotFoundError,
-    APIRequestError,
-)
 
 logger = logging.getLogger(__name__)
 

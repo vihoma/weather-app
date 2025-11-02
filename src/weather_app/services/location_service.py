@@ -3,9 +3,12 @@
 import logging
 import re
 from typing import Optional, Tuple
+
+from geopy.exc import (GeocoderServiceError, GeocoderTimedOut,
+                       GeocoderUnavailable)
 from geopy.geocoders import Nominatim
-from geopy.exc import GeocoderUnavailable, GeocoderServiceError, GeocoderTimedOut
-from ..exceptions import InvalidLocationError, NetworkError, GeocodingError
+
+from ..exceptions import GeocodingError, InvalidLocationError, NetworkError
 
 logger = logging.getLogger(__name__)
 

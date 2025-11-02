@@ -3,9 +3,11 @@
 import os
 from pathlib import Path
 from typing import Optional
+
 from dotenv import load_dotenv
+
 from .exceptions import APIKeyError
-from .security import SecureConfig, KeyringUnavailableError
+from .security import KeyringUnavailableError, SecureConfig
 
 
 class Config:
@@ -150,7 +152,7 @@ class Config:
             if keyring_available:
                 error_message += (
                     "\nAlternatively, you can store your API key securely in keyring "
-                    "using the store_api_key() method."
+                    "using: weather --setup-api-key"
                 )
             else:
                 error_message += (

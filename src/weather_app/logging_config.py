@@ -3,7 +3,8 @@
 import logging
 import logging.handlers
 from pathlib import Path
-from typing import Optional, Any, TYPE_CHECKING
+from typing import TYPE_CHECKING, Any, Optional
+
 from weather_app.security import setup_secure_logging
 
 if TYPE_CHECKING:

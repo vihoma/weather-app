@@ -2,24 +2,21 @@
 
 import asyncio
 from typing import Union
-from rich.prompt import Prompt, Confirm
+
 from rich.console import Console
+from rich.progress import Progress, SpinnerColumn, TextColumn
+from rich.prompt import Confirm, Prompt
 from rich.table import Table
 from rich.text import Text
-from rich.progress import Progress, SpinnerColumn, TextColumn
-from ..models.weather_data import WeatherData
+
 from ..config import Config
-from .weather_service import WeatherService
+from ..exceptions import (APIRequestError, DataParsingError,
+                          InvalidLocationError, LocationNotFoundError,
+                          NetworkError, RateLimitError)
+from ..models.weather_data import WeatherData
 from .async_weather_service import AsyncWeatherService
 from .location_service import LocationService
-from ..exceptions import (
-    InvalidLocationError,
-    LocationNotFoundError,
-    APIRequestError,
-    NetworkError,
-    RateLimitError,
-    DataParsingError,
-)
+from .weather_service import WeatherService
 
 
 class UIService:

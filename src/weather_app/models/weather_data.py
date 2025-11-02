@@ -3,6 +3,7 @@
 from dataclasses import dataclass
 from typing import Optional
 
+
 @dataclass
 class WeatherData:
     """Structured weather data container."""

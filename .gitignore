@@ -4,12 +4,13 @@
 **/**/*.log
 .env
 .*.env
+*.bak
 .aider*
 .coverage
 conversation-*.md
 desktop.ini
 weather.env
-weather_app.json
+weather_app.log.json
 **/**/venv/**
 **/**/.venv/**
 MagicMock/

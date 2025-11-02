@@ -6,7 +6,8 @@ and sensitive data masking for logging.
 
 import logging
 import re
-from typing import Optional, Dict
+from typing import Dict, Optional
+
 import keyring
 from keyring.errors import KeyringError
 

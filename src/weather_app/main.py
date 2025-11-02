@@ -7,24 +7,69 @@ Uses Rich for enhanced terminal output and structured logging.
 
 import asyncio
 import logging
-from rich.traceback import install
+import sys
+
 from rich.console import Console
-from weather_app.services.ui_service import UIService
-from weather_app.logging_config import (
-    setup_default_logging,
-    LoggingConfig,
-    log_with_context,
-)
+from rich.prompt import Prompt
+from rich.traceback import install
+
 from weather_app.config import Config
 from weather_app.exceptions import (
-    WeatherAppError,
+    APIRequestError,
     ConfigurationError,
     LocationNotFoundError,
-    APIRequestError,
+    WeatherAppError,
 )
+from weather_app.logging_config import (
+    LoggingConfig,
+    log_with_context,
+    setup_default_logging,
+)
+from weather_app.services.ui_service import UIService
 
 # Global logger instance
 logger = None
+
+
+def setup_api_key() -> bool:
+    """Interactive setup for storing API key in secure keyring.
+
+    Returns:
+        bool: True if setup was successful, False otherwise
+    """
+    console = Console()
+    config = Config()
+
+    if not config.is_keyring_available():
+        console.print(
+            "\n[yellow]⚠️  Secure keyring storage is not available on this system[/yellow]",
+            "\nPlease use one of these alternatives:",
+            "  • Set OWM_API_KEY environment variable",
+            "  • Create .weather.env file with your API key",
+            sep="\n",
+        )
+        return False
+
+    console.print("\n[bold blue]🔑 OpenWeatherMap API Key Setup[/bold blue]")
+    console.print("\nThis will securely store your API key in your system's keyring.")
+
+    try:
+        api_key = Prompt.ask("\nEnter your OpenWeatherMap API key", password=True)
+
+        if not api_key:
+            console.print("\n[yellow]❌ No API key provided. Setup cancelled.[/yellow]")
+            return False
+
+        config.store_api_key(api_key)
+        console.print("\n[green]✅ API key stored securely in keyring![/green]")
+        console.print(
+            "\nYou can now run the weather app without setting environment variables."
+        )
+        return True
+
+    except Exception as e:
+        console.print(f"\n[red]❌ Failed to store API key: {e}[/red]")
+        return False
 
 
 async def main_async() -> None:
@@ -33,6 +78,31 @@ async def main_async() -> None:
 
     # Set up configuration and logging
     config = Config()
+
+    # First-run setup: prompt for API key storage if none found and keyring available
+    if not config.api_key and config.is_keyring_available():
+        console = Console()
+        console.print("\n[bold yellow]🔑 No API key found[/bold yellow]")
+        console.print(
+            "\nWould you like to set up your OpenWeatherMap API key securely?"
+        )
+
+        try:
+            setup_now = Prompt.ask(
+                "Store API key in secure keyring?", choices=["y", "n"], default="y"
+            )
+
+            if setup_now.lower() == "y":
+                if setup_api_key():
+                    # Reload config to get the stored key
+                    config = Config()
+                else:
+                    console.print(
+                        "\n[yellow]Continuing without API key setup...[/yellow]"
+                    )
+        except KeyboardInterrupt:
+            console.print("\n[yellow]Setup cancelled by user.[/yellow]")
+
     config.validate()
     setup_default_logging(config)
     global logger
@@ -173,6 +243,24 @@ async def main_async() -> None:
 
 def main() -> None:
     """Initialize and run the weather application (sync wrapper)."""
+    # Check for setup command
+    if len(sys.argv) > 1 and sys.argv[1] == "--setup-api-key":
+        success = setup_api_key()
+        sys.exit(0 if success else 1)
+
+    # Check for help command
+    if len(sys.argv) > 1 and sys.argv[1] in ["--help", "-h"]:
+        console = Console()
+        console.print("\n[bold blue]🌦️ Weather App[/bold blue]")
+        console.print("\nUsage:")
+        console.print("  weather                    - Run the weather application")
+        console.print("  weather --setup-api-key   - Set up API key securely")
+        console.print("  weather --help            - Show this help")
+        console.print("\nConfiguration:")
+        console.print("  • Set OWM_API_KEY environment variable")
+        console.print("  • Or use --setup-api-key to store securely in keyring")
+        sys.exit(0)
+
     asyncio.run(main_async())
 
 
