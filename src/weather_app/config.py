@@ -37,17 +37,28 @@ class Config:
         )  # Default 30 seconds
         self._use_async = os.getenv("USE_ASYNC", "true").lower() == "true"
         self._log_level = os.getenv("LOG_LEVEL", "INFO")
-        self._log_file = os.getenv("LOG_FILE")
         self._log_format = os.getenv("LOG_FORMAT", "text").lower()
+        self._cache_dir = os.getenv(
+            "CACHE_DIR", os.path.join(os.getenv("HOME"), ".cache", "weather_app")
+        )
+        self._cache_file = os.getenv(
+            "CACHE_FILE", os.path.join(self._cache_dir, "weather_app_cache.json")
+        )
+        if self._log_format == "json":
+            self._log_file = os.getenv(
+                "LOG_FILE", os.path.join(self._cache_dir, "weather_app.log.json")
+            )
+        else:
+            self._log_file = os.getenv(
+                "LOG_FILE", os.path.join(self._cache_dir, "weather_app.log")
+            )
         self._cache_persist = os.getenv("CACHE_PERSIST", "false").lower() == "true"
-        self._cache_file = os.getenv("CACHE_FILE", "~/.weather_app_cache.json")
 
     def _load_environment_variables(self) -> None:
         """Load environment variables from multiple potential config files."""
         config_locations = [
             ".weather.env",  # Project directory
-            "~/.weather.env",  # User home directory
-            "/etc/weather_app/.env",  # System-wide configuration
+            os.path.join(os.getenv("HOME"), ".weather.env"),  # User home directory
         ]
 
         for location in config_locations:
