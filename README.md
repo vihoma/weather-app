@@ -29,15 +29,16 @@ A command-line weather application that provides current weather conditions for 
    cd weather-app
    ```
 
-2. Install dependencies using Poetry (recommended):
+2. Install wheel and dependencies using pip (recommended):
+   ```bash
+   pip install dist/weather_app-<version>-py3-none-any.whl
+   ```
+
+   Install using Poetry:
    ```bash
    poetry install
    ```
 
-   Or using pip:
-   ```bash
-   pip install -e .
-   ```
 
 ## Configuration
 
@@ -68,7 +69,8 @@ Example `.weather.env` file:
 ```ini
 OWM_API_KEY=your_api_key_here
 OWM_UNITS=metric
-CACHE_TTL=600
+CACHE_PERSIST=true # default = false
+CACHE_TTL=120 # default = 600
 LOG_LEVEL=INFO
 LOG_FORMAT=json # default = text
 ```
@@ -78,6 +80,7 @@ LOG_FORMAT=json # default = text
 - `OWM_API_KEY`: Your OpenWeatherMap API key (required). If keyring is available, this will be securely stored and removed from environment.
 - `USE_KEYRING`: Enable secure keyring storage (`true`/`false`) - default: `true`
 - `OWM_UNITS`: Measurement units (`metric`, `imperial`, `default`) - default: `metric`
+- `CACHE_PERSIST`: Use persistent cache or not - default: `false`
 - `CACHE_TTL`: Cache time-to-live in seconds - default: `600` (10 minutes)
 - `REQUEST_TIMEOUT`: API request timeout in seconds - default: `30`
 - `USE_ASYNC`: Enable async mode (`true`/`false`) - default: `true`
@@ -96,9 +99,13 @@ LOG_FORMAT=json # default = text
 
 ## Usage
 
-Run the application with Poetry:
+Run the application:
 ```bash
-poetry run weather
+weather
+```
+Or on Windows:
+```powershell
+weather.exe
 ```
 
 Follow the interactive prompts to:

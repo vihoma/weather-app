@@ -125,7 +125,7 @@ CACHE_TTL=300  # 5 minutes
 2. Run the application normally:
 
 ```bash
-poetry run python -m src.weather_app.main
+weather
 ```
 
 ### Manual Cache Management
@@ -176,6 +176,5 @@ The cache persistence system includes robust error handling:
 
 Potential improvements:
 - Compressed cache storage
-- Encryption for cache files
 - Cache statistics and monitoring
 - Manual cache management commands
