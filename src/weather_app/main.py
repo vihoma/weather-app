@@ -14,17 +14,10 @@ from rich.prompt import Prompt
 from rich.traceback import install
 
 from weather_app.config import Config
-from weather_app.exceptions import (
-    APIRequestError,
-    ConfigurationError,
-    LocationNotFoundError,
-    WeatherAppError,
-)
-from weather_app.logging_config import (
-    LoggingConfig,
-    log_with_context,
-    setup_default_logging,
-)
+from weather_app.exceptions import (APIRequestError, ConfigurationError,
+                                    LocationNotFoundError, WeatherAppError)
+from weather_app.logging_config import (LoggingConfig, log_with_context,
+                                        setup_default_logging)
 from weather_app.services.ui_service import UIService
 
 # Global logger instance

@@ -63,7 +63,6 @@ API keys are checked in this order (first match wins):
 2. System keyring secure storage
 3. `.weather.env` file in project root
 4. `~/.weather.env` in your home directory  
-5. `/etc/weather_app/.env` for system-wide configuration
 
 Example `.weather.env` file:
 ```ini
@@ -94,7 +93,6 @@ LOG_FORMAT=json # default = text
 2. System keyring secure storage
 3. `.weather.env` in project root
 4. `~/.weather.env` in home directory
-5. `/etc/weather_app/.env` system-wide
 6. Default values
 
 ## Usage

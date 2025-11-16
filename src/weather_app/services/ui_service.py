@@ -10,14 +10,9 @@ from rich.table import Table
 from rich.text import Text
 
 from ..config import Config
-from ..exceptions import (
-    APIRequestError,
-    DataParsingError,
-    InvalidLocationError,
-    LocationNotFoundError,
-    NetworkError,
-    RateLimitError,
-)
+from ..exceptions import (APIRequestError, DataParsingError,
+                          InvalidLocationError, LocationNotFoundError,
+                          NetworkError, RateLimitError)
 from ..models.weather_data import WeatherData
 from .async_weather_service import AsyncWeatherService
 from .location_service import LocationService
