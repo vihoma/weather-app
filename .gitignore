@@ -10,6 +10,7 @@
 conversation-*.md
 desktop.ini
 weather.env
+weather_app.log
 weather_app.log.json
 **/**/venv/**
 **/**/.venv/**
