@@ -1,16 +1,19 @@
 # Weather CLI Application
 
-A command-line weather application that provides current weather conditions for any location worldwide, with a beautiful terminal interface.
+A command-line weather application that provides current weather conditions for
+any location worldwide, with a beautiful terminal interface.
 
 ## Features
 
-- 🌦️ Get current weather conditions including temperature, humidity, wind speed, and more
+- 🌦️ Get current weather conditions including temperature, humidity,
+  wind speed, and more
 - 🌍 Search by city name or coordinates with automatic validation
 - 🎨 Beautiful terminal UI using Rich for formatting and colors
 - ⚡ **Async operations** for faster API calls with progress indicators
 - ⚙️ Configurable units (metric/imperial/kelvin)
 - 📊 View weather history comparisons
-- 🔐 Secure API key management via environment variables
+- 🔐 Secure API key management via the system's keyring service when
+  available or via environment variables
 - 💾 Response caching with configurable TTL
 - 📝 Structured logging with file and console output
 - 🎯 Comprehensive error handling with helpful messages
@@ -18,7 +21,7 @@ A command-line weather application that provides current weather conditions for 
 
 ## Requirements
 
-- Python 3.8+
+- Python >= 3.13
 - OpenWeatherMap API key (free tier available)
 
 ## Installation
@@ -51,9 +54,11 @@ You need an OpenWeatherMap API key. Get one for free at
 
 The application supports secure API key storage using your system's keyring:
 
-1. **System Keyring (Most Secure)**: API keys are stored encrypted in your system's credential store
+1. **System Keyring (Most Secure)**: API keys are stored encrypted in your
+   system's credential store
 2. **Environment Variables**: `OWM_API_KEY` environment variable
-3. **Configuration Files**: `.weather.env` file in project root, home directory, or system-wide
+3. **Configuration Files**: `.weather.env` file in project root or user home
+   directory
 
 #### Priority Order
 
@@ -76,7 +81,8 @@ LOG_FORMAT=json # default = text
 
 ### Environment Variables
 
-- `OWM_API_KEY`: Your OpenWeatherMap API key (required). If keyring is available, this will be securely stored and removed from environment.
+- `OWM_API_KEY`: Your OpenWeatherMap API key (required). If keyring is available,
+  this will be securely stored and removed from environment.
 - `USE_KEYRING`: Enable secure keyring storage (`true`/`false`) - default: `true`
 - `OWM_UNITS`: Measurement units (`metric`, `imperial`, `default`) - default: `metric`
 - `CACHE_PERSIST`: Use persistent cache or not - default: `false`
@@ -84,7 +90,8 @@ LOG_FORMAT=json # default = text
 - `REQUEST_TIMEOUT`: API request timeout in seconds - default: `30`
 - `USE_ASYNC`: Enable async mode (`true`/`false`) - default: `true`
 - `LOG_LEVEL`: Logging level (`DEBUG`, `INFO`, `WARNING`, `ERROR`) - default: `INFO`
-- `LOG_FILE`: Path to log file - default: `weather_app.log` or `weather_app.json` (depends on `LOG_FORMAT`)
+- `LOG_FILE`: Path to log file - default: `weather_app.log` or `weather_app.json`
+  (depends on `LOG_FORMAT`)
 - `LOG_FORMAT`: Format of logs (`text` or `json`) - default : `text`
 
 ### Configuration Precedence
@@ -140,10 +147,14 @@ poetry build
 
 The application includes several security enhancements:
 
-- **Secure API Key Storage**: API keys are stored using the system's keyring service when available
-- **Sensitive Data Masking**: Logs automatically mask API keys, passwords, and other sensitive information
-- **Environment Variable Protection**: API keys provided via environment variables are automatically moved to secure storage
-- **Error Handling**: Secure error messages that don't expose sensitive information
+- **Secure API Key Storage**: API keys are stored using the system's keyring
+  service when available
+- **Sensitive Data Masking**: Logs automatically mask API keys, passwords, and
+  other sensitive information
+- **Environment Variable Protection**: API keys provided via environment
+  variables are automatically moved to secure storage
+- **Error Handling**: Secure error messages that don't expose sensitive
+  information
 
 ### Project Structure
 
