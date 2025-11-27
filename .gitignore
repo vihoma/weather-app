@@ -9,6 +9,7 @@
 .coverage
 conversation-*.md
 desktop.ini
+TODO.md
 weather.env
 weather_app.log
 weather_app.log.json
