@@ -26,15 +26,19 @@ any location worldwide, with a beautiful terminal interface.
 
 ## Installation
 
-1. Clone the repository:
+1. Install wheel and dependencies using pip (recommended):
+   Download the latest release from
+   [https://github.com/vihoma/weather-app/releases](https://github.com/vihoma/weather-app/releases)
+   ```bash
+   pip install weather_app-<version>-py3-none-any.whl
+   ```
+
+**OR**
+
+2. Clone the repository:
    ```bash
    git clone https://github.com/vihoma/weather-app.git
    cd weather-app
-   ```
-
-2. Install wheel and dependencies using pip (recommended):
-   ```bash
-   pip install dist/weather_app-<version>-py3-none-any.whl
    ```
 
    Install using Poetry:
@@ -50,9 +54,9 @@ any location worldwide, with a beautiful terminal interface.
 You need an OpenWeatherMap API key. Get one for free at
 [https://openweathermap.org/api](https://openweathermap.org/api).
 
-#### Secure Storage Options (Recommended)
+#### API Key Persistence Options
 
-The application supports secure API key storage using your system's keyring:
+The application supports secure API key storage using your system's keyring
 
 1. **System Keyring (Most Secure)**: API keys are stored encrypted in your
    system's credential store
@@ -70,7 +74,7 @@ API keys are checked in this order (first match wins):
 4. `~/.weather.env` in your home directory  
 
 Example `.weather.env` file:
-```ini
+```env
 OWM_API_KEY=your_api_key_here
 OWM_UNITS=metric
 CACHE_PERSIST=true # default = false
@@ -112,11 +116,23 @@ Or on Windows:
 ```powershell
 weather.exe
 ```
+(Well, in fact Windows shells should not need the file extension either, so
+just type ```weather```...)
 
 Follow the interactive prompts to:
-1. Enter your location
-2. Choose temperature units (Celsius/Fahrenheit/Kelvin)
-3. View current weather conditions
+1. Enter your location:
+   ```<City>,<CC>``` (i.e. ```London,GB```)
+   ***or***
+   ```<Longitude>,<Latitude>``` (i.e. ```51.5074,-0.1278```)
+2. See current weather conditions in given location...
+3. Change display units:
+   1: Metric (Celsius/°C)
+   2: Imperial (Fahrenheit/°F)
+   3: Scientific (Kelvin/K)
+4. Show comparison with previous query (y/n)
+5. Check another location (y/n)
+
+... That's it, this is a simple implementation over the OpenWeatherMap API (PyOWM)
 
 ## Screenshot
 
@@ -138,8 +154,10 @@ poetry run ruff check src/
 
 # Formatting imports  
 poetry run isort src/
+```
 
-# Building package
+### Building package
+```bash
 poetry build
 ```
 
@@ -160,13 +178,22 @@ The application includes several security enhancements:
 
 ```
 src/weather_app/
-├── models/           # Data models
-├── services/         # Business logic services
-├── exceptions.py     # Custom exceptions
-├── config.py         # Configuration handling
-├── logging_config.py # Logging configuration
-├── security.py       # Security utilities (keyring, data masking)
-└── main.py          # Application entry point
+└── models/                     # Data models
+   |-- __init__.py              # Initialization
+   └── weather_data.py          # Data models
+└── services/                   # Business logic services
+   |-- __init__.py              # Initialization
+   |-- async_weather_service.py # Async weather data operations
+   |-- location_service.py      # Location validation and geocoding
+   |── ui_service.py            # Rich-based user interface components
+   └── weather_service.py       # Core weather data operations
+|-- __init__.py                 # Initialization
+|-- config.py                   # Configuration handling
+|-- exceptions.py               # Custom exceptions
+|-- main.py                     # Application entry point
+|-- logging_config.py           # Logging configuration
+|-- security.py                 # Security utilities (keyring, data masking)
+└── utils.py                    # Utility functions
 
 tests/
 ├── unit/            # Unit tests
