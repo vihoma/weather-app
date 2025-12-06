@@ -4,8 +4,7 @@ import logging
 import re
 from typing import Optional, Tuple
 
-from geopy.exc import (GeocoderServiceError, GeocoderTimedOut,
-                       GeocoderUnavailable)
+from geopy.exc import GeocoderServiceError, GeocoderTimedOut, GeocoderUnavailable
 from geopy.geocoders import Nominatim
 
 from ..exceptions import GeocodingError, InvalidLocationError, NetworkError

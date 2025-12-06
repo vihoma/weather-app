@@ -11,8 +11,13 @@ from async_timeout import timeout
 from cachetools import TTLCache
 
 from ..config import Config
-from ..exceptions import (APIRequestError, DataParsingError,
-                          LocationNotFoundError, NetworkError, RateLimitError)
+from ..exceptions import (
+    APIRequestError,
+    DataParsingError,
+    LocationNotFoundError,
+    NetworkError,
+    RateLimitError,
+)
 from ..models.weather_data import WeatherData
 from ..utils import sanitize_string_for_logging
 
