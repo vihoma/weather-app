@@ -165,6 +165,62 @@ class Config(BaseSettings):
         """Return the logging format string (e.g., "text" or "json")."""
         return self.LOG_FORMAT
 
+    @property
+    def use_async(self) -> bool:
+        """Compatibility alias for the ``USE_ASYNC`` setting.
+
+        Returns the flag that determines whether the application runs in async mode.
+        """
+        return self.USE_ASYNC
+
+    @use_async.setter
+    def use_async(self, value: bool) -> None:
+        """Allow mutation of the flag through the legacy attribute."""
+        self.USE_ASYNC = value
+
+    # ---------------------------------------------------------------------
+    # Lower‑case read‑only accessors for all configuration fields
+    # ---------------------------------------------------------------------
+    @property
+    def owm_api_key(self) -> Optional[str]:
+        """Return the OpenWeatherMap API key (may be None)."""
+        return self.OWM_API_KEY
+
+    @property
+    def owm_units(self) -> str:
+        """Return the unit system used for the API (e.g., "metric" or "imperial")."""
+        return self.OWM_UNITS
+
+    @property
+    def units(self) -> str:
+        """Backward-compatibility alias for owm_units."""
+        return self.OWM_UNITS
+
+    @units.setter
+    def units(self, value: str) -> None:
+        """Allow mutation of the units through the legacy attribute."""
+        self.OWM_UNITS = value
+
+    @property
+    def cache_ttl(self) -> int:
+        """Return the cache time‑to‑live value (seconds)."""
+        return self.CACHE_TTL
+
+    @property
+    def request_timeout(self) -> int:
+        """Return the HTTP request timeout (seconds)."""
+        return self.REQUEST_TIMEOUT
+
+    @property
+    def cache_dir(self) -> str:
+        """Return the base directory used for cache files."""
+        return self.CACHE_DIR
+
+    @property
+    def cache_persist(self) -> bool:
+        """Return whether the cache should be persisted across runs."""
+        return self.CACHE_PERSIST
+
     # ---------------------------------------------------------------------
     # Compatibility helpers (store_api_key, is_keyring_available, validate)
     # ---------------------------------------------------------------------

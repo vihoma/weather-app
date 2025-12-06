@@ -27,7 +27,7 @@ class TestConfig:
                     config = Config()
                     
                     assert config.api_key is None
-                    assert config.units == "metric"
+                    assert config.owm_units == "metric"
                     assert config.cache_ttl == 600
                     assert config.request_timeout == 30
                     assert config.use_async is True
