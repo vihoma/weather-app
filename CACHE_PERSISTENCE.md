@@ -2,27 +2,45 @@
 
 ## Overview
 
-The Weather App now includes persistent cache functionality that saves weather query results to disk using JSON format. This allows the application to maintain cached data between sessions, reducing API calls and improving performance.
+The Weather App now includes persistent cache functionality that saves weather
+query results to disk using JSON format. This allows the application to maintain
+cached data between sessions, reducing API calls and improving performance.
 
 ## Features
 
 - **JSON-based cache storage**: Cache data is stored in human-readable JSON format
-- **User home directory storage**: Cache files are stored in the user's home directory by default
+- **User home directory storage**: Cache files are stored in the user's home
+  directory by default
 - **Automatic loading**: Cache is automatically loaded on application startup
 - **Automatic saving**: Cache is automatically saved when the application exits
-- **Configurable**: All cache settings are configurable via environment variables
+- **Configurable**: All cache settings are configurable via a YAML configuration
+  file or environment variables
 
 ## Configuration Options
 
-### Environment Variables
+### YAML Configuration
 
-Add these to your `.weather.env` file or set as environment variables:
+Add these to your `.weather.yaml` file or set as environment variables:
+
+```yaml
+# Enable cache persistence (default: false)
+cache_persist: true
+
+# Cache file path (default: "~/.cache/weather-app/weather_app_cache.json")
+cache_file: "~/.weather_app_cache.json"
+
+# Cache TTL in seconds (default: 600 - 10 minutes)
+cache_ttl: 600
+```
+
+
+### Environment Variables
 
 ```bash
 # Enable cache persistence (default: false)
 CACHE_PERSIST=true
 
-# Cache file path (default: ~/.weather_app_cache.json)
+# Cache file path (default: ~/.cache/weather-app/weather_app_cache.json)
 CACHE_FILE=~/.weather_app_cache.json
 
 # Cache TTL in seconds (default: 600 - 10 minutes)
@@ -31,9 +49,9 @@ CACHE_TTL=600
 
 ### Default Values
 
-- **CACHE_PERSIST**: `false` (disabled by default)
-- **CACHE_FILE**: `~/.weather_app_cache.json`
-- **CACHE_TTL**: `600` seconds (10 minutes)
+- **cache_persist**: `false` (disabled by default)
+- **cache_file**: `~/.cache/weather-app/weather_app_cache.json`
+- **cache_ttl**: `600` seconds (10 minutes)
 
 ## Cache File Format
 
@@ -106,27 +124,6 @@ Examples:
 - Added `cache_file` property to configure cache file path
 
 ## Usage Examples
-
-### Enable Cache Persistence
-
-1. Create or edit `.weather.env` file:
-
-```bash
-# Enable cache persistence
-CACHE_PERSIST=true
-
-# Optional: Custom cache file location
-CACHE_FILE=~/.my_weather_cache.json
-
-# Optional: Adjust cache TTL (in seconds)
-CACHE_TTL=300  # 5 minutes
-```
-
-2. Run the application normally:
-
-```bash
-weather
-```
 
 ### Manual Cache Management
 

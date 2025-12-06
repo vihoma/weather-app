@@ -61,7 +61,7 @@ The application supports secure API key storage using your system's keyring
 1. **System Keyring (Most Secure)**: API keys are stored encrypted in your
    system's credential store
 2. **Environment Variables**: `OWM_API_KEY` environment variable
-3. **Configuration Files**: `.weather.env` file in project root or user home
+3. **Configuration Files**: `.weather.yaml` file in project root or user home
    directory
 
 #### Priority Order
@@ -70,20 +70,29 @@ API keys are checked in this order (first match wins):
 
 1. Environment variable `OWM_API_KEY` (will be moved to keyring if available)
 2. System keyring secure storage
-3. `.weather.env` file in project root
-4. `~/.weather.env` in your home directory  
+3. `.weather.yaml` file in project root
+4. `~/.weather.yaml` in your home directory
 
-Example `.weather.env` file:
-```env
-OWM_API_KEY=your_api_key_here
-OWM_UNITS=metric
-CACHE_PERSIST=true # default = false
-CACHE_TTL=120 # default = 600
-LOG_LEVEL=INFO
-LOG_FORMAT=json # default = text
+#### YAML configuration file (recommended)
+
+The application now prefers a single YAML file named `.weather.yaml` placed
+either in the project root or in your home directory (`~/.weather.yaml`).
+All keys are **lower‑case**.
+
+```yaml
+# weather.yaml
+owm_api_key: your_api_key_here
+owm_units: metric          # options: metric, imperial, kelvin
+cache_persist: true        # default: false
+cache_ttl: 120             # seconds, default: 600
+log_level: INFO            # DEBUG, INFO, WARNING, ERROR
+log_format: json           # text or json (default: text)
 ```
 
-### Environment Variables
+> **Note:** The same settings can still be provided via environment variables;
+> the YAML file simply offers a more structured, version‑controlled alternative.
+
+### Environment Variables (optional if using `weather.yaml`)
 
 - `OWM_API_KEY`: Your OpenWeatherMap API key (required). If keyring is available,
   this will be securely stored and removed from environment.
@@ -102,8 +111,8 @@ LOG_FORMAT=json # default = text
 
 1. Environment variables (API keys are moved to secure storage if available)
 2. System keyring secure storage
-3. `.weather.env` in project root
-4. `~/.weather.env` in home directory
+3. `.weather.yaml` in project root
+4. `~/.weather.yaml` in home directory
 6. Default values
 
 ## Usage
@@ -182,17 +191,17 @@ src/weather_app/
    |-- __init__.py              # Initialization
    └── weather_data.py          # Data models
 └── services/                   # Business logic services
-   |-- __init__.py              # Initialization
-   |-- async_weather_service.py # Async weather data operations
-   |-- location_service.py      # Location validation and geocoding
-   |── ui_service.py            # Rich-based user interface components
+   ├── __init__.py              # Initialization
+   ├── async_weather_service.py # Async weather data operations
+   ├── location_service.py      # Location validation and geocoding
+   ├── ui_service.py            # Rich-based user interface components
    └── weather_service.py       # Core weather data operations
-|-- __init__.py                 # Initialization
-|-- config.py                   # Configuration handling
-|-- exceptions.py               # Custom exceptions
-|-- main.py                     # Application entry point
-|-- logging_config.py           # Logging configuration
-|-- security.py                 # Security utilities (keyring, data masking)
+├── __init__.py                 # Initialization
+├── config.py                   # Configuration handling
+├── exceptions.py               # Custom exceptions
+├── main.py                     # Application entry point
+├── logging_config.py           # Logging configuration
+├── security.py                 # Security utilities (keyring, data masking)
 └── utils.py                    # Utility functions
 
 tests/

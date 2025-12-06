@@ -1,0 +1,7 @@
+---
+owm_units: "metric"   # Default: "metric"
+use_async: true       # Default: true
+cache_persist: false  # Default: false
+cache_ttl: 120        # Default: 600 (10 minutes)
+log_format: "text"    # Default: "text"
+log_level: "INFO"     # Default: "INFO"

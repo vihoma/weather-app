@@ -22,6 +22,7 @@ from pathlib import Path
 from typing import Any, Dict, Optional
 
 import yaml
+from dotenv import load_dotenv
 from pydantic import Field, field_validator
 from pydantic_settings import BaseSettings, SettingsConfigDict
 
@@ -50,10 +51,9 @@ class Config(BaseSettings):
     LOG_LEVEL: str = Field(default="INFO", env="LOG_LEVEL")
     LOG_FORMAT: str = Field(default="text", env="LOG_FORMAT")
     CACHE_DIR: str = Field(
-        default_factory=lambda: os.path.join(
-            os.getenv("HOME", ""), ".cache", "weather_app"
-        ),
-        env="CACHE_DIR",
+        default_factory=lambda: os.getenv("CACHE_DIR")
+        or os.path.join(os.getenv("HOME", ""), ".cache", "weather_app"),
+        env="CACHE_DIR" or os.getenv("TEMP"),
     )
     CACHE_FILE: Optional[str] = Field(default=None, env="CACHE_FILE")
     LOG_FILE: Optional[str] = Field(default=None, env="LOG_FILE")
@@ -74,6 +74,7 @@ class Config(BaseSettings):
     def customise_sources(cls, init_settings, env_settings, file_secret_settings):
         return (
             cls._yaml_settings_source,
+            cls._env_file_settings_source,
             env_settings,
             init_settings,
         )
@@ -97,9 +98,32 @@ class Config(BaseSettings):
                 return {k.upper(): v for k, v in data.items()}
         return {}
 
+    @classmethod
+    def _env_file_settings_source(cls, settings: BaseSettings) -> Dict[str, Any]:
+        """Load configuration from the first existing ``.weather.env`` file using python-dotenv."""
+        locations = [
+            Path(".weather.env").expanduser(),
+            Path(os.getenv("HOME", "")).expanduser() / ".weather.env",
+        ]
+        for path in locations:
+            if path.is_file():
+                # Load env vars from the file
+                load_dotenv(dotenv_path=path, override=False)
+                # Once loaded, break – env_settings will pick them up
+                break
+        return {}
+
     # ---------------------------------------------------------------------
     # Validators for derived defaults (CACHE_FILE and LOG_FILE)
     # ---------------------------------------------------------------------
+    @field_validator("USE_ASYNC", "CACHE_PERSIST", mode="before")
+    def _parse_bool(cls, v: Any) -> bool:
+        if isinstance(v, bool):
+            return v
+        if isinstance(v, str):
+            return v.lower() == "true"
+        return bool(v)
+
     @field_validator("CACHE_FILE", mode="before")
     def _default_cache_file(cls, v: Optional[str], info: Any) -> str:
         if v:
@@ -172,11 +196,6 @@ class Config(BaseSettings):
         Returns the flag that determines whether the application runs in async mode.
         """
         return self.USE_ASYNC
-
-    @use_async.setter
-    def use_async(self, value: bool) -> None:
-        """Allow mutation of the flag through the legacy attribute."""
-        self.USE_ASYNC = value
 
     # ---------------------------------------------------------------------
     # Lower‑case read‑only accessors for all configuration fields
