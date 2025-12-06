@@ -3,8 +3,11 @@ async-timeout
 cachetools
 geopy
 keyring
+pydantic
+pydantic-settings
 python-dotenv
 python-json-logger
 pyowm
+PyYAML
 rich
 setuptools
