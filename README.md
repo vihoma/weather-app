@@ -13,7 +13,7 @@ any location worldwide, with a beautiful terminal interface.
 - ⚙️ Configurable units (metric/imperial/kelvin)
 - 📊 View weather history comparisons
 - 🔐 Secure API key management via the system's keyring service when
-  available or via environment variables
+  available or via a YAML configuration file or environment variables
 - 💾 Response caching with configurable TTL
 - 📝 Structured logging with file and console output
 - 🎯 Comprehensive error handling with helpful messages
