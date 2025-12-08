@@ -5,6 +5,7 @@ import json
 import logging
 from pathlib import Path
 from typing import Any, Dict, Optional
+from urllib.parse import quote
 
 import aiohttp
 from async_timeout import timeout
@@ -123,45 +124,27 @@ class AsyncWeatherService:
         # Determine if location is coordinates or city name
         if self._is_coordinates(location):
             lat, lon = location.split(",")
-            url = f"{self.base_url}/weather?lat={lat}&lon={lon}&appid={self.api_key}&units={units}"
+            # URL encode all parameters for security
+            encoded_lat = quote(lat.strip())
+            encoded_lon = quote(lon.strip())
+            encoded_units = quote(units)
+            # Build URL with API key as query parameter (OpenWeatherMap requirement)
+            url = f"{self.base_url}/weather?lat={encoded_lat}&lon={encoded_lon}&appid={self.api_key}&units={encoded_units}"
         else:
-            url = f"{self.base_url}/weather?q={location}&appid={self.api_key}&units={units}"
+            # URL encode the location query
+            encoded_location = quote(location.strip())
+            encoded_units = quote(units)
+            url = f"{self.base_url}/weather?q={encoded_location}&appid={self.api_key}&units={encoded_units}"
 
         try:
             session = await self._ensure_session()
             async with timeout(self.timeout):
+                # Create a safe URL for logging (without API key)
+                safe_url = url.replace(f"appid={self.api_key}", "appid=***")
+                logger.debug(f"Making API request to: {safe_url}")
+
                 async with session.get(url) as response:
-                    if response.status == 404:
-                        logger.warning(
-                            "Location not found: %s",
-                            sanitize_string_for_logging(location),
-                        )
-                        raise LocationNotFoundError(
-                            f"Location '{location}' not found. Please check the spelling and format (City,CC)."
-                        )
-
-                    if response.status == 401:
-                        logger.error("Invalid API key")
-                        raise APIRequestError(
-                            "Invalid API key. Please check your OpenWeatherMap API key."
-                        )
-
-                    if response.status == 429:
-                        logger.warning("Rate limit exceeded")
-                        raise RateLimitError(
-                            "Rate limit exceeded. Please wait before making more requests."
-                        )
-
-                    if response.status != 200:
-                        logger.error(
-                            "API request failed with status %d", response.status
-                        )
-                        raise APIRequestError(
-                            f"API request failed with status {response.status}"
-                        )
-
-                    data = await response.json()
-                    return self._parse_weather_data(location, data, units)
+                    return await self._handle_response(response, location, units)
 
         except asyncio.TimeoutError:
             logger.error(
@@ -178,6 +161,38 @@ class AsyncWeatherService:
                 e,
             )
             raise NetworkError(f"Network error: {e}")
+
+    async def _handle_response(
+        self, response: aiohttp.ClientResponse, location: str, units: str
+    ) -> WeatherData:
+        """Handle API response and convert to WeatherData."""
+        if response.status == 404:
+            logger.warning(
+                "Location not found: %s",
+                sanitize_string_for_logging(location),
+            )
+            raise LocationNotFoundError(
+                f"Location '{location}' not found. Please check the spelling and format (City,CC)."
+            )
+
+        if response.status == 401:
+            logger.error("Invalid API key")
+            raise APIRequestError(
+                "Invalid API key. Please check your OpenWeatherMap API key."
+            )
+
+        if response.status == 429:
+            logger.warning("Rate limit exceeded")
+            raise RateLimitError(
+                "Rate limit exceeded. Please wait before making more requests."
+            )
+
+        if response.status != 200:
+            logger.error("API request failed with status %d", response.status)
+            raise APIRequestError(f"API request failed with status {response.status}")
+
+        data = await response.json()
+        return self._parse_weather_data(location, data, units)
 
     def _is_coordinates(self, location: str) -> bool:
         """Check if location string represents coordinates."""
