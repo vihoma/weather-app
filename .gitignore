@@ -8,6 +8,7 @@
 .aider*
 .coverage
 conversation-*.md
+*-ses_*.md
 desktop.ini
 TODO.md
 weather.env
