@@ -1,0 +1,24 @@
+{
+  "version": "5.9.0",
+  "integrations": [
+    "agents-md",
+    "claude-code",
+    "gemini",
+    "opencode",
+    "qwen",
+    "roocode"
+  ],
+  "templates": {
+    "prdQuestions": "default",
+    "fullPrd": "default",
+    "quickPrd": "default"
+  },
+  "outputs": {
+    "path": ".clavix/outputs",
+    "format": "markdown"
+  },
+  "preferences": {
+    "autoOpenOutputs": false,
+    "verboseLogging": false
+  }
+}
