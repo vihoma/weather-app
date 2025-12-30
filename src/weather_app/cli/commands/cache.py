@@ -7,12 +7,20 @@ import click
 from rich.console import Console
 from rich.table import Table
 
+from weather_app.cli.help_formatter import apply_preserve_epilog_formatting
 from weather_app.config import Config
 
 
+@apply_preserve_epilog_formatting
 @click.group(
     name="cache",
-    help="Manage weather data cache.\n\nExamples:\n  weather cache clear --force\n  weather cache status\n  weather cache ttl",
+    help="Manage weather data cache.",
+    epilog="""
+Examples:
+  weather cache clear --force
+  weather cache status
+  weather cache ttl
+""",
 )
 def cache_group() -> None:
     """Group for cache management commands."""

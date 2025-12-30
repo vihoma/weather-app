@@ -5,9 +5,11 @@ This module defines the main CLI group with global options that apply to all sub
 
 import click
 
+from weather_app.cli.help_formatter import apply_preserve_epilog_formatting
 from weather_app.config import Config
 
 
+@apply_preserve_epilog_formatting
 @click.group(
     context_settings={"help_option_names": ["-h", "--help"]},
     epilog="""
@@ -30,6 +32,9 @@ Examples:
   # Configuration inspection
   weather config show
   weather config sources
+  
+  # Version information
+  weather version
   
   # Global options can be used with any command
   weather --verbose weather --city "Paris,FR"
@@ -110,8 +115,10 @@ from weather_app.cli.commands.weather import weather_command
 from weather_app.cli.commands.setup import setup_group
 from weather_app.cli.commands.cache import cache_group
 from weather_app.cli.commands.config import config_group
+from weather_app.cli.commands.version import version_command
 
 cli.add_command(weather_command)
 cli.add_command(setup_group)
 cli.add_command(cache_group)
 cli.add_command(config_group)
+cli.add_command(version_command)

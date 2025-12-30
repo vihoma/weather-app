@@ -170,6 +170,7 @@ weather weather --city "Tokyo,JP" --use-async --no-cache
 | **`weather cache ttl`** | Show or set cache TTL | `weather cache ttl --set 300` |
 | **`weather config show`** | Show configuration with sources | `weather config show` |
 | **`weather config sources`** | Detailed source analysis | `weather config sources` |
+| **`weather version`** | Show application version information | `weather version` |
 
 ### Global Options
 

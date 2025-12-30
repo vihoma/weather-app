@@ -9,12 +9,19 @@ import yaml
 from rich.console import Console
 from rich.table import Table
 
+from weather_app.cli.help_formatter import apply_preserve_epilog_formatting
 from weather_app.config import Config
 
 
+@apply_preserve_epilog_formatting
 @click.group(
     name="config",
-    help="View and manage application configuration.\n\nExamples:\n  weather config show\n  weather config sources",
+    help="View and manage application configuration.",
+    epilog="""
+Examples:
+  weather config show
+  weather config sources
+""",
 )
 def config_group() -> None:
     """Group for configuration commands."""

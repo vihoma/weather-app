@@ -4,6 +4,7 @@ import asyncio
 
 import click
 
+from weather_app.cli.help_formatter import apply_preserve_epilog_formatting
 from weather_app.cli.options import location_options, output_option
 from weather_app.cli.output_formatters import FormatterFactory
 from weather_app.cli.errors import (
@@ -21,6 +22,7 @@ from weather_app.exceptions import (
 )
 
 
+@apply_preserve_epilog_formatting
 @click.command(
     name="weather",
     help="Get current weather for a location.",
@@ -28,19 +30,19 @@ from weather_app.exceptions import (
 Examples:
   # Get weather by city name with TUI output (default)
   weather weather --city "London,GB"
-  
+
   # Get weather by coordinates with JSON output
   weather weather --coordinates "51.5074,-0.1278" --output json
-  
+
   # Get weather with Markdown output
   weather weather --city "Paris,FR" --output markdown
-  
+
   # Use imperial units
   weather weather --city "New York" --units imperial
-  
+
   # Combine with global options
   weather --verbose --no-cache weather --city "Tokyo,JP" --output json
-  
+
 Output Formats:
   • tui: Rich terminal UI with colors and formatting (default)
   • json: Structured JSON output for scripting

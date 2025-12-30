@@ -418,3 +418,14 @@ cache_file: /tmp/test_cache.json
             # Clean up environment variable
             if "OWM_UNITS" in os.environ:
                 del os.environ["OWM_UNITS"]
+
+    def test_version_command_integration(self, runner):
+        """Test version command integration without mocking."""
+        result = runner.invoke(cli, ["version"])
+        
+        assert result.exit_code == 0
+        assert "Weather Application" in result.output
+        assert "weather-app" in result.output
+        # Should contain version number (could be any valid version)
+        # Just ensure output is not empty and formatted
+        assert result.output.strip() != ""

@@ -4,12 +4,20 @@ import click
 from rich.console import Console
 from rich.prompt import Prompt
 
+from weather_app.cli.help_formatter import apply_preserve_epilog_formatting
 from weather_app.security import SecureConfig
 
 
+@apply_preserve_epilog_formatting
 @click.group(
     name="setup",
-    help="Manage application setup and configuration.\n\nExamples:\n  weather setup api-key set --interactive\n  weather setup api-key view\n  weather setup api-key remove --force"
+    help="Manage application setup and configuration.",
+    epilog="""
+Examples:
+  weather setup api-key set --interactive
+  weather setup api-key view
+  weather setup api-key remove --force
+""",
 )
 def setup_group() -> None:
     """Group for setup-related commands."""
