@@ -119,7 +119,7 @@
 
 ## Phase 6: Testing and Documentation
 
-- [ ] **Add unit tests for CLI commands** (ref: Testing)
+- [x] **Add unit tests for CLI commands** (ref: Testing)
   Task ID: phase-6-testing-01
   > **Implementation**: Create `tests/unit/test_cli_commands.py` and `tests/integration/test_cli_integration.py`.
   > **Details**: Use `click.testing.CliRunner` to test command outputs, error codes, and argument parsing. Test each subcommand (weather, setup api-key, cache, config). Mock external services (PyOWM, geopy) to avoid API calls. Ensure coverage for location validation, output formats, error handling.
