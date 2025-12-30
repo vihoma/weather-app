@@ -236,6 +236,12 @@ class Config(BaseSettings):
         return self.CACHE_DIR
 
     @property
+    def cache_file(self) -> str:
+        """Return the path to the cache file."""
+        # CACHE_FILE is guaranteed to be non-None after validation
+        return self.CACHE_FILE if self.CACHE_FILE is not None else ""
+
+    @property
     def cache_persist(self) -> bool:
         """Return whether the cache should be persisted across runs."""
         return self.CACHE_PERSIST

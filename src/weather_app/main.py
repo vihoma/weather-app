@@ -26,6 +26,9 @@ from weather_app.logging_config import (
     setup_default_logging,
 )
 from weather_app.services.ui_service import UIService
+import click
+from weather_app.cli.group import cli
+from weather_app.cli.errors import map_exception_to_exit_code
 
 # Global logger instance
 logger = None
@@ -243,25 +246,29 @@ async def main_async() -> None:
 
 def main() -> None:
     """Initialize and run the weather application (sync wrapper)."""
-    # Check for setup command
+    # Check for setup command (legacy)
     if len(sys.argv) > 1 and sys.argv[1] == "--setup-api-key":
         success = setup_api_key()
         sys.exit(0 if success else 1)
 
-    # Check for help command
-    if len(sys.argv) > 1 and sys.argv[1] in ["--help", "-h"]:
-        console = Console()
-        console.print("\n[bold blue]🌦️ Weather App[/bold blue]")
-        console.print("\nUsage:")
-        console.print("  weather                    - Run the weather application")
-        console.print("  weather --setup-api-key   - Set up API key securely")
-        console.print("  weather --help            - Show this help")
-        console.print("\nConfiguration:")
-        console.print("  • Set OWM_API_KEY environment variable")
-        console.print("  • Or use --setup-api-key to store securely in keyring")
-        sys.exit(0)
+    # If no CLI arguments provided, run interactive TUI
+    if len(sys.argv) == 1:
+        asyncio.run(main_async())
+        return
 
-    asyncio.run(main_async())
+    # Otherwise delegate to Click CLI
+    try:
+        cli()
+    except click.ClickException as e:
+        # Click handles its own exceptions with proper exit codes
+        sys.exit(e.exit_code)
+    except Exception as e:
+        # Unexpected errors
+        import traceback
+
+        traceback.print_exc()
+        exit_code = map_exception_to_exit_code(e)
+        sys.exit(exit_code)
 
 
 if __name__ == "__main__":

@@ -24,7 +24,9 @@
 - Source code in `src/weather_app/` with package structure
 - Models in `models/`, services in `services/`
 - Tests in `tests/` with pytest structure
-- Configuration handled via environment variables (.weather.env)
+- Configuration handled via CLI arguments, environment variables
+  and a YAML configuration file, in the precedence order, CLI
+  arguments override anything else in configuration
 - Uses Rich for terminal UI, PyOWM for weather data
 
 
