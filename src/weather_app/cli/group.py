@@ -8,7 +8,34 @@ import click
 from weather_app.config import Config
 
 
-@click.group(context_settings={"help_option_names": ["-h", "--help"]})
+@click.group(
+    context_settings={"help_option_names": ["-h", "--help"]},
+    epilog="""
+Examples:
+  # Interactive mode (traditional TUI)
+  weather
+  
+  # One-shot weather queries
+  weather weather --city "London,GB" --output json
+  weather weather --coordinates "51.5074,-0.1278" --output markdown
+  
+  # API key management
+  weather setup api-key set --interactive
+  weather setup api-key view
+  
+  # Cache management
+  weather cache clear --force
+  weather cache status
+  
+  # Configuration inspection
+  weather config show
+  weather config sources
+  
+  # Global options can be used with any command
+  weather --verbose weather --city "Paris,FR"
+  weather --no-cache --units imperial weather --city "New York"
+""",
+)
 @click.option(
     "--verbose",
     "-v",

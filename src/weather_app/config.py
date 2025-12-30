@@ -17,6 +17,7 @@ Key points:
   patches functional.
 """
 
+import logging
 import os
 from pathlib import Path
 from typing import Any, Dict, Optional
@@ -28,6 +29,8 @@ from pydantic_settings import BaseSettings, SettingsConfigDict
 
 from .exceptions import APIKeyError
 from .security import KeyringUnavailableError, SecureConfig
+
+logger = logging.getLogger(__name__)
 
 
 class Config(BaseSettings):
@@ -72,6 +75,9 @@ class Config(BaseSettings):
     # ---------------------------------------------------------------------
     @classmethod
     def customise_sources(cls, init_settings, env_settings, file_secret_settings):
+        import sys
+
+        print(f"[DEBUG] customise_sources called for {cls.__name__}", file=sys.stderr)
         return (
             cls._yaml_settings_source,
             cls._env_file_settings_source,
@@ -101,12 +107,17 @@ class Config(BaseSettings):
     @classmethod
     def _env_file_settings_source(cls, settings: BaseSettings) -> Dict[str, Any]:
         """Load configuration from the first existing ``.weather.env`` file using python-dotenv."""
+        import sys
+
+        print("[DEBUG] _env_file_settings_source called, locations:", file=sys.stderr)
         locations = [
             Path(".weather.env").expanduser(),
             Path(os.getenv("HOME", "")).expanduser() / ".weather.env",
         ]
-        for path in locations:
+        for i, path in enumerate(locations):
+            print(f"[DEBUG]   Checking location {i}: {path}", file=sys.stderr)
             if path.is_file():
+                print(f"[DEBUG]   File exists, loading dotenv: {path}", file=sys.stderr)
                 # Load env vars from the file
                 load_dotenv(dotenv_path=path, override=False)
                 # Once loaded, break – env_settings will pick them up
@@ -154,7 +165,7 @@ class Config(BaseSettings):
             if keyring_key:
                 self._api_key = keyring_key
                 self.OWM_API_KEY = keyring_key
-                print("🔑 API key loaded from secure keyring storage")
+                logger.debug("🔑 API key loaded from secure keyring storage")
         except KeyringUnavailableError:
             # Keyring not available – fall back to YAML / env value
             pass

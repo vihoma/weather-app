@@ -117,16 +117,14 @@ log_format: json           # text or json (default: text)
 
 ## Usage
 
-Run the application:
+The weather application now supports both **interactive TUI mode** and **one-shot CLI mode**.
+
+### Interactive Mode (Traditional)
+
+Run without arguments for the interactive terminal UI:
 ```bash
 weather
 ```
-Or on Windows:
-```powershell
-weather.exe
-```
-(Well, in fact Windows shells should not need the file extension either, so
-just type ```weather```...)
 
 Follow the interactive prompts to:
 1. Enter your location:
@@ -141,7 +139,64 @@ Follow the interactive prompts to:
 4. Show comparison with previous query (y/n)
 5. Check another location (y/n)
 
-... That's it, this is a simple implementation over the OpenWeatherMap API (PyOWM)
+### CLI Mode (One-shot Commands)
+
+Get weather data directly from the command line:
+
+```bash
+# Get weather by city name
+weather weather --city "London,GB" --output json
+
+# Get weather by coordinates
+weather weather --coordinates "51.5074,-0.1278" --output markdown
+
+# Use metric units with TUI output (default)
+weather weather --city "Paris,FR" --units metric --output tui
+
+# Force async mode and disable caching
+weather weather --city "Tokyo,JP" --use-async --no-cache
+```
+
+### Subcommands Reference
+
+| Command | Description | Examples |
+|---------|-------------|----------|
+| **`weather weather`** | Get current weather for a location | `weather weather --city "London,GB" --output json` |
+| **`weather setup api-key set`** | Store API key securely | `weather setup api-key set --interactive` |
+| **`weather setup api-key view`** | View stored API key (masked) | `weather setup api-key view` |
+| **`weather setup api-key remove`** | Remove stored API key | `weather setup api-key remove --force` |
+| **`weather cache clear`** | Clear weather cache | `weather cache clear --force` |
+| **`weather cache status`** | Show cache statistics | `weather cache status` |
+| **`weather cache ttl`** | Show or set cache TTL | `weather cache ttl --set 300` |
+| **`weather config show`** | Show configuration with sources | `weather config show` |
+| **`weather config sources`** | Detailed source analysis | `weather config sources` |
+
+### Global Options
+
+All commands support these global options:
+
+- `--verbose, -v` - Enable verbose output (debug logging)
+- `--config-file FILE` - Path to custom configuration file (YAML)
+- `--units [metric|imperial|standard]` - Temperature units
+- `--use-async` - Force asynchronous mode
+- `--no-cache` - Disable caching for this request
+
+### Output Formats
+
+The `weather` command supports three output formats:
+
+1. **`tui`** (default) - Rich terminal UI with colors and formatting
+2. **`json`** - Structured JSON output for scripting
+3. **`markdown`** - Markdown formatted output for documentation
+
+### Configuration Precedence
+
+CLI arguments follow this precedence order:
+1. **CLI arguments** (highest priority)
+2. **Environment variables**
+3. **YAML configuration file** (`.weather.yaml`)
+4. **Keyring storage** (for API keys)
+5. **Default values** (lowest priority)
 
 ## Screenshot
 
@@ -187,15 +242,33 @@ The application includes several security enhancements:
 
 ```
 src/weather_app/
-└── models/                     # Data models
-   |-- __init__.py              # Initialization
-   └── weather_data.py          # Data models
-└── services/                   # Business logic services
-   ├── __init__.py              # Initialization
-   ├── async_weather_service.py # Async weather data operations
-   ├── location_service.py      # Location validation and geocoding
-   ├── ui_service.py            # Rich-based user interface components
-   └── weather_service.py       # Core weather data operations
+├── models/                     # Data models
+│   ├── __init__.py              # Initialization
+│   └── weather_data.py          # Data models
+├── services/                   # Business logic services
+│   ├── __init__.py              # Initialization
+│   ├── async_weather_service.py # Async weather data operations
+│   ├── location_service.py      # Location validation and geocoding
+│   ├── ui_service.py            # Rich-based user interface components
+│   └── weather_service.py       # Core weather data operations
+├── cli/                        # CLI interface
+│   ├── __init__.py              # Initialization
+│   ├── group.py                 # Main CLI command group
+│   ├── config_override.py       # CLI configuration overrides
+│   ├── options.py               # Reusable CLI options
+│   ├── output_formatters.py     # Output formatter factory
+│   ├── errors.py                # CLI error handling
+│   ├── commands/                # CLI subcommands
+│   │   ├── __init__.py
+│   │   ├── weather.py           # Weather command
+│   │   ├── setup.py             # Setup command
+│   │   ├── cache.py             # Cache command
+│   │   └── config.py            # Config command
+│   └── formatters/              # Output formatters
+│       ├── __init__.py
+│       ├── json_formatter.py    # JSON output
+│       ├── markdown_formatter.py # Markdown output
+│       └── tui_formatter.py     # TUI output
 ├── __init__.py                 # Initialization
 ├── config.py                   # Configuration handling
 ├── exceptions.py               # Custom exceptions

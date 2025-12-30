@@ -7,7 +7,10 @@ from rich.prompt import Prompt
 from weather_app.security import SecureConfig
 
 
-@click.group(name="setup", help="Manage application setup and configuration.")
+@click.group(
+    name="setup",
+    help="Manage application setup and configuration.\n\nExamples:\n  weather setup api-key set --interactive\n  weather setup api-key view\n  weather setup api-key remove --force"
+)
 def setup_group() -> None:
     """Group for setup-related commands."""
     pass

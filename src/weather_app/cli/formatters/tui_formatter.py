@@ -4,7 +4,6 @@ Reuses the existing UIService rendering logic.
 """
 
 import io
-from typing import Optional
 
 from rich.console import Console
 from rich.table import Table

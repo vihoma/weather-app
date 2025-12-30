@@ -2,7 +2,7 @@
 
 import os
 from pathlib import Path
-from typing import Dict, List, Optional, Tuple
+from typing import List, Optional, Tuple
 
 import click
 import yaml
@@ -12,7 +12,10 @@ from rich.table import Table
 from weather_app.config import Config
 
 
-@click.group(name="config", help="View and manage application configuration.")
+@click.group(
+    name="config",
+    help="View and manage application configuration.\n\nExamples:\n  weather config show\n  weather config sources",
+)
 def config_group() -> None:
     """Group for configuration commands."""
     pass
@@ -207,7 +210,7 @@ def config_show(ctx: click.Context) -> None:
     # Keyring status
     has_keyring, masked_key = _get_keyring_status(config)
     if has_keyring:
-        console.print(f"  • Keyring storage: [green]Available[/green] (API key stored)")
+        console.print("  • Keyring storage: [green]Available[/green] (API key stored)")
     else:
         if config.is_keyring_available():
             console.print(

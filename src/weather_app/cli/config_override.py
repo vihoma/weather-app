@@ -4,7 +4,6 @@ This module applies command-line argument overrides to the configuration,
 ensuring the precedence: CLI > environment > YAML > keyring.
 """
 
-import logging
 from typing import Any
 
 from weather_app.config import Config

@@ -124,17 +124,17 @@
   > **Implementation**: Create `tests/unit/test_cli_commands.py` and `tests/integration/test_cli_integration.py`.
   > **Details**: Use `click.testing.CliRunner` to test command outputs, error codes, and argument parsing. Test each subcommand (weather, setup api-key, cache, config). Mock external services (PyOWM, geopy) to avoid API calls. Ensure coverage for location validation, output formats, error handling.
 
-- [ ] **Update README with new CLI usage** (ref: Documentation)
+- [x] **Update README with new CLI usage** (ref: Documentation)
   Task ID: phase-6-testing-02
   > **Implementation**: Edit `README.md` to include CLI examples, subcommand reference, and migration notes.
   > **Details**: Replace interactive usage section with CLI examples. Show `weather --city "London,GB" --output json`, `setup api-key set --interactive`, `cache clear`, `config show`. Include table of subcommands and options. Keep existing installation/config details.
 
-- [ ] **Generate comprehensive help with examples** (ref: Comprehensive help system)
+- [x] **Generate comprehensive help with examples** (ref: Comprehensive help system)
   Task ID: phase-6-testing-03
   > **Implementation**: Add detailed docstrings and `click.help_option` to commands, with examples in epilog.
   > **Details**: Ensure `weather --help` shows examples for each subcommand. Add `@click.epilog` with usage examples. Consider generating man pages (optional). Verify that `--help` works for all subcommands and groups.
 
-- [ ] **Run existing test suite and ensure no regressions** (ref: Testing requirements)
+- [x] **Run existing test suite and ensure no regressions** (ref: Testing requirements)
   Task ID: phase-6-testing-04
   > **Implementation**: Execute `pytest` and fix any failures introduced by changes.
   > **Details**: Ensure all existing unit, integration, and functional tests pass. Add new tests for CLI features. Run `poetry run pytest tests/ -v`. Address any linting issues (`ruff check src/`).
@@ -143,7 +143,7 @@
 
 ## Phase 7: Final Validation and Release
 
-- [ ] **Verify CLI works in one-shot mode** (ref: One-shot execution mode)
+- [x] **Verify CLI works in one-shot mode** (ref: One-shot execution mode)
   Task ID: phase-7-validation-01
   > **Implementation**: Manual testing of CLI commands with real API key (or mocked).
   > **Details**: Test `weather --city "Kuopio,FI" --once` (note: `--once` flag not yet implemented). Actually, the `--once` flag is not needed; the CLI already exits after output. Verify that command exits with code 0 and outputs weather data. Test all output formats (tui, json, markdown). Test coordinates.

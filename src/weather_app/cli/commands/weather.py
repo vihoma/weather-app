@@ -10,7 +10,6 @@ from weather_app.cli.errors import (
     ConfigurationClickException,
     APIClickException,
     LocationClickException,
-    EXIT_GENERAL_ERROR,
 )
 from weather_app.exceptions import (
     APIRequestError,
@@ -22,7 +21,32 @@ from weather_app.exceptions import (
 )
 
 
-@click.command(name="weather", help="Get current weather for a location.")
+@click.command(
+    name="weather",
+    help="Get current weather for a location.",
+    epilog="""
+Examples:
+  # Get weather by city name with TUI output (default)
+  weather weather --city "London,GB"
+  
+  # Get weather by coordinates with JSON output
+  weather weather --coordinates "51.5074,-0.1278" --output json
+  
+  # Get weather with Markdown output
+  weather weather --city "Paris,FR" --output markdown
+  
+  # Use imperial units
+  weather weather --city "New York" --units imperial
+  
+  # Combine with global options
+  weather --verbose --no-cache weather --city "Tokyo,JP" --output json
+  
+Output Formats:
+  • tui: Rich terminal UI with colors and formatting (default)
+  • json: Structured JSON output for scripting
+  • markdown: Markdown formatted output for documentation
+""",
+)
 @location_options()
 @output_option()
 @click.pass_context
@@ -33,6 +57,11 @@ def weather_command(
     output_format: str,
 ) -> None:
     """Get current weather for a location and output in specified format.
+
+    This command fetches current weather data from OpenWeatherMap API
+    and formats it according to the specified output format.
+
+    You must provide either --city or --coordinates to specify the location.
 
     Args:
         ctx: Click context containing global options and configuration overrides.
@@ -91,6 +120,8 @@ def weather_command(
         raise ConfigurationClickException(f"Configuration error: {e}")
     except (APIRequestError, NetworkError, DataParsingError, RateLimitError) as e:
         raise APIClickException(f"API request failed: {e}")
+    except click.BadParameter:
+        raise  # Re-raise click.BadParameter to preserve its exit code
     except Exception as e:
         raise click.ClickException(f"Unexpected error: {e}")
 

@@ -12,8 +12,8 @@ from unittest.mock import Mock, patch, AsyncMock
 import pytest
 from click.testing import CliRunner
 
-from src.weather_app.cli.group import cli
-from src.weather_app.models.weather_data import WeatherData
+from weather_app.cli.group import cli
+from weather_app.models.weather_data import WeatherData
 
 
 @pytest.mark.integration
@@ -69,7 +69,7 @@ cache_file: /tmp/test_cache.json
 
     def test_cli_with_config_file(self, runner, temp_config_file):
         """Test CLI with custom configuration file."""
-        with patch("src.weather_app.cli.commands.weather._fetch_weather_data") as mock_fetch:
+        with patch("weather_app.cli.commands.weather._fetch_weather_data") as mock_fetch:
             mock_fetch.return_value = WeatherData(
                 city="London,GB",
                 units="imperial",  # Should come from config file
@@ -104,7 +104,7 @@ cache_file: /tmp/test_cache.json
 
     def test_cli_config_precedence_cli_overrides_file(self, runner, temp_config_file):
         """Test CLI arguments override configuration file values."""
-        with patch("src.weather_app.cli.commands.weather._fetch_weather_data") as mock_fetch:
+        with patch("weather_app.cli.commands.weather._fetch_weather_data") as mock_fetch:
             mock_fetch.return_value = WeatherData(
                 city="London,GB",
                 units="metric",  # CLI should override config file's imperial
@@ -138,7 +138,7 @@ cache_file: /tmp/test_cache.json
 
     def test_cli_async_mode_with_coordinates(self, runner):
         """Test CLI async mode with coordinates (should use async service)."""
-        with patch("src.weather_app.cli.commands.weather._fetch_weather_data") as mock_fetch:
+        with patch("weather_app.cli.commands.weather._fetch_weather_data") as mock_fetch:
             mock_fetch.return_value = WeatherData(
                 city="51.5074,-0.1278",
                 units="metric",
@@ -171,7 +171,7 @@ cache_file: /tmp/test_cache.json
 
     def test_cli_cache_disabled_via_flag(self, runner):
         """Test CLI --no-cache flag disables caching."""
-        with patch("src.weather_app.cli.commands.weather._fetch_weather_data") as mock_fetch:
+        with patch("weather_app.cli.commands.weather._fetch_weather_data") as mock_fetch:
             mock_fetch.return_value = WeatherData(
                 city="London,GB",
                 units="metric",
@@ -206,7 +206,7 @@ cache_file: /tmp/test_cache.json
         """Test CLI --verbose flag enables debug logging."""
         # We can't easily test logging output, but we can ensure the flag
         # doesn't break command execution
-        with patch("src.weather_app.cli.commands.weather._fetch_weather_data") as mock_fetch:
+        with patch("weather_app.cli.commands.weather._fetch_weather_data") as mock_fetch:
             mock_fetch.return_value = WeatherData(
                 city="London,GB",
                 units="metric",
@@ -241,7 +241,7 @@ cache_file: /tmp/test_cache.json
         formats = ["tui", "json", "markdown"]
         
         for fmt in formats:
-            with patch("src.weather_app.cli.commands.weather._fetch_weather_data") as mock_fetch:
+            with patch("weather_app.cli.commands.weather._fetch_weather_data") as mock_fetch:
                 mock_fetch.return_value = mock_weather_data
                 
                 result = runner.invoke(
@@ -265,13 +265,15 @@ cache_file: /tmp/test_cache.json
 
     def test_cli_setup_api_key_integration(self, runner):
         """Test setup api-key command integration with keyring."""
-        with patch("src.weather_app.cli.commands.setup.Config") as mock_config_class:
-            mock_config = Mock()
-            mock_config.is_keyring_available = Mock(return_value=True)
-            mock_config_class.return_value = mock_config
+        with patch("weather_app.security.SecureConfig") as mock_secure_config_class:
+            mock_secure_config = Mock()
+            mock_secure_config.is_keyring_available = Mock(return_value=True)
+            mock_secure_config.store_api_key = Mock()
+            mock_secure_config_class.return_value = mock_secure_config
             
-            with patch("src.weather_app.cli.commands.setup.setup_api_key") as mock_setup:
-                mock_setup.return_value = True
+            # Mock Prompt.ask
+            with patch("weather_app.cli.commands.setup.Prompt.ask") as mock_prompt:
+                mock_prompt.return_value = "test_api_key"
                 
                 result = runner.invoke(
                     cli,
@@ -279,40 +281,60 @@ cache_file: /tmp/test_cache.json
                 )
                 
                 assert result.exit_code == 0
-                mock_setup.assert_called_once()
+                mock_secure_config.store_api_key.assert_called_once_with(
+                    "test_api_key", service_name="openweathermap"
+                )
 
     def test_cli_cache_management_integration(self, runner):
-        """Test cache command integration with WeatherService."""
-        with patch("src.weather_app.cli.commands.cache.Config") as mock_config_class:
+        """Test cache command integration with file system."""
+        with patch("weather_app.cli.commands.cache.Config") as mock_config_class:
             mock_config = Mock()
+            mock_config.cache_file = "/tmp/test_cache.json"
+            mock_config.cache_persist = True
+            mock_config.cache_ttl = 600
             mock_config_class.return_value = mock_config
             
-            with patch("src.weather_app.cli.commands.cache.WeatherService") as mock_service_class:
-                mock_service = Mock()
-                mock_service.clear_cache = Mock()
-                mock_service.get_cache_stats = Mock(return_value={
-                    "size": 5,
-                    "hits": 10,
-                    "misses": 3,
-                    "ttl": 600
-                })
-                mock_service_class.return_value = mock_service
+            # Mock Path for cache file
+            with patch("weather_app.cli.commands.cache.Path") as mock_path_class:
+                mock_path = Mock()
+                mock_path.expanduser.return_value = mock_path
+                mock_path.exists.return_value = True
+                mock_path.stat.return_value.st_size = 12345
+                mock_path.unlink = Mock()
+                mock_path_class.return_value = mock_path
                 
-                # Test cache clear
-                result = runner.invoke(cli, ["cache", "clear", "--yes"])
-                assert result.exit_code == 0
-                mock_service.clear_cache.assert_called_once()
-                
-                # Test cache status
-                result = runner.invoke(cli, ["cache", "status"])
-                assert result.exit_code == 0
-                assert "5" in result.output
-                assert "10" in result.output
-                assert "3" in result.output
+                # Mock json.load for cache status
+                with patch("weather_app.cli.commands.cache.json.load") as mock_json_load:
+                    mock_json_load.return_value = {
+                        "key1": {"data": "value1"},
+                        "key2": {"data": "value2"},
+                        "key3": {"data": "value3"},
+                        "key4": {"data": "value4"}
+                    }
+                    
+                    # Mock click.confirm for cache clear
+                    with patch("weather_app.cli.commands.cache.click.confirm") as mock_confirm:
+                        mock_confirm.return_value = True
+                        
+                        # Test cache clear
+                        result = runner.invoke(cli, ["cache", "clear", "--force"])
+                        assert result.exit_code == 0
+                        mock_path.unlink.assert_called_once()
+                        
+                        # Reset mock for status test
+                        mock_path.unlink.reset_mock()
+                        
+                        # Test cache status
+                        result = runner.invoke(cli, ["cache", "status"])
+                        assert result.exit_code == 0
+                        assert "Enabled" in result.output
+                        assert "600" in result.output
+                        assert "key1" in result.output
+                        assert "... (+2 more)" in result.output
 
     def test_cli_config_show_integration(self, runner):
         """Test config show command integration with Config."""
-        with patch("src.weather_app.cli.commands.config.Config") as mock_config_class:
+        with patch("weather_app.cli.commands.config.Config") as mock_config_class:
             mock_config = Mock()
             mock_config.api_key = "test_key_masked"
             mock_config.units = "metric"
@@ -343,8 +365,8 @@ cache_file: /tmp/test_cache.json
     def test_cli_error_handling_integration(self, runner):
         """Test error handling integration across CLI stack."""
         # Test configuration error
-        with patch("src.weather_app.cli.commands.weather._fetch_weather_data") as mock_fetch:
-            from src.weather_app.exceptions import ConfigurationError
+        with patch("weather_app.cli.commands.weather._fetch_weather_data") as mock_fetch:
+            from weather_app.exceptions import ConfigurationError
             mock_fetch.side_effect = ConfigurationError("API key missing")
             
             result = runner.invoke(
@@ -361,7 +383,7 @@ cache_file: /tmp/test_cache.json
         os.environ["OWM_UNITS"] = "kelvin"
         
         try:
-            with patch("src.weather_app.cli.commands.weather._fetch_weather_data") as mock_fetch:
+            with patch("weather_app.cli.commands.weather._fetch_weather_data") as mock_fetch:
                 mock_fetch.return_value = WeatherData(
                     city="London,GB",
                     units="metric",  # CLI should override env var

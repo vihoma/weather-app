@@ -1,7 +1,6 @@
 """Cache subcommand for managing weather data cache."""
 
 import json
-import os
 from pathlib import Path
 
 import click
@@ -11,7 +10,10 @@ from rich.table import Table
 from weather_app.config import Config
 
 
-@click.group(name="cache", help="Manage weather data cache.")
+@click.group(
+    name="cache",
+    help="Manage weather data cache.\n\nExamples:\n  weather cache clear --force\n  weather cache status\n  weather cache ttl",
+)
 def cache_group() -> None:
     """Group for cache management commands."""
     pass
@@ -37,7 +39,7 @@ def cache_clear(ctx: click.Context, force: bool) -> None:
 
     if not force:
         console.print(
-            f"[bold yellow]⚠️  Warning: This will delete cache file:[/bold yellow]"
+            "[bold yellow]⚠️  Warning: This will delete cache file:[/bold yellow]"
         )
         console.print(f"    {cache_file}")
         confirm = click.confirm("Are you sure you want to delete the cache file?")
