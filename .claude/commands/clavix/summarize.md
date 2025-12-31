@@ -404,7 +404,7 @@ The `/clavix:summarize` command extracts requirements from exploratory conversat
 
 ---
 
-## Agent Transparency (v5.9.0)
+## Agent Transparency (v5.9.1)
 
 ### Agent Manual (Universal Protocols)
 # Clavix Agent Manual (v5.1)

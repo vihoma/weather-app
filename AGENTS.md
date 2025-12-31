@@ -31,21 +31,29 @@
 
 
 <!-- CLAVIX:START -->
-# Clavix - Prompt Improvement Assistant
+## Clavix Integration
 
-Clavix is installed in this project. Use the following slash commands:
+This project uses Clavix for prompt improvement and PRD generation.
 
-- `/clavix:improve [prompt]` - Optimize prompts with smart depth auto-selection
-- `/clavix:prd` - Generate a PRD through guided questions
-- `/clavix:start` - Start conversational mode for iterative refinement
-- `/clavix:summarize` - Extract optimized prompt from conversation
+### Setup Commands (CLI)
+| Command | Purpose |
+|---------|---------|
+| `clavix init` | Initialize Clavix in a project |
+| `clavix update` | Update templates after package update |
+| `clavix diagnose` | Check installation health |
+| `clavix version` | Show version |
 
-**When to use:**
-- **Standard depth**: Quick cleanup for simple, clear prompts
-- **Comprehensive depth**: Thorough analysis for complex requirements
-- **PRD mode**: Strategic planning with architecture and business impact
+### Workflow Commands (Slash Commands)
+| Slash Command | Purpose |
+|---------------|---------|
+| `/clavix:improve` | Optimize prompts (auto-selects depth) |
+| `/clavix:prd` | Generate PRD through guided questions |
+| `/clavix:plan` | Create task breakdown from PRD |
+| `/clavix:implement` | Execute tasks or prompts (auto-detects source) |
+| `/clavix:start` | Begin conversational session |
+| `/clavix:summarize` | Extract requirements from conversation |
+| `/clavix:verify` | Verify implementation |
+| `/clavix:archive` | Archive completed projects |
 
-Clavix automatically selects the appropriate depth based on your prompt quality.
-
-For more information, run `clavix --help` in your terminal.
+Learn more: https://github.com/clavixdev/clavix
 <!-- CLAVIX:END -->

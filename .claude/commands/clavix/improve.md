@@ -519,7 +519,7 @@ Wait for the user to decide what to do next.
 
 ---
 
-## Agent Transparency (v5.9.0)
+## Agent Transparency (v5.9.1)
 
 ### Agent Manual (Universal Protocols)
 # Clavix Agent Manual (v5.1)
