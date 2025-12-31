@@ -6,7 +6,7 @@ breaking up multi-line examples.
 """
 
 import click
-from typing import Any, Callable
+from typing import Any
 
 
 class PreserveEpilogFormatter(click.HelpFormatter):
