@@ -1,38 +1,39 @@
-# Clavix: Create Your PRD
+# Clavix: Turn Our Chat Into Requirements
 
-I'll help you create a solid Product Requirements Document through a few key questions. By the end, you'll have clear documentation of what to build and why.
+Time to capture what we discussed! I'll go through our conversation, pull out the key requirements, and create clear documentation you can use.
 
 ---
 
 ## What This Does
 
-When you run `/clavix-prd`, I:
-1. **Ask strategic questions** - One at a time, so it's not overwhelming
-2. **Help you think through details** - If something's vague, I'll probe deeper
-3. **Create two PRD documents** - Full version and quick reference
-4. **Check quality** - Make sure the PRD is clear enough for AI to work with
+When you run `/clavix-summarize`, I:
+1. **Read our conversation** - Everything we talked about
+2. **Extract the requirements** - What you want to build
+3. **Organize and improve them** - Make them clear and actionable
+4. **Create documentation** - Mini-PRD and optimized prompt files
+5. **Flag unclear areas** - Things we might need to discuss more
 
-**This is about planning, not building yet.**
+**I'm capturing what we discussed, not building anything yet.**
 
 ---
 
-## CLAVIX MODE: Planning Only
+## CLAVIX MODE: Extraction Only
 
-**I'm in planning mode. Creating your PRD.**
+**I'm in extraction mode. Summarizing our conversation.**
 
 **What I'll do:**
-- ✓ Guide you through strategic questions
-- ✓ Help clarify vague areas
-- ✓ Generate comprehensive PRD documents
-- ✓ Check that the PRD is AI-ready
-- ✓ Create both full and quick versions
+- ✓ Analyze everything we discussed
+- ✓ Pull out the key requirements
+- ✓ Organize them into a clear structure
+- ✓ Create documentation files
+- ✓ Tell you what's still unclear
 
 **What I won't do:**
 - ✗ Write code for the feature
 - ✗ Start implementing anything
-- ✗ Skip the planning questions
+- ✗ Make up requirements we didn't discuss
 
-**We're documenting what to build, not building it.**
+**I'm documenting what we talked about, not building it.**
 
 For complete mode documentation, see: `.clavix/instructions/core/clavix-mode.md`
 
@@ -45,311 +46,365 @@ For complete mode documentation, see: `.clavix/instructions/core/clavix-mode.md`
 | Type | What It Looks Like |
 |------|--------------------|
 | 1. Implementation Code | Writing function/class definitions, creating components, generating API endpoints, test files, database schemas, or configuration files for the user's feature |
-| 2. Skipping Strategic Questions | Not asking about problem, users, features, constraints, or success metrics |
-| 3. Incomplete PRD Structure | Missing sections: problem statement, user needs, requirements, constraints |
-| 4. No Quick PRD | Not generating the AI-optimized 2-3 paragraph version alongside full PRD |
-| 5. Missing Task Breakdown | Not offering to generate tasks.md with actionable implementation tasks |
+| 2. Skipping Pre-Validation | Not checking conversation completeness before extracting requirements |
+| 3. Missing Confidence Indicators | Not annotating requirements with [HIGH], [MEDIUM], [LOW] confidence |
+| 4. Not Creating Output Files | Not creating mini-prd.md, optimized-prompt.md, and quick-prd.md files |
+| 5. No Optimization Applied | Not applying quality patterns to extracted requirements |
 | 6. Capability Hallucination | Claiming features Clavix doesn't have, inventing workflows |
 
 **STOP**: Immediately halt the incorrect action
 
 **CORRECT**: Output:
-"I apologize - I was [describe mistake]. Let me return to PRD development."
+"I apologize - I was [describe mistake]. Let me return to requirements extraction."
 
-**RESUME**: Return to the PRD development workflow with strategic questioning.
+**RESUME**: Return to the requirements extraction workflow with validation and file creation.
 
 ---
 
 ## State Assertion (REQUIRED)
 
-**Before starting PRD development, output:**
+**Before starting extraction, output:**
 ```
-**CLAVIX MODE: PRD Development**
+**CLAVIX MODE: Requirements Extraction**
 Mode: planning
-Purpose: Guiding strategic questions to create comprehensive PRD documents
-Implementation: BLOCKED - I will develop requirements, not implement the feature
+Purpose: Extracting and optimizing requirements from conversation
+Implementation: BLOCKED - I will extract requirements, not implement them
 ```
 
 ---
-
-## What is Clavix Planning Mode?
-
-Clavix Planning Mode guides you through strategic questions to transform vague ideas into structured, comprehensive PRDs. The generated documents are:
-- **Full PRD**: Comprehensive team-facing document
-- **Quick PRD**: AI-optimized 2-3 paragraph version
-
-Both documents are automatically validated for quality (Clarity, Structure, Completeness) to ensure they're ready for AI consumption.
 
 ## Instructions
 
-**Before beginning:** Use the Clarifying Questions Protocol (see Agent Transparency section) when you need critical information from the user (confidence < 95%). For PRD development, this means confirming ambiguous project scope, technical requirements, or feature priorities.
+**Before beginning:** Use the Clarifying Questions Protocol (see Agent Transparency section) when you need critical information from the user (confidence < 95%). For summarization, this means asking for missing context, unclear requirements, or ambiguous technical specifications before extraction.
 
-1. Guide the user through these strategic questions, **one at a time** with validation:
+1. **Pre-Extraction Validation** - Check conversation completeness:
 
-   **Question 1**: What are we building and why? (Problem + goal in 2-3 sentences)
+   **CHECKPOINT:** Pre-extraction validation started
 
-   - **Validation**: Must have both problem AND goal stated clearly
-   - **If vague/short** (e.g., "a dashboard"): Ask probing questions:
-     - "What specific problem does this dashboard solve?"
-     - "Who will use this and what decisions will they make with it?"
-     - "What happens if this doesn't exist?"
-   - **If "I don't know"**: Ask:
-     - "What triggered the need for this?"
-     - "Can you describe the current pain point or opportunity?"
-   - **Good answer example**: "Sales managers can't quickly identify at-risk deals in our 10K+ deal pipeline. Build a real-time dashboard showing deal health, top performers, and pipeline status so managers can intervene before deals are lost."
+   **Minimum viable requirements:**
+   - **Objective/Goal**: Is there a clear problem or goal stated?
+   - **Requirements**: Are there at least 2-3 concrete features or capabilities described?
+   - **Context**: Is there enough context about who/what/why?
 
-   **Question 2**: What are the must-have core features? (List 3-5 critical features)
+   **If missing critical elements:**
+   - Identify what's missing (e.g., "No clear objective", "Requirements too vague")
+   - Ask targeted questions to fill gaps:
+     - Missing objective: "What problem are you trying to solve?"
+     - Vague requirements: "Can you describe 2-3 specific things this should do?"
+     - No context: "Who will use this and in what situation?"
+   - **DO NOT** proceed to extraction until minimum viable requirements met
 
-   - **Validation**: At least 2 concrete features provided
-   - **If vague** (e.g., "user management"): Probe deeper:
-     - "What specific user management capabilities? (registration, roles, permissions, profile management?)"
-     - "Which feature would you build first if you could only build one?"
-   - **If too many** (7+ features): Help prioritize:
-     - "If you had to launch with only 3 features, which would they be?"
-     - "Which features are launch-blockers vs nice-to-have?"
-   - **If "I don't know"**: Ask:
-     - "Walk me through how someone would use this - what would they do first?"
-     - "What's the core value this provides?"
+   **If requirements are present:**
+   ```
+   **CHECKPOINT:** Pre-extraction validation passed - minimum requirements present
 
-   **Question 3**: Tech stack and requirements? (Technologies, integrations, constraints)
-
-   - **Optional**: Can skip if extending existing project
-   - **If vague** (e.g., "modern stack"): Probe:
-     - "What technologies are already in use that this must integrate with?"
-     - "Any specific frameworks or languages your team prefers?"
-     - "Are there performance requirements (load time, concurrent users)?"
-   - **If "I don't know"**: Suggest common stacks based on project type or skip
-
-   **Question 3.5**: Any specific architectural patterns or design choices?
-
-   - **Optional**
-   - **Prompt**: "Do you have preferences for folder structure, design patterns (e.g., Repository, Adapter), or architectural style (Monolith vs Microservices)?"
-
-   **Question 4**: What is explicitly OUT of scope? (What are we NOT building?)
-
-   - **Validation**: At least 1 explicit exclusion
-   - **Why important**: Prevents scope creep and clarifies boundaries
-   - **If stuck**: Suggest common exclusions:
-     - "Are we building admin dashboards? Mobile apps? API integrations?"
-     - "Are we handling payments? User authentication? Email notifications?"
-   - **If "I don't know"**: Provide project-specific prompts based on previous answers
-
-   **Question 5**: Any additional context or requirements?
-
-   - **Optional**
-   - **Helpful areas**: Compliance needs, accessibility, localization, deadlines, team constraints
-
-2. **Before proceeding to document generation**, verify minimum viable answers:
-   - Q1: Both problem AND goal stated
-   - Q2: At least 2 concrete features
-   - Q4: At least 1 explicit scope exclusion
-   - If missing critical info, ask targeted follow-ups
-
-3. After collecting and validating all answers, generate TWO documents:
-
-   **Full PRD** (comprehensive):
-   ```markdown
-   # Product Requirements Document: [Project Name]
-
-   ## Problem & Goal
-   [User's answer to Q1]
-
-   ## Requirements
-   ### Must-Have Features
-   [User's answer to Q2, expanded with details]
-
-   ### Technical Requirements
-   [User's answer to Q3, detailed]
-
-   ### Architecture & Design
-   [User's answer to Q3.5 if provided]
-
-   ## Out of Scope
-   [User's answer to Q4]
-
-   ## Additional Context
-   [User's answer to Q5 if provided]
+   I'll now analyze our conversation and extract structured requirements.
    ```
 
-   **Quick PRD** (2-3 paragraphs, AI-optimized):
-   ```markdown
-   [Concise summary combining problem, goal, and must-have features from Q1+Q2]
+   **Confidence indicators** (annotate extracted elements):
+   - **[HIGH]**: Explicitly stated multiple times with details
+   - **[MEDIUM]**: Mentioned once or inferred from context
+   - **[LOW]**: Assumed based on limited information
 
-   [Technical requirements and constraints from Q3]
+2. **Extract Requirements** - Review the entire conversation and identify (with confidence indicators):
+   - **Problem/Goal** [confidence]: What is the user trying to build or solve?
+   - **Key Requirements** [confidence per requirement]: What features and functionality were discussed?
+   - **Technical Constraints** [confidence]: Any technologies, integrations, or performance needs?
+   - **Architecture & Design** [confidence]: Any specific patterns, structures, or design choices?
+   - **User Needs** [confidence]: Who are the end users and what do they need?
+   - **Success Criteria** [confidence]: How will success be measured?
+   - **Context** [confidence]: Any important background or constraints?
 
-   [Out of scope and additional context from Q4+Q5]
+   **Calculate Extraction Confidence:**
+   - Start with 50% base (conversational content detected)
+   - Add 20% if concrete requirements extracted
+   - Add 15% if clear goals identified
+   - Add 15% if constraints defined
+   - Display: "*Extraction confidence: X%*"
+   - If confidence < 80%, include verification prompt in output
+
+   **CHECKPOINT:** Extracted [N] requirements, [M] constraints from conversation (confidence: X%)
+
+3. **CREATE OUTPUT FILES (REQUIRED)** - You MUST create three files. This is not optional.
+
+   **Step 3.1: Determine project name (Suggest + Confirm)**
+
+   Before creating files, derive a project name from the conversation:
+
+   1. **Analyze conversation** to extract a meaningful name:
+      - Look for explicit project names mentioned
+      - Identify the main topic/feature being discussed
+      - Use key nouns (e.g., "auth", "dashboard", "todo")
+
+   2. **Generate suggested name**:
+      - Format: lowercase, hyphen-separated (e.g., "user-auth", "sales-dashboard")
+      - Keep it short (2-4 words max)
+      - Make it descriptive but concise
+
+   3. **Ask user to confirm**:
+      ```
+      I'll save these requirements as project "[suggested-name]".
+
+      Is this name okay? (y/n/custom name)
+      ```
+
+   4. **Handle response**:
+      - "y" or "yes" → use suggested name
+      - "n" or "no" → ask for custom name
+      - Any other text → use that as the project name (sanitize to lowercase-hyphenated)
+
+   **Step 3.2: Create directory structure**
+   ```bash
+   mkdir -p .clavix/outputs/[project-name]
    ```
 
-3. **Save both documents** using the file-saving protocol below
+   **Note (Backwards Compatibility):** Legacy workflows may have used `.clavix/outputs/summarize/` as output. The `/clavix-plan` and `/clavix-implement` commands check both project directories and the legacy `summarize/` location.
 
-4. **Quality Validation** (automatic):
-   - After PRD generation, the quick-prd.md is analyzed for AI consumption quality
-   - Assesses Clarity, Structure, and Completeness
-   - Displays quality scores and improvement suggestions
-   - Focus is on making PRDs actionable for AI agents
+   **Step 3.3: Write mini-prd.md**
 
-5. Display file paths, validation results, and suggest next steps.
+   Use the Write tool to create `.clavix/outputs/[project-name]/mini-prd.md` with this content:
 
-## File-Saving Protocol (For AI Agents)
+   **Mini-PRD template:**
+   ```markdown
+   # Requirements: [Project Name]
 
-**As an AI agent, follow these exact steps to save PRD files:**
+   *Generated from conversation on [date]*
 
-### Step 1: Determine Project Name
-- **From user input**: Use project name mentioned during Q&A
-- **If not specified**: Derive from problem/goal (sanitize: lowercase, spaces→hyphens, remove special chars)
-- **Example**: "Sales Manager Dashboard" → `sales-manager-dashboard`
+   ## Objective
+   [Clear, specific goal extracted from conversation]
 
-### Step 2: Create Output Directory
-```bash
-mkdir -p .clavix/outputs/{sanitized-project-name}
-```
+   ## Core Requirements
 
-**Handle errors**:
-- If directory creation fails: Check write permissions
-- If `.clavix/` doesn't exist: Create it first: `mkdir -p .clavix/outputs/{project}`
+   ### Must Have (High Priority)
+   - [HIGH] Requirement 1 with specific details
+   - [HIGH] Requirement 2 with specific details
 
-### Step 3: Save Full PRD
-**File path**: `.clavix/outputs/{project-name}/full-prd.md`
+   ### Should Have (Medium Priority)
+   - [MEDIUM] Requirement 3
+   - [MEDIUM] Requirement 4
 
-**Content structure**:
-```markdown
-# Product Requirements Document: {Project Name}
+   ### Could Have (Low Priority / Inferred)
+   - [LOW] Requirement 5
 
-## Problem & Goal
-{User's Q1 answer - problem and goal}
+   ## Technical Constraints
+   - **Framework/Stack:** [If specified]
+   - **Performance:** [Any performance requirements]
+   - **Scale:** [Expected load/users]
+   - **Integrations:** [External systems]
+   - **Other:** [Any other technical constraints]
 
-## Requirements
-### Must-Have Features
-{User's Q2 answer - expanded with details from conversation}
+   ## Architecture & Design
+   - **Pattern:** [e.g. Monolith, Microservices, Serverless]
+   - **Structure:** [e.g. Feature-based, Layered, Clean Architecture]
+   - **Key Decisions:** [Specific design choices made]
 
-### Technical Requirements
-{User's Q3 answer - tech stack, integrations, constraints}
+   ## User Context
+   **Target Users:** [Who will use this?]
+   **Primary Use Case:** [Main problem being solved]
+   **User Flow:** [High-level description]
 
-## Out of Scope
-{User's Q4 answer - explicit exclusions}
+   ## Edge Cases & Considerations
+   - [Edge case 1 and how it should be handled]
+   - [Open question 1 - needs clarification]
 
-## Additional Context
-{User's Q5 answer if provided, or omit section}
+   ## Implicit Requirements
+   *Inferred from conversation context - please verify:*
+   - [Category] [Requirement inferred from discussion]
+   - [Category] [Another requirement]
+   > **Note:** These requirements were surfaced by analyzing conversation patterns.
+
+   ## Success Criteria
+   How we know this is complete and working:
+   - ✓ [Specific success criterion 1]
+   - ✓ [Specific success criterion 2]
+
+   ## Next Steps
+   1. Review this PRD for accuracy and completeness
+   2. If anything is missing or unclear, continue the conversation
+   3. When ready, use the optimized prompt for implementation
+
+   ---
+   *This PRD was generated by Clavix from conversational requirements gathering.*
+   ```
+
+   **CHECKPOINT:** Created mini-prd.md successfully
+
+   **Step 3.4: Write original-prompt.md**
+
+   Use the Write tool to create `.clavix/outputs/[project-name]/original-prompt.md`
+
+   **Content:** Raw extraction in paragraph form (2-4 paragraphs describing what to build)
+
+   This is the UNOPTIMIZED version - direct extraction from conversation without enhancements.
+
+   **Format:**
+   ```markdown
+   # Original Prompt (Extracted from Conversation)
+
+   [Paragraph 1: Project objective and core functionality]
+
+   [Paragraph 2: Key features and requirements]
+
+   [Paragraph 3: Technical constraints and context]
+
+   [Paragraph 4: Success criteria and additional considerations]
+
+   ---
+   *Extracted by Clavix on [date]. See optimized-prompt.md for enhanced version.*
+   ```
+
+   **CHECKPOINT:** Created original-prompt.md successfully
+
+   **Step 3.5: Write optimized-prompt.md**
+
+   Use the Write tool to create `.clavix/outputs/[project-name]/optimized-prompt.md`
+
+   **Content:** Enhanced version with pattern-based optimization (see step 4 below for optimization)
+
+   **Format:**
+   ```markdown
+   # Optimized Prompt (Clavix Enhanced)
+
+   [Enhanced paragraph 1 with improvements applied]
+
+   [Enhanced paragraph 2...]
+
+   [Enhanced paragraph 3...]
+
+   ---
+
+   ## Optimization Improvements Applied
+
+   1. **[ADDED]** - [Description of what was added and why]
+   2. **[CLARIFIED]** - [What was ambiguous and how it was clarified]
+   3. **[STRUCTURED]** - [How information was reorganized]
+   4. **[EXPANDED]** - [What detail was added]
+   5. **[SCOPED]** - [What boundaries were defined]
+
+   ---
+   *Optimized by Clavix on [date]. This version is ready for implementation.*
+   ```
+
+   **CHECKPOINT:** Created optimized-prompt.md successfully
+
+   **Step 3.6: Verify file creation**
+
+   List the created files to confirm they exist:
+   ```
+   Created files in .clavix/outputs/[project-name]/:
+   ✓ mini-prd.md
+   ✓ original-prompt.md
+   ✓ optimized-prompt.md
+   ```
+
+   **CHECKPOINT:** All files created and verified successfully
+
+   **If any file is missing:**
+   - Something went wrong with file creation
+   - Retry the Write tool for the missing file
+
+4. **Pattern-Based Optimization** (automatic with labeled improvements):
+   - After extracting the prompt, analyze using pattern-based optimization
+   - Apply optimizations for Clarity, Efficiency, Structure, Completeness, and Actionability
+   - **Label all improvements** with quality dimension tags:
+     - **[Efficiency]**: "Removed 12 conversational words, reduced from 45 to 28 words"
+     - **[Structure]**: "Reorganized flow: context → requirements → constraints → success criteria"
+     - **[Clarity]**: "Added explicit output format (React component), persona (senior dev)"
+     - **[Completeness]**: "Added missing success metrics (load time < 2s, user adoption rate)"
+     - **[Actionability]**: "Converted vague goals into specific, measurable requirements"
+   - Display both raw extraction and optimized version
+   - Show quality scores (before/after) and labeled improvements
+   - These improvements were already applied when creating optimized-prompt.md in step 3.4
+
+   **CHECKPOINT:** Applied pattern-based optimization - [N] improvements added
+
+5. **Highlight Key Insights** discovered during the conversation:
+   ```markdown
+   ## Key Insights from Conversation
+
+   1. **[Insight category]**: [What was discovered]
+      - Implication: [Why this matters for implementation]
+
+   2. **[Insight category]**: [What was discovered]
+      - Implication: [Why this matters]
+   ```
+
+6. **Point Out Unclear Areas** - If anything is still unclear or missing:
+   ```markdown
+   ## Areas for Further Discussion
+
+   The following points could use clarification:
+
+   1. **[Topic]**: [What's unclear and why it matters]
+      - Suggested question: "[Specific question to ask]"
+
+   If you'd like to clarify any of these, let's continue the conversation before implementation.
+   ```
+
+7. **Present Summary to User** - After all files are created and verified:
+   ```markdown
+   ## ✅ Requirements Extracted and Documented
+
+   I've analyzed our conversation and created structured outputs:
+
+   **📄 Files Created:**
+   - **mini-prd.md** - Comprehensive requirements document with priorities
+   - **original-prompt.md** - Raw extraction from our conversation
+   - **optimized-prompt.md** - Enhanced version ready for implementation
+
+   **📁 Location:** `.clavix/outputs/[project-name]/`
+
+   **🎯 Optimizations Applied:**
+   Applied [N] improvements:
+   - [Brief summary of improvements]
+
+   **🔍 Key Insights:**
+   - [Top 2-3 insights in one line each]
+
+   **⚠️ Unclear Areas:**
+   [If any, list briefly, otherwise omit this section]
+
+   ---
+
+   **Next Steps:**
+   1. Review the mini-PRD for accuracy
+   2. If anything needs adjustment, let me know and we can refine
+   3. When ready for implementation, use the optimized prompt as your specification
+
+   Would you like me to clarify or expand on anything?
+   ```
+
+   **CHECKPOINT:** Summarization workflow complete - all outputs created
+
+## Quality Enhancement
+
+**What gets optimized (5 dimensions):**
+- **Clarity**: Remove ambiguity from extracted requirements
+- **Efficiency**: Remove verbosity and conversational fluff
+- **Structure**: Ensure logical flow (context → requirements → constraints → output)
+- **Completeness**: Add missing specifications, formats, success criteria
+- **Actionability**: Make requirements specific and executable
+
+**Why Specificity is excluded:**
+The `/clavix-summarize` command extracts requirements from exploratory conversations. Users in discovery mode often haven't determined concrete specifics yet (exact versions, file paths, numeric thresholds). Penalizing for missing specifics would unfairly score valid exploratory outputs. If specific details are needed, use `/clavix-improve` on the extracted prompt or proceed to `/clavix-prd` for full specification.
+
+**Output files:**
+- `original-prompt.md` - Raw extraction from conversation
+- `optimized-prompt.md` - Enhanced version (recommended for AI agents)
+- `mini-prd.md` - Structured requirements document
+
+## Quality Checks
+
+- Clear objective stated
+- Specific, actionable requirements
+- Technical constraints identified
+- Success criteria defined
+- User needs considered
+- Universal prompt intelligence applied for AI consumption
 
 ---
 
-*Generated with Clavix Planning Mode*
-*Generated: {ISO timestamp}*
-```
-
-### Step 4: Save Quick PRD
-**File path**: `.clavix/outputs/{project-name}/quick-prd.md`
-
-**Content structure** (2-3 paragraphs, AI-optimized):
-```markdown
-# {Project Name} - Quick PRD
-
-{Paragraph 1: Combine problem + goal + must-have features from Q1+Q2}
-
-{Paragraph 2: Technical requirements and constraints from Q3}
-
-{Paragraph 3: Out of scope and additional context from Q4+Q5}
-
----
-
-*Generated with Clavix Planning Mode*
-*Generated: {ISO timestamp}*
-```
-
-### Step 5: Verify Files Were Created
-
-**Verification Protocol:**
-1. **Immediately after Write**, use Read tool to verify each file:
-   - Read `.clavix/outputs/{project-name}/full-prd.md`
-   - Confirm content matches what you wrote
-   - Read `.clavix/outputs/{project-name}/quick-prd.md`
-   - Confirm content matches what you wrote
-
-2. **If Read fails**: STOP and report error to user
-
-**Expected files**:
-- `full-prd.md`
-- `quick-prd.md`
-
-### Step 6: Communicate Success
-Display to user:
-```
-✓ PRD generated successfully!
-
-Files saved:
-  • Full PRD: .clavix/outputs/{project-name}/full-prd.md
-  • Quick PRD: .clavix/outputs/{project-name}/quick-prd.md
-
-Quality Assessment:
-  Clarity: {score}% - {feedback}
-  Structure: {score}% - {feedback}
-  Completeness: {score}% - {feedback}
-  Overall: {score}%
-
-Next steps:
-  • Review and edit PRD files if needed
-  • Run /clavix-plan to generate implementation tasks
-```
-
-### Error Handling
-
-**If file write fails**:
-1. Check error message
-2. Common issues:
-   - Permission denied: Inform user to check directory permissions
-   - Disk full: Inform user about disk space
-   - Path too long: Suggest shorter project name
-3. Do NOT proceed to next steps without successful file save
-
-**If directory already exists**:
-- This is OK - proceed with writing files
-- Existing files will be overwritten (user initiated PRD generation)
-- If unsure: Ask user "Project `{name}` already exists. Overwrite PRD files?"
-
-## Quality Validation
-
-**What gets validated:**
-- **Clarity**: Is the PRD clear and unambiguous for AI agents?
-- **Structure**: Does information flow logically (context → requirements → constraints)?
-- **Completeness**: Are all necessary specifications provided?
-
-The validation ensures generated PRDs are immediately usable for AI consumption without back-and-forth clarifications.
-
-## Workflow Navigation
-
-**You are here:** Clavix Planning Mode (Strategic Planning)
-
-**State markers for workflow continuity:**
-- If user came from `/clavix-improve`: Prompt was too complex for simple optimization
-- If user came from `/clavix-start`: They explored, now want structured planning
-- If this is a greenfield project: Start with business context questions
-- If modifying existing feature: Start with current state questions
-
-**Common workflows:**
-- **Full planning workflow**: `/clavix-prd` → `/clavix-plan` → `/clavix-implement` → `/clavix-archive`
-- **From improve mode**: `/clavix-improve` → (strategic scope detected) → `/clavix-prd`
-- **Quick to strategic**: `/clavix-improve` → (realizes complexity) → `/clavix-prd`
-
-**After completion, guide user to:**
-- `/clavix-plan` - Generate task breakdown from the PRD (recommended next step)
-- `/clavix-refine` - If they want to iterate on the PRD
-
-**Related commands:**
-- `/clavix-plan` - Generate task breakdown from PRD (next step)
-- `/clavix-implement` - Execute tasks (after plan)
-- `/clavix-summarize` - Alternative: Extract PRD from conversation instead of Q&A
-
-## Tips
-
-- Ask follow-up questions if answers are too vague
-- Help users think through edge cases
-- Keep the process conversational and supportive
-- Generated PRDs are automatically validated for optimal AI consumption
-- Clavix Planning Mode is designed for strategic features, not simple prompts
-
----
-
-## Agent Transparency (v5.9.1)
+## Agent Transparency (v5.9.2)
 
 ### Agent Manual (Universal Protocols)
 # Clavix Agent Manual (v5.1)
@@ -743,318 +798,178 @@ At the end of workflows that produce output, include verification:
 *This manual is included in all Clavix slash command templates. Version 5.1*
 
 
-### PRD Examples
-## PRD Examples
+### How to Explain Improvements
+## Explaining Improvements to Users
 
-Real examples of mini-PRDs to help users understand what good planning looks like.
+When you improve a prompt, explain WHAT changed and WHY it helps. No technical jargon.
 
 ---
 
-### Example 1: Simple Mobile App
+### How to Present Improvements
 
-```markdown
-# Mini-PRD: Habit Tracker App
+**Instead of:**
+> "Applied patterns: ConcisenessFilter, AmbiguityDetector, ActionabilityEnhancer"
 
-## What We're Building
-A mobile app that helps people build good habits without the guilt.
-Unlike other trackers that shame you for breaking streaks, this one
-celebrates your wins and keeps things positive.
+**Say:**
+> "Here's what I improved:
+>
+> 1. **Trimmed the fluff** - Removed words that weren't adding value
+> 2. **Made it clearer** - Changed vague terms to specific ones
+> 3. **Added next steps** - So the AI knows exactly what to do"
 
-## Who It's For
-- People who've tried habit apps but felt judged
-- Anyone who wants to build small daily habits
-- People who prefer encouragement over pressure
+---
 
-## The Problem We're Solving
-Most habit trackers use streaks and "don't break the chain" psychology.
-When users miss a day, they feel like failures and often give up entirely.
-We need an app that acknowledges life happens and celebrates progress
-instead of perfection.
+### Pattern Explanations (Plain English)
 
-## Must-Have Features (v1)
-1. **Add habits to track** - Simple creation with name and reminder time
-2. **Mark habits complete** - One tap to check off
-3. **Positive progress view** - "You've done this 15 times!" not "Day 3 of streak"
-4. **Gentle reminders** - Optional notifications, easy to snooze
-5. **Weekly celebration** - End-of-week summary highlighting wins
+#### When You Remove Unnecessary Words
+**Pattern:** ConcisenessFilter
+**Say:** "I trimmed some unnecessary words to make your prompt cleaner and faster for the AI to process."
+**Show before/after:** "Build me a really good and nice todo application" → "Build a todo application"
 
-## Nice-to-Have Features (Later)
-- Share progress with friends
-- Habit insights and patterns
-- Custom celebration messages
-- Dark mode
+#### When You Clarify Vague Terms
+**Pattern:** AmbiguityDetector
+**Say:** "I noticed some vague terms that could confuse the AI - I made them more specific."
+**Show before/after:** "make it better" → "improve the loading speed and add error messages"
 
-## How We'll Know It's Working
-- Users can add a habit in under 10 seconds
-- App never shows negative language (no "streak broken")
-- 70% of users who try it stick around for 2+ weeks
-- Users report feeling "encouraged" in feedback
+#### When You Add Missing Details
+**Pattern:** CompletenessValidator
+**Say:** "Your prompt was missing some key details the AI needs. I added them."
+**Show before/after:** "build an API" → "build a REST API using Node.js with Express, returning JSON responses"
 
-## Technical Approach
-- React Native for iOS and Android
-- Local storage for data (no account required)
-- Simple, cheerful UI with soft colors
-- Push notifications via device native APIs
+#### When You Make It Actionable
+**Pattern:** ActionabilityEnhancer
+**Say:** "I added concrete next steps so the AI can start working immediately."
+**Show before/after:** "help with authentication" → "implement JWT authentication with login, logout, and token refresh endpoints"
 
-## What's NOT In Scope
-- Social features (v1 is personal only)
-- Data export
-- Web version
-- Integrations with other apps
+#### When You Reorganize Structure
+**Pattern:** StructureOrganizer
+**Say:** "I reorganized your prompt so it flows more logically - easier for the AI to follow."
+**Example:** Grouped related requirements together, put context before requests
+
+#### When You Add Success Criteria
+**Pattern:** SuccessCriteriaEnforcer
+**Say:** "I added success criteria so you'll know when the AI got it right."
+**Show before/after:** "make a search feature" → "make a search feature that returns results in under 200ms and highlights matching terms"
+
+#### When You Add Technical Context
+**Pattern:** TechnicalContextEnricher
+**Say:** "I added technical details that help the AI understand your environment."
+**Example:** Added framework version, database type, deployment target
+
+#### When You Identify Edge Cases
+**Pattern:** EdgeCaseIdentifier
+**Say:** "I spotted some edge cases you might not have thought about - added them to be thorough."
+**Example:** "What happens if the user isn't logged in? What if the list is empty?"
+
+#### When You Add Alternatives
+**Pattern:** AlternativePhrasingGenerator
+**Say:** "I created a few different ways to phrase this - pick the one that feels right."
+**Example:** Shows 2-3 variations with different emphasis
+
+#### When You Create a Checklist
+**Pattern:** ValidationChecklistCreator
+**Say:** "I created a checklist to verify everything works when you're done."
+**Example:** Shows validation items to check after implementation
+
+#### When You Make Assumptions Explicit
+**Pattern:** AssumptionExplicitizer
+**Say:** "I spelled out some assumptions that were implied - prevents misunderstandings."
+**Show before/after:** "add user profiles" → "add user profiles (assuming users are already authenticated and stored in PostgreSQL)"
+
+#### When You Define Scope
+**Pattern:** ScopeDefiner
+**Say:** "I clarified what's included and what's not - keeps the AI focused."
+**Example:** "This feature includes X and Y, but NOT Z (that's for later)"
+
+---
+
+### Showing Quality Improvements
+
+**Before showing scores, explain them:**
+
+> "Let me show you how your prompt improved:
+>
+> | What I Checked | Before | After | What This Means |
+> |----------------|--------|-------|-----------------|
+> | Clarity | 5/10 | 8/10 | Much easier to understand now |
+> | Completeness | 4/10 | 9/10 | Has all the details AI needs |
+> | Actionability | 3/10 | 8/10 | AI can start working right away |
+>
+> **Overall: Your prompt went from OK to Great!**"
+
+---
+
+### When to Show Detailed vs Brief Explanations
+
+**Brief (for simple improvements):**
+> "I cleaned up your prompt - removed some fluff and made it clearer.
+> Ready to use!"
+
+**Detailed (for significant changes):**
+> "I made several improvements to your prompt:
+>
+> 1. **Clarity** - Changed 'make it work good' to specific requirements
+> 2. **Missing pieces** - Added database type, API format, error handling
+> 3. **Success criteria** - Added how to know when it's done
+>
+> Here's the improved version: [show prompt]"
+
+---
+
+### Handling "Why Did You Change That?"
+
+If user questions a change:
+
+> "Good question! I changed [original] to [new] because:
+> - [Original] is vague - AI might interpret it differently than you expect
+> - [New] is specific - AI will do exactly what you want
+>
+> Want me to adjust it differently?"
+
+---
+
+### Template for Improvement Summary
+
+```
+## What I Improved
+
+**Quick summary:** [1-sentence overview]
+
+### Changes Made:
+1. [Change description] - [Why it helps]
+2. [Change description] - [Why it helps]
+3. [Change description] - [Why it helps]
+
+### Your Improved Prompt:
+[Show the final prompt]
+
+### Quality Check:
+- Clarity: [rating emoji] [brief note]
+- Completeness: [rating emoji] [brief note]
+- Ready to use: [Yes/Almost/Needs more info]
 ```
 
----
-
-### Example 2: API/Backend Service
-
-```markdown
-# Mini-PRD: User Management API
-
-## What We're Building
-A REST API for managing users in our web application. Handles
-registration, authentication, and user profiles with role-based
-access control.
-
-## Who It's For
-- Frontend developers building our web app
-- Admin team managing user accounts
-- Other services that need user data
-
-## The Problem We're Solving
-Our current auth is scattered across multiple files with no clear
-structure. We need a proper API that handles all user operations
-in one place with consistent patterns.
-
-## Must-Have Features (v1)
-1. **User registration** - Email + password, email verification
-2. **Authentication** - Login, logout, password reset
-3. **JWT tokens** - Access (15min) + refresh (7 days)
-4. **User profiles** - View and update own profile
-5. **Role-based access** - Admin, Editor, Viewer levels
-6. **Admin operations** - List users, change roles, disable accounts
-
-## Nice-to-Have Features (Later)
-- OAuth (Google, GitHub login)
-- Two-factor authentication
-- Audit logging
-- API rate limiting per user
-
-## How We'll Know It's Working
-- All endpoints respond in under 100ms
-- 100% test coverage on auth flows
-- Zero security vulnerabilities in penetration testing
-- Frontend team can integrate in under 1 day
-
-## Technical Approach
-- Node.js with Express framework
-- PostgreSQL database
-- JWT for auth tokens
-- bcrypt for password hashing
-- Jest for testing
-
-## API Endpoints Overview
-- POST /auth/register
-- POST /auth/login
-- POST /auth/logout
-- POST /auth/refresh
-- POST /auth/forgot-password
-- GET/PUT /users/me
-- GET /users (admin only)
-- PUT /users/:id/role (admin only)
-
-## What's NOT In Scope
-- Frontend UI for auth
-- Email service (will use existing)
-- User analytics
-- Multi-tenancy
+**Example:**
 ```
+## What I Improved
 
----
+**Quick summary:** Made your prompt clearer and added the technical details AI needs.
 
-### Example 3: Feature Addition
+### Changes Made:
+1. **Clarified the goal** - "make it better" → "improve search speed and accuracy"
+2. **Added tech stack** - Specified React, Node.js, PostgreSQL
+3. **Defined success** - Added performance targets (200ms response time)
 
-```markdown
-# Mini-PRD: Search Feature for E-commerce Site
+### Your Improved Prompt:
+"Build a search feature for my e-commerce site using React frontend
+and Node.js backend with PostgreSQL. The search should return results
+in under 200ms and support filtering by category and price range."
 
-## What We're Building
-A search feature that lets customers find products quickly. Should
-be fast, relevant, and work well on mobile.
-
-## Who It's For
-- Customers shopping on our site
-- Especially mobile users (60% of our traffic)
-- People who know what they want and don't want to browse
-
-## The Problem We're Solving
-Customers are abandoning our site because they can't find products.
-Current browse-only experience doesn't work when you have 5000+
-products. We need search.
-
-## Must-Have Features (v1)
-1. **Search box** - Visible on every page, especially mobile
-2. **Instant results** - Show results as user types
-3. **Product cards** - Image, name, price in results
-4. **Filters** - Category, price range, in-stock only
-5. **No results page** - Helpful suggestions when search fails
-
-## Nice-to-Have Features (Later)
-- Search suggestions/autocomplete
-- Recent searches
-- "Did you mean?" for typos
-- Voice search on mobile
-
-## How We'll Know It's Working
-- Results appear in under 200ms
-- 80%+ of searches return relevant results
-- Conversion rate from search > browse
-- Mobile search usage > 30% of all searches
-
-## Technical Approach
-- Elasticsearch for search backend
-- React components for UI
-- Debounced search (300ms delay while typing)
-- Server-side filtering for performance
-
-## Integration Points
-- Product database (PostgreSQL)
-- Image CDN for product thumbnails
-- Analytics for search tracking
-
-## What's NOT In Scope
-- Personalized results (same results for everyone)
-- Search within categories (just global search)
-- Advanced operators ("AND", "OR", quotes)
+### Quality Check:
+- Clarity: ✅ Crystal clear
+- Completeness: ✅ All details included
+- Ready to use: Yes!
 ```
-
----
-
-### Example 4: Internal Tool
-
-```markdown
-# Mini-PRD: Team Task Board
-
-## What We're Building
-A simple Kanban board for our team to track tasks. Think Trello
-but just for us, without all the features we don't use.
-
-## Who It's For
-- Our development team (8 people)
-- Project manager for oversight
-- Occasionally stakeholders for status updates
-
-## The Problem We're Solving
-We're paying for Trello but only use 10% of it. Tasks get lost,
-people forget to update cards, and it's overkill for our needs.
-We want something simpler that fits how we actually work.
-
-## Must-Have Features (v1)
-1. **Three columns** - To Do, In Progress, Done
-2. **Task cards** - Title, description, assignee
-3. **Drag and drop** - Move cards between columns
-4. **Comments** - Discuss tasks without leaving the board
-5. **Slack notifications** - When tasks move or get assigned
-
-## Nice-to-Have Features (Later)
-- Due dates with reminders
-- Labels/tags
-- Multiple boards per project
-- Time tracking
-
-## How We'll Know It's Working
-- Team adopts it within 1 week
-- No tasks "fall through the cracks"
-- Status meetings take 50% less time
-- Nobody asks "what are you working on?"
-
-## Technical Approach
-- React frontend
-- Node.js backend
-- MongoDB for flexibility
-- Socket.io for real-time updates
-- Slack API integration
-
-## What's NOT In Scope
-- Mobile app (desktop only for now)
-- Reporting/analytics
-- Time tracking
-- Multiple teams/permissions
-```
-
----
-
-### PRD Template (Blank)
-
-Copy and fill in:
-
-```markdown
-# Mini-PRD: [Project Name]
-
-## What We're Building
-[1-2 sentences describing the product/feature]
-
-## Who It's For
-- [Primary user type]
-- [Secondary user type]
-- [Use case context]
-
-## The Problem We're Solving
-[What's the pain point? Why does this need to exist?]
-
-## Must-Have Features (v1)
-1. **[Feature]** - [Brief description]
-2. **[Feature]** - [Brief description]
-3. **[Feature]** - [Brief description]
-
-## Nice-to-Have Features (Later)
-- [Feature]
-- [Feature]
-
-## How We'll Know It's Working
-- [Measurable success criteria]
-- [Measurable success criteria]
-- [Measurable success criteria]
-
-## Technical Approach
-- [Key technology choices]
-- [Architecture notes]
-
-## What's NOT In Scope
-- [Explicitly excluded feature]
-- [Explicitly excluded feature]
-```
-
----
-
-## Quick PRD Examples
-
-Quick PRDs condense the full PRD into 2-3 AI-optimized paragraphs for efficient agent consumption.
-
-### Quick PRD Example 1: Habit Tracker
-
-**Goal:** Build a mobile-first habit tracking app that helps users build consistent daily routines through streak tracking, reminders, and progress visualization. Target users are productivity-focused individuals who want simple habit management without complex features.
-
-**Core Features:** Daily habit check-in with streak counter, customizable reminder notifications, weekly/monthly progress charts, habit templates for common goals (exercise, reading, meditation). Tech stack: React Native, local storage with optional cloud sync.
-
-**Scope Boundaries:** No social features, no gamification beyond streaks, no premium tiers. Focus on core tracking reliability over feature breadth.
-
-### Quick PRD Example 2: API User Management
-
-**Goal:** Create a RESTful user management microservice for the existing e-commerce platform, handling authentication, authorization, and user profile CRUD operations. Must integrate with existing PostgreSQL database and support OAuth2.
-
-**Core Features:** JWT-based authentication, role-based access control (admin/user/guest), user registration with email verification, password reset flow, profile management endpoints. Built with Node.js/Express, PostgreSQL, Redis for session caching.
-
-**Scope Boundaries:** No frontend components, no payment integration, no analytics dashboard. Service-only implementation with OpenAPI documentation.
-
----
-
-### Key Elements of a Good Mini-PRD
-
-1. **Clear problem statement** - Why are we building this?
-2. **Specific users** - Who exactly will use it?
-3. **Prioritized features** - What's essential vs nice-to-have?
-4. **Success metrics** - How do we measure success?
-5. **Technical direction** - Enough detail to start, not over-specified
-6. **Explicit scope** - What we're NOT doing is as important as what we are
 
 
 ### Quality Dimensions (Plain English)
@@ -1695,42 +1610,100 @@ For ANY unexpected error:
 
 ---
 
+## Workflow Navigation
+
+**You are here:** Summarize (Conversation Extraction)
+
+**State markers for workflow continuity:**
+- If user came from `/clavix-start`: There's conversation context to extract
+- If user invoked directly: Look for any recent conversation in context
+- If conversation was technical: Focus on implementation details in extraction
+- If conversation was exploratory: Focus on requirements and goals
+
+**Common workflows:**
+- **Standard flow**: `/clavix-start` → [conversation] → `/clavix-summarize` → Use optimized prompt
+- **To implementation**: `/clavix-summarize` → `/clavix-plan` → `/clavix-implement` → `/clavix-archive`
+- **Standalone use**: [Any conversation] → `/clavix-summarize` → Extract and optimize
+
+**After completion, guide user to:**
+- `/clavix-plan` - Generate tasks from the mini-PRD (if strategic)
+- `/clavix-implement --latest` - Build directly (if simple)
+- `/clavix-improve` - Polish the extracted prompt further
+
+**Related commands:**
+- `/clavix-start` - Begin conversational exploration (typical previous step)
+- `/clavix-plan` - Generate tasks from extracted mini-PRD (next step)
+- `/clavix-improve` - Further optimize the extracted prompt
+
+## Example
+
+From conversation about "analytics dashboard for sales team"...
+
+**Original Extraction**:
+```
+We discussed building a dashboard for the sales team that shows analytics. They want to see revenue trends and who's performing well. It should update in real-time and help managers spot problems. We talked about using React and connecting to Salesforce.
+```
+
+**Optimized Prompt**:
+```
+Build a real-time sales analytics dashboard for the sales team showing revenue trends, top performers, pipeline status, and conversion rates. The dashboard should update live as deals progress, support filtering by date range/region/rep, and display key metrics prominently. Users need to quickly identify at-risk deals and celebrate wins.
+
+Technical stack: React + TypeScript frontend, integrate with existing Salesforce API, use Chart.js for visualizations, responsive design for mobile access. Must handle 10K+ deals without performance degradation.
+
+Success: Sales managers can identify issues within 30 seconds of opening, dashboard loads in <2 seconds, 90% of team uses it daily within first month.
+```
+
+**Improvements Applied**:
+- **[Efficiency]**: Removed 8 conversational phrases, increased information density
+- **[Structure]**: Organized into objective → requirements → technical → success
+- **[Clarity]**: Specified exact features (filtering, metrics display) instead of vague "shows analytics"
+- **[Completeness]**: Added performance requirements (10K+ deals, <2s load), success metrics (30s to identify issues, 90% adoption)
+- **[Actionability]**: Converted "help managers spot problems" into specific, measurable outcome
+
 ## Troubleshooting
 
-### Issue: User's answers to Q1 are too vague ("make an app")
-**Cause**: User hasn't thought through the problem/goal deeply enough
+### Issue: Files not created or verification fails
+**Cause**: Skipped file creation steps or Write tool not used
+**Solution**:
+- Review step 3 file creation instructions
+- Ensure each file has explicit Write tool step
+- Verify all files exist before continuing
+- Retry the Write tool for any missing files
+
+### Issue: Pre-extraction validation fails (missing objective/requirements)
+**Cause**: Conversation didn't cover enough detail
+**Solution** (inline - DO NOT extract):
+- List what's missing specifically
+- Ask targeted questions to fill gaps
+- Only proceed to extraction after minimum viable requirements met
+- Show confidence indicators for what WAS discussed
+
+### Issue: Conversation covered multiple unrelated topics
+**Cause**: Exploratory discussion without focus
+**Solution**:
+- Ask user which topic to extract/focus on
+- Or extract all topics separately into different sections
+- Mark multi-topic extraction with [MULTI-TOPIC] indicator
+- Suggest breaking into separate PRDs for each topic
+
+### Issue: Optimization doesn't significantly improve extracted prompt
+**Cause**: Conversation was already well-structured and detailed
+**Solution**:
+- Minor improvements are normal for good conversations
+- Show quality scores (should be high: >80%)
+- Still provide both versions but note that original extraction was already high quality
+
+### Issue: Low confidence indicators across all extracted elements
+**Cause**: Conversation was too vague or high-level
 **Solution** (inline):
-- Stop and ask probing questions before proceeding
-- "What specific problem does this app solve?"
-- "Who will use this and what pain point does it address?"
-- Don't proceed until both problem AND goal are clear
+- Don't just extract with [LOW] markers everywhere
+- Ask follow-up questions to increase confidence
+- Or inform user: "Our conversation was exploratory. I recommend `/clavix-start` to go deeper, or `/clavix-prd` for structured planning"
 
-### Issue: User lists 10+ features in Q2
-**Cause**: Unclear priorities or scope creep
-**Solution** (inline):
-- Help prioritize: "If you could only launch with 3 features, which would they be?"
-- Separate must-have from nice-to-have
-- Document extras in "Additional Context" or "Out of scope"
-
-### Issue: User says "I don't know" to critical questions
-**Cause**: Genuine uncertainty or needs exploration
+### Issue: Extracted prompt contradicts earlier conversation
+**Cause**: Requirements evolved during conversation
 **Solution**:
-- For Q1: Ask about what triggered the need, current pain points
-- For Q2: Walk through user journey step-by-step
-- For Q4: Suggest common exclusions based on project type
-- Consider suggesting `/clavix-start` for conversational exploration first
-
-### Issue: Quality validation shows low scores after generation
-**Cause**: Answers were too vague or incomplete
-**Solution**:
-- Review the generated PRD
-- Identify specific gaps (missing context, vague requirements)
-- Ask targeted follow-up questions
-- Regenerate PRD with enhanced answers
-
-### Issue: Generated PRD doesn't match user's vision
-**Cause**: Miscommunication during Q&A or assumptions made
-**Solution**:
-- Review each section with user
-- Ask "What's missing or inaccurate?"
-- Update PRD manually or regenerate with corrected answers
+- Use latest/final version of requirements
+- Note that requirements evolved
+- Ask user to confirm which version is correct
+- Suggest starting fresh with `/clavix-prd` if major contradictions exist

@@ -1,416 +1,230 @@
-# Clavix: Update Your Work
+# Clavix: Plan Your Implementation
 
-Want to tweak your PRD or improve a saved prompt? Let's update what you already have without starting from scratch.
+I'll turn your PRD into a low-level, technically detailed implementation plan that fits your existing codebase.
 
 ---
 
 ## What This Does
 
-When you run `/clavix-refine`, I:
-1. **Find what you've got** - Look for your PRDs and saved prompts
-2. **Ask what to update** - Which one do you want to refine?
-3. **Load it up** - Read what's there now
-4. **Talk through changes** - What do you want to add, change, or remove?
-5. **Save the update** - Keep track of what changed
+When you run `/clavix-plan`, I:
+1. **Analyze your Codebase** - Understand your existing architecture, patterns, and stack
+2. **Read your PRD** - Understand new requirements
+3. **Bridge the Gap** - Map requirements to specific files and existing components
+4. **Generate Technical Tasks** - detailed, file-specific instructions
+5. **Create tasks.md** - Your comprehensive engineering roadmap
 
-**We're improving what exists, not starting over.**
+**I create the plan. I don't build anything yet.**
 
 ---
 
-## CLAVIX MODE: Refinement
+## CLAVIX MODE: Technical Planning
 
-**I'm in refinement mode. Updating existing stuff, not building new things.**
+**I'm in planning mode. Creating your engineering roadmap.**
 
 **What I'll do:**
-- Find your existing PRDs and prompts
-- Ask which one to update
-- Show you what's there now
-- Talk through what you want to change
-- Save the updated version
-- Track what changed and what stayed the same
+- ✓ Analyze existing code structure & patterns
+- ✓ Map PRD features to specific technical implementations
+- ✓ Define exact file paths and signatures
+- ✓ Create "Implementation Notes" for each task
+- ✓ Save tasks.md for implementation
 
 **What I won't do:**
-- Write code
-- Create brand new PRDs (use `/clavix-prd` for that)
-- Create brand new prompts (use `/clavix-improve` for that)
-- Change things without asking you first
+- ✗ Write any code yet
+- ✗ Start implementing features
+- ✗ Create actual components
 
-**We're tweaking what exists, not starting fresh.**
+**I'm planning strictly *how* to build it.**
+
+For complete mode documentation, see: `.clavix/instructions/core/clavix-mode.md`
 
 ---
 
 ## Self-Correction Protocol
 
-**DETECT**: If you find yourself doing any of these 6 mistake types:
+**DETECT**: If you find yourself doing any of these mistake types:
 
 | Type | What It Looks Like |
 |------|--------------------|
-| 1. Implementation Code | Writing function/class definitions, creating components, generating API endpoints |
-| 2. Skipping Mode Selection | Not asking user what to refine (PRD vs prompt) first |
-| 3. Not Loading Existing Content | Making changes without reading current state first |
-| 4. Losing Requirements | Removing existing requirements during refinement without user approval |
-| 5. Not Tracking Changes | Failing to mark what was [ADDED], [MODIFIED], [REMOVED], [UNCHANGED] |
-| 6. Capability Hallucination | Claiming features Clavix doesn't have, inventing workflows |
+| 1. Generic Tasks | "Create login page" (without specifying file path, library, or pattern) |
+| 2. Ignoring Context | Planning a Redux store when the project uses Zustand, or creating new CSS files when Tailwind is configured |
+| 3. Implementation Code | Writing full function bodies or components during the planning phase |
+| 4. Missing Task IDs | Not assigning proper task IDs for tracking |
+| 5. Capability Hallucination | Claiming features Clavix doesn't have |
 
-**STOP**: Immediately halt the incorrect action
+**STOP**: Immediately halt the incorrect action.
 
 **CORRECT**: Output:
-"I apologize - I was [describe mistake]. Let me get back to refining your existing work."
+"I apologize - I was [describe mistake]. Let me return to generating specific technical tasks based on the codebase."
 
-**RESUME**: Return to refinement mode - load content and discuss changes.
+**RESUME**: Return to the workflow with correct context-aware approach.
 
 ---
 
 ## State Assertion (REQUIRED)
 
-**Before starting refinement, output:**
+**Before starting task breakdown, output:**
 ```
-**CLAVIX MODE: Refinement**
+**CLAVIX MODE: Technical Planning**
 Mode: planning
-Purpose: Updating existing PRD or prompt
-Implementation: BLOCKED - I'll update requirements, not build them
+Purpose: Generating low-level engineering tasks from PRD & Codebase
+Implementation: BLOCKED - I will create the plan, not the code
 ```
 
 ---
 
 ## Instructions
 
-### Step 1: Find What You Have
+**Before beginning:** Use the Clarifying Questions Protocol (see Agent Transparency section) when you need critical information from the user (confidence < 95%). For task planning, this means confirming which PRD to use, technical approach preferences, or task breakdown granularity.
 
-I'll check what's available to refine:
+### Part A: Agent Execution Protocol
 
-**Looking for PRDs:**
-- Check `.clavix/outputs/*/mini-prd.md`
-- Check `.clavix/outputs/*/quick-prd.md`
-- Check `.clavix/outputs/*/full-prd.md`
+**As an AI agent, you must follow this strict sequence:**
 
-**Looking for saved prompts:**
-- Check `.clavix/outputs/prompts/*.md`
+#### **Phase 1: Context Analysis (CRITICAL)**
+*Before reading the PRD, understand the "Team's Coding Method".*
 
-**What you'll see:**
-```
-Found 2 PRD projects and 3 saved prompts.
-Which would you like to refine?
-```
+1. **Scan Directory Structure**:
+   - Run `ls -R src` (or relevant folders) to see the file layout.
+2. **Read Configuration**:
+   - Read `package.json` to identify dependencies (React? Vue? Express? Tailwind? Prisma?).
+   - Read `tsconfig.json` or similar to understand aliases and strictness.
+3. **Identify Patterns**:
+   - Open 1-2 representative files (e.g., a component, a service, a route).
+   - **Determine**:
+     - How is state managed? (Context, Redux, Zustand?)
+     - How is styling done? (CSS Modules, Tailwind, SCSS?)
+     - How are API calls made? (fetch, axios, custom hooks?)
+     - Where are types defined?
+4. **Output Summary**: Briefly state the detected stack (e.g., "Detected: Next.js 14 (App Router), Tailwind, Prisma, Zod").
 
----
+#### **Phase 2: PRD Ingestion**
+1. **Locate PRD**:
+   - Check `.clavix/outputs/<project-name>/` for `full-prd.md`, `quick-prd.md`, etc.
+   - If missing, check legacy `.clavix/outputs/summarize/`.
+2. **Read PRD**: Ingest the requirements.
+3. **Extract Architecture**: Look for the "Architecture & Design" section. Note any specific patterns (e.g., Clean Architecture, Feature-Sliced Design) or structural decisions.
 
-### Step 2: Ask What to Update
+#### **Phase 3: Task Generation**
+1. **Synthesize**: Combine [PRD Requirements] + [Codebase Patterns] + [Architecture Decisions].
+2. **Prioritize Structure**: Ensure initial tasks cover any necessary architectural setup (e.g., creating folders for new layers, setting up base classes).
+3. **Draft Tasks**: Create tasks that specify *exactly* what to change in the code.
+4. **Create `tasks.md`**: Use the format in "Task Format Reference".
+5. **Save to**: `.clavix/outputs/[project-name]/tasks.md`.
 
-**If you have both PRDs and prompts:**
+### Part B: Behavioral Guidance (Technical Specificity)
 
-"I found some things you can refine:
+**Your goal is "Low-Level Engineering Plans", not "High-Level Management Plans".**
 
-**PRD Projects:**
-- user-auth (has PRD and tasks)
-- dashboard (has PRD)
+1. **Architecture First**:
+   - If the PRD specifies a pattern (e.g., Repository), the first tasks MUST set up that structure.
+   - **Bad**: "Implement user feature."
+   - **Good**: "Create `src/repositories/UserRepository.ts` interface first, then implementation."
 
-**Saved Prompts:**
-- api-integration.md
-- payment-flow.md
+2. **Specific File Paths**:
+   - **Bad**: "Create a user profile component."
+   - **Good**: "Create `src/components/user/UserProfile.tsx`. Export as default."
 
-Which one do you want to update?"
+3. **Technical Constraints**:
+   - **Bad**: "Add validation."
+   - **Good**: "Use `zod` schema in `src/schemas/user.ts`. Integrate with `react-hook-form`."
 
-**If you only have PRDs:**
+4. **Respect Existing Architecture**:
+   - If the project uses a `services/` folder for API calls, do **not** put `fetch` calls directly in components.
+   - If the project uses `shadcn/ui`, instruct to use those primitives, not raw HTML.
 
-"Found your user-auth PRD. Want to update it?
-
-I can help you:
-- Add new features
-- Change existing requirements
-- Adjust scope or constraints
-- Update tech requirements"
-
-**If you only have prompts:**
-
-"Found 2 saved prompts:
-- api-integration.md
-- payment-flow.md
-
-Which one should we improve?"
-
-**If nothing exists:**
-
-"I don't see any PRDs or saved prompts to refine yet.
-
-To create something first:
-- `/clavix-prd` - Create a new PRD
-- `/clavix-improve [prompt]` - Save an optimized prompt
-- `/clavix-start` then `/clavix-summarize` - Extract from chat
-
-Once you've got something, come back and we can refine it!"
+5. **Granularity**:
+   - Each task should be a single logical unit of work (approx. 20-40 mins).
+   - Separate "Backend API" from "Frontend UI" tasks.
+   - Separate "Type Definition" from "Implementation" if complex.
 
 ---
 
-## Refining a PRD
+## Task Format Reference
 
-### Step 3: Show What's There
+**You must generate `tasks.md` using this exact format:**
 
-I'll read and show you the current PRD:
-
-"Here's your user-auth PRD:
-
-**Goal:** Build secure user authentication system
-
-**Features:**
-- User registration
-- Login/logout
-- Session management
-
-**Tech:** Node.js, JWT tokens, PostgreSQL
-
-**Out of Scope:** Social login, 2FA
-
----
-
-What do you want to change?"
-
-### Step 4: Talk Through Changes
-
-Let's discuss what you want to update:
-- Add new features?
-- Change existing stuff?
-- Update tech requirements?
-- Adjust scope?
-
-I'll track what changes:
-- `[ADDED]` - New stuff
-- `[MODIFIED]` - Changed stuff
-- `[REMOVED]` - Removed stuff
-- `[UNCHANGED]` - Kept as-is
-
-### Step 5: Save the Update
-
-After we agree on changes, I'll update the PRD file and add a history section:
-
+### File Structure
 ```markdown
-## Refinement History
+# Implementation Plan
 
-### Dec 1, 2024
+**Project**: {project-name}
+**Generated**: {ISO timestamp}
 
-**Changes:**
-- [ADDED] Password reset via email
-- [MODIFIED] Now using bcrypt instead of plain JWT
-- [REMOVED] Session management (moved to separate feature)
-
-**Why:** User feedback needed password reset, security upgrade
-```
-
-### Step 6: About Tasks
-
-If you have a tasks.md file, heads up:
-
-"Your tasks.md was made from the old PRD. After these changes, you might want to:
-- Run `/clavix-plan` to regenerate tasks
-- Or manually update tasks.md
-
-Biggest changes that affect tasks:
-- New password reset feature
-- Different auth approach"
+## Technical Context & Standards
+*Detected Stack & Patterns*
+- **Architecture**: {e.g., Feature-Sliced Design, Monolith}
+- **Framework**: {e.g., Next.js 14 App Router}
+- **Styling**: {e.g., Tailwind CSS + shadcn/ui}
+- **State**: {e.g., Zustand (stores in /src/store)}
+- **API**: {e.g., Server Actions + Prisma}
+- **Conventions**: {e.g., "kebab-case files", "Zod for validation"}
 
 ---
 
-## Refining a Prompt
+## Phase {number}: {Phase Name}
 
-### Step 3: Pick Which Prompt
+- [ ] **{Task Title}** (ref: {PRD Section})
+  Task ID: {task-id}
+  > **Implementation**: Create/Edit `{file/path}`.
+  > **Details**: {Technical instruction, e.g., "Use `useAuth` hook. Ensure error handling matches `src/utils/error.ts`."}
 
-If you have multiple saved prompts:
+## Phase {number}: {Next Phase}
 
-"Which prompt do you want to refine?
-1. api-integration.md (Dec 1)
-2. payment-flow.md (Nov 28)
-
-Pick a number or say 'latest' for the most recent."
-
-### Step 4: Show Current Quality
-
-I'll show you the prompt and assess its quality:
-
-"Here's your current prompt:
-
-'Build an API integration for our system.'
-
-**Quality scores:**
-- Clarity: 40/100 (too vague)
-- Specificity: 30/100 (no details)
-- Completeness: 20/100 (missing info)
-
-What do you want to improve?
-- Make it more specific?
-- Add context or constraints?
-- Clarify the goal?
-- Something else?"
-
-### Step 5: Improve Together
-
-We'll talk through what to change:
-- What's missing?
-- What's unclear?
-- What needs more detail?
-
-I'll suggest improvements and we'll refine together.
-
-### Step 6: Save the Better Version
-
-I'll save the improved prompt with before/after scores:
-
-"Done! Your refined prompt:
-
-**Quality improvement:** 30% → 85%
-
-**What changed:**
-- Made objective specific (Stripe API for payments)
-- Added technical requirements
-- Specified error handling
-- Listed all needed operations
-
-Want to:
-- Run `/clavix-implement --latest` to build this?
-- Refine it more?
-- Leave it for later?"
+- [ ] **{Task Title}**
+  Task ID: {task-id}
+  > **Implementation**: Modify `{file/path}`.
+  > **Details**: {Specific logic requirements}
 
 ---
 
-## What's Next
+*Generated by Clavix /clavix-plan*
+```
 
-**After refining a PRD:**
-- Run `/clavix-plan` to regenerate your task list
-- Your old tasks.md might be outdated
+### Task ID Format
+**Pattern**: `phase-{phase-number}-{sanitized-phase-name}-{task-counter}`
+(e.g., `phase-1-setup-01`, `phase-2-auth-03`)
 
-**After refining a prompt:**
-- Run `/clavix-implement --latest` to build it
-
-**Multiple refinements:**
-- You can run `/clavix-refine` as many times as you want
-- Each update adds to the history
-- Changes build on each other
+### Checklist Rules
+- Use `- [ ]` for pending.
+- Use `- [x]` for completed.
+- **Implementation Note**: The `> **Implementation**` block is REQUIRED. It forces you to think about *where* the code goes.
 
 ---
 
-## Examples
+## After Plan Generation
 
-### Example: Adding a Feature to PRD
-
-**User:** "/clavix-refine"
-
-**Agent:** "I found 1 PRD project: 'user-dashboard'. Would you like to refine it?"
-
-**User:** "Yes, I want to add dark mode support."
-
-**Agent:**
-```markdown
-## Adding to [user-dashboard] PRD
-
-**Current features:**
-- User profile display
-- Activity feed
-- Notifications panel
-
-**Proposed addition:**
-- [ADDED] Dark mode toggle with system preference detection
-- [ADDED] Theme persistence across sessions
-- [MODIFIED] All UI components must support both themes
-
-Does this capture what you want to add?
-```
-
-### Example: Changing PRD Constraints
-
-**User:** "Actually, we need to support mobile now too."
-
-**Agent:**
-```markdown
-## Modifying Technical Constraints
-
-**Previous constraints:**
-- Desktop-only (1024px minimum)
-- Chrome/Firefox/Safari support
-
-**Updated constraints:**
-- [MODIFIED] Responsive design: 320px to 1920px
-- [ADDED] Mobile-first approach
-- [ADDED] Touch interaction support
-- [UNCHANGED] Chrome/Firefox/Safari support
-- [ADDED] iOS Safari and Chrome mobile support
-
-This changes scope significantly. Should I also update the success criteria?
-```
-
-### Example: Making a Prompt More Specific
-
-**User:** "/clavix-refine"
-
-**Agent:** "I found 2 saved prompts. Which would you like to refine?"
-
-**User:** "The API integration one."
-
-**Agent:**
-```markdown
-## Current Prompt Assessment
-
-"Build an API integration for our system."
-
-**Quality Scores:**
-- Clarity: 40/100 (too vague)
-- Specificity: 30/100 (no details)
-- Completeness: 20/100 (missing critical info)
-
-**What would you like to specify?**
-1. Which API to integrate?
-2. What operations are needed?
-3. Authentication requirements?
-4. Error handling expectations?
-```
-
-**User:** "It's the Stripe API for payments."
-
-**Agent:**
-```markdown
-## Refined Prompt
-
-"Integrate Stripe API for payment processing:
-- Support one-time payments and subscriptions
-- Handle webhook events for payment status updates
-- Store payment methods securely using Stripe tokens
-- Implement retry logic for failed charges
-- Generate receipts and send confirmation emails
-
-Technical: Use Stripe Node.js SDK, handle PCI compliance through Stripe Elements."
-
-**Quality Scores (After):**
-- Clarity: 85/100 (+45)
-- Specificity: 90/100 (+60)
-- Completeness: 80/100 (+60)
-```
-
-### Example: Reducing PRD Scope
-
-**User:** "We need to cut scope. Remove the analytics feature."
-
-**Agent:**
-```markdown
-## Scope Reduction
-
-**Removing from scope:**
-- [REMOVED] Analytics dashboard
-- [REMOVED] Usage metrics tracking
-- [REMOVED] Export to CSV feature
-
-**Keeping:**
-- [UNCHANGED] Core user management
-- [UNCHANGED] Notification system
-- [UNCHANGED] Settings page
-
-**Impact:**
-- Estimated effort reduction: ~30%
-- Dependencies affected: None (analytics was standalone)
-
-I'll update the PRD and add this to the refinement history. Confirm?
-```
+Present the plan and ask:
+> "I've generated a technical implementation plan based on your PRD and existing codebase (detected: {stack}).
+>
+> **Please Verify**:
+> 1. Did I correctly identify the file structure and patterns?
+> 2. Are the specific file paths correct?
+> 3. Is the order of operations logical (e.g., Database -> API -> UI)?
+>
+> Type `/clavix-implement` to start coding, or tell me what to adjust."
 
 ---
 
-## Agent Transparency (v5.9.1)
+## Workflow Navigation
+
+**You are here:** Plan (Technical Task Breakdown)
+
+**Pre-requisites**:
+- A PRD (from `/clavix-prd`)
+- An existing codebase (or empty folder structure)
+
+**Next Steps**:
+- `/clavix-implement`: Execute the tasks one by one.
+- **Manual Edit**: You can edit `.clavix/outputs/.../tasks.md` directly if you want to change the architecture.
+
+## Tips for Agents
+- **Don't guess**. If you don't see a directory, don't reference it.
+- **Check imports**. If `src/components/Button` exists, tell the user to reuse it.
+- **Be pedantic**. Developers prefer specific instructions like "Export interface `User`" over "Create a type".
+
+---
+
+## Agent Transparency (v5.9.2)
 
 ### Agent Manual (Universal Protocols)
 # Clavix Agent Manual (v5.1)
@@ -804,6 +618,111 @@ At the end of workflows that produce output, include verification:
 *This manual is included in all Clavix slash command templates. Version 5.1*
 
 
+### Workflow State Detection
+## Workflow State Detection
+
+### PRD-to-Implementation States
+
+```
+NO_PROJECT → PRD_EXISTS → TASKS_EXIST → IMPLEMENTING → ALL_COMPLETE → ARCHIVED
+```
+
+### State Detection Protocol
+
+**Step 1: Check for project config**
+```
+Read: .clavix/outputs/{project}/.clavix-implement-config.json
+```
+
+**Step 2: Interpret state based on conditions**
+
+| Condition | State | Next Action |
+|-----------|-------|-------------|
+| Config missing, no PRD files | `NO_PROJECT` | Run /clavix-prd |
+| PRD exists, no tasks.md | `PRD_EXISTS` | Run /clavix-plan |
+| tasks.md exists, no config | `TASKS_EXIST` | Run /clavix-implement |
+| config.stats.remaining > 0 | `IMPLEMENTING` | Continue from currentTask |
+| config.stats.remaining == 0 | `ALL_COMPLETE` | Suggest /clavix-archive |
+| Project in archive/ directory | `ARCHIVED` | Move back from archive to restore |
+
+**Step 3: State assertion**
+Always output current state when starting a workflow:
+```
+"Current state: [STATE]. Progress: [X]/[Y] tasks. Next: [action]"
+```
+
+### File Detection Guide
+
+**PRD Files (check in order):**
+1. `.clavix/outputs/{project}/full-prd.md` - Full PRD
+2. `.clavix/outputs/{project}/quick-prd.md` - Quick PRD
+3. `.clavix/outputs/{project}/mini-prd.md` - Mini PRD from summarize
+4. `.clavix/outputs/prompts/*/optimized-prompt.md` - Saved prompts
+
+**Task Files:**
+- `.clavix/outputs/{project}/tasks.md` - Task breakdown
+
+**Config Files:**
+- `.clavix/outputs/{project}/.clavix-implement-config.json` - Implementation state
+
+### State Transition Rules
+
+```
+NO_PROJECT:
+  → /clavix-prd creates PRD_EXISTS
+  → /clavix-start + /clavix-summarize creates PRD_EXISTS
+  → /clavix-improve creates prompt (not PRD_EXISTS)
+
+PRD_EXISTS:
+  → /clavix-plan creates TASKS_EXIST
+
+TASKS_EXIST:
+  → /clavix-implement starts tasks → IMPLEMENTING
+
+IMPLEMENTING:
+  → Agent edits tasks.md (- [ ] → - [x]) reduces remaining
+  → When remaining == 0 → ALL_COMPLETE
+
+ALL_COMPLETE:
+  → /clavix-archive moves to archive/ → ARCHIVED
+  → Adding new tasks → back to IMPLEMENTING
+
+ARCHIVED:
+  → Agent moves project back from archive/ → back to previous state
+```
+
+### Prompt Lifecycle States (Separate from PRD)
+
+```
+NO_PROMPTS → PROMPT_EXISTS → EXECUTED → CLEANED
+```
+
+| Condition | State | Detection |
+|-----------|-------|-----------|
+| No files in prompts/ | `NO_PROMPTS` | .clavix/outputs/prompts/ empty |
+| Prompt saved, not executed | `PROMPT_EXISTS` | File exists, executed: false |
+| Prompt was executed | `EXECUTED` | executed: true in metadata |
+| Prompt was cleaned up | `CLEANED` | File deleted |
+
+### Multi-Project Handling
+
+When multiple projects exist:
+```
+IF project count > 1:
+  → LIST: Show all projects with progress
+  → ASK: "Multiple projects found. Which one?"
+  → Options: [project names with % complete]
+```
+
+Project listing format:
+```
+Available projects:
+  1. auth-feature (75% - 12/16 tasks)
+  2. api-refactor (0% - not started)
+  3. dashboard-v2 (100% - complete, suggest archive)
+```
+
+
 ### CLI Reference
 ## CLI Commands Reference (v5.0 - Agentic-First)
 
@@ -921,297 +840,6 @@ originalPrompt: "the user's original prompt"
 | `clavix config` | User can run `clavix init` to reconfigure |
 
 **If user asks you to run these commands:** Explain they were removed in v5 and the equivalent workflow.
-
-
-### Quality Dimensions (for Prompt Refinement)
-## Quality Dimensions Reference
-
-When you check a prompt's quality, you're looking at 6 things. Here's what each one means and how to explain it to users.
-
----
-
-### The 6 Quality Dimensions (Plain English)
-
-#### 1. Clarity - "How clear is your prompt?"
-
-**What you're checking:** Can AI understand exactly what the user wants?
-
-**How to explain scores:**
-| Score | What to Say |
-|-------|-------------|
-| 8-10 | "Crystal clear - AI will understand immediately" |
-| 5-7 | "Mostly clear, but some terms might confuse the AI" |
-| 1-4 | "Pretty vague - AI might misunderstand you" |
-
-**Low score signs:** Vague goals, words that could mean different things, unclear scope
-
-**Example feedback:**
-> "Your prompt says 'make it better' - better how? Faster? Prettier? More features?
-> I changed it to 'improve the loading speed and add error messages' so AI knows exactly what you want."
-
----
-
-#### 2. Efficiency - "How concise is your prompt?"
-
-**What you're checking:** Does every word earn its place?
-
-**How to explain scores:**
-| Score | What to Say |
-|-------|-------------|
-| 8-10 | "No wasted words - everything counts" |
-| 5-7 | "Some filler that could be trimmed" |
-| 1-4 | "Lots of repetition or unnecessary detail" |
-
-**Low score signs:** Filler words, pleasantries ("please kindly..."), saying the same thing twice
-
-**Example feedback:**
-> "I trimmed some unnecessary words. 'Please kindly help me with building...'
-> became 'Build...' - same meaning, faster for AI to process."
-
----
-
-#### 3. Structure - "How organized is your prompt?"
-
-**What you're checking:** Does information flow logically?
-
-**How to explain scores:**
-| Score | What to Say |
-|-------|-------------|
-| 8-10 | "Well organized - easy to follow" |
-| 5-7 | "Decent organization, could be clearer" |
-| 1-4 | "Jumbled - hard to follow what you're asking" |
-
-**Low score signs:** No clear sections, random order, context at the end instead of beginning
-
-**Example feedback:**
-> "I reorganized your prompt so it flows better - context first, then requirements,
-> then specifics. Easier for AI to follow."
-
----
-
-#### 4. Completeness - "Does it have everything AI needs?"
-
-**What you're checking:** Are all critical details provided?
-
-**How to explain scores:**
-| Score | What to Say |
-|-------|-------------|
-| 8-10 | "All the important details are there" |
-| 5-7 | "Most info is there, but some gaps" |
-| 1-4 | "Missing key details AI needs to help you" |
-
-**Low score signs:** Missing tech stack, no constraints, no success criteria, missing context
-
-**Example feedback:**
-> "Your prompt was missing some key details - I added the database type,
-> API format, and how to know when it's done."
-
----
-
-#### 5. Actionability - "Can AI start working right away?"
-
-**What you're checking:** Is there enough to take immediate action?
-
-**How to explain scores:**
-| Score | What to Say |
-|-------|-------------|
-| 8-10 | "AI can start working immediately" |
-| 5-7 | "General direction, but might need to ask questions" |
-| 1-4 | "Too abstract - AI wouldn't know where to start" |
-
-**Low score signs:** Too high-level, needs clarification before starting, missing concrete next steps
-
-**Example feedback:**
-> "Your prompt was pretty abstract. I added concrete next steps so AI
-> knows exactly what to build first."
-
----
-
-#### 6. Specificity - "How concrete are your requirements?"
-
-**What you're checking:** Are there real details vs vague descriptions?
-
-**How to explain scores:**
-| Score | What to Say |
-|-------|-------------|
-| 8-10 | "Specific details - versions, names, numbers" |
-| 5-7 | "Some specifics, some vague" |
-| 1-4 | "Too abstract - needs concrete details" |
-
-**Low score signs:** No version numbers, no specific file paths, no concrete examples
-
-**Example feedback:**
-> "I made things more specific - 'recent version of React' became 'React 18',
-> and 'fast response' became 'under 200ms'."
-
----
-
-### Overall Quality (How to Present)
-
-**Don't show this:**
-> "Quality: 73% (Clarity: 7, Efficiency: 8, Structure: 6...)"
-
-**Show this instead:**
-> "Your prompt is **good** but could be better:
-> - ✅ Clear and concise
-> - ⚠️ Missing some technical details
-> - ⚠️ Could use success criteria
->
-> I've made these improvements..."
-
----
-
-### When to Recommend Deep Analysis
-
-If ANY of these are true, suggest deep mode:
-- Overall score below 65%
-- Clarity below 50% (can't understand the goal)
-- Completeness below 50% (missing essential info)
-- Actionability below 50% (can't start without more info)
-
-**What to say:**
-> "This prompt needs more work than a quick cleanup.
-> Want me to do a thorough analysis? I'll explore alternatives,
-> edge cases, and give you a much more detailed improvement."
-
----
-
-### Quick Reference (For Internal Use)
-
-| Dimension | Weight | Critical? |
-|-----------|--------|-----------|
-| Clarity | 20% | Yes - below 50% triggers deep mode |
-| Efficiency | 10% | No |
-| Structure | 15% | No |
-| Completeness | 25% | Yes - below 50% triggers deep mode |
-| Actionability | 20% | Yes - below 50% triggers deep mode |
-| Specificity | 10% | No |
-
----
-
-### Workflow-Specific Dimension Usage
-
-Different Clavix workflows use quality dimensions in different ways:
-
-| Workflow | Dimensions Used | Notes |
-|----------|----------------|-------|
-| `/clavix-improve` | All 6 | Full quality assessment for prompt optimization |
-| `/clavix-prd` | All 6 | PRD quality requires all dimensions |
-| `/clavix-summarize` | 5 (excludes Specificity) | Conversational extraction may lack concrete specifics by nature |
-| `/clavix-refine` | All 6 | Refinement targets all quality aspects |
-
-**Why Summarize Excludes Specificity:**
-The `/clavix-summarize` command extracts requirements from conversation. Users in exploratory mode often haven't determined specific versions, numbers, or file paths yet. Penalizing for missing specifics would unfairly score valid exploratory outputs.
-
-**Rationale for Dimension Selection:**
-- **Clarity, Completeness, Actionability**: Always critical - these determine if AI can act on the prompt
-- **Structure, Efficiency**: Important for complex prompts, less critical for simple ones
-- **Specificity**: Important for implementation, less important for early-stage exploration
-
-
-### Workflow State Detection
-## Workflow State Detection
-
-### PRD-to-Implementation States
-
-```
-NO_PROJECT → PRD_EXISTS → TASKS_EXIST → IMPLEMENTING → ALL_COMPLETE → ARCHIVED
-```
-
-### State Detection Protocol
-
-**Step 1: Check for project config**
-```
-Read: .clavix/outputs/{project}/.clavix-implement-config.json
-```
-
-**Step 2: Interpret state based on conditions**
-
-| Condition | State | Next Action |
-|-----------|-------|-------------|
-| Config missing, no PRD files | `NO_PROJECT` | Run /clavix-prd |
-| PRD exists, no tasks.md | `PRD_EXISTS` | Run /clavix-plan |
-| tasks.md exists, no config | `TASKS_EXIST` | Run /clavix-implement |
-| config.stats.remaining > 0 | `IMPLEMENTING` | Continue from currentTask |
-| config.stats.remaining == 0 | `ALL_COMPLETE` | Suggest /clavix-archive |
-| Project in archive/ directory | `ARCHIVED` | Move back from archive to restore |
-
-**Step 3: State assertion**
-Always output current state when starting a workflow:
-```
-"Current state: [STATE]. Progress: [X]/[Y] tasks. Next: [action]"
-```
-
-### File Detection Guide
-
-**PRD Files (check in order):**
-1. `.clavix/outputs/{project}/full-prd.md` - Full PRD
-2. `.clavix/outputs/{project}/quick-prd.md` - Quick PRD
-3. `.clavix/outputs/{project}/mini-prd.md` - Mini PRD from summarize
-4. `.clavix/outputs/prompts/*/optimized-prompt.md` - Saved prompts
-
-**Task Files:**
-- `.clavix/outputs/{project}/tasks.md` - Task breakdown
-
-**Config Files:**
-- `.clavix/outputs/{project}/.clavix-implement-config.json` - Implementation state
-
-### State Transition Rules
-
-```
-NO_PROJECT:
-  → /clavix-prd creates PRD_EXISTS
-  → /clavix-start + /clavix-summarize creates PRD_EXISTS
-  → /clavix-improve creates prompt (not PRD_EXISTS)
-
-PRD_EXISTS:
-  → /clavix-plan creates TASKS_EXIST
-
-TASKS_EXIST:
-  → /clavix-implement starts tasks → IMPLEMENTING
-
-IMPLEMENTING:
-  → Agent edits tasks.md (- [ ] → - [x]) reduces remaining
-  → When remaining == 0 → ALL_COMPLETE
-
-ALL_COMPLETE:
-  → /clavix-archive moves to archive/ → ARCHIVED
-  → Adding new tasks → back to IMPLEMENTING
-
-ARCHIVED:
-  → Agent moves project back from archive/ → back to previous state
-```
-
-### Prompt Lifecycle States (Separate from PRD)
-
-```
-NO_PROMPTS → PROMPT_EXISTS → EXECUTED → CLEANED
-```
-
-| Condition | State | Detection |
-|-----------|-------|-----------|
-| No files in prompts/ | `NO_PROMPTS` | .clavix/outputs/prompts/ empty |
-| Prompt saved, not executed | `PROMPT_EXISTS` | File exists, executed: false |
-| Prompt was executed | `EXECUTED` | executed: true in metadata |
-| Prompt was cleaned up | `CLEANED` | File deleted |
-
-### Multi-Project Handling
-
-When multiple projects exist:
-```
-IF project count > 1:
-  → LIST: Show all projects with progress
-  → ASK: "Multiple projects found. Which one?"
-  → Options: [project names with % complete]
-```
-
-Project listing format:
-```
-Available projects:
-  1. auth-feature (75% - 12/16 tasks)
-  2. api-refactor (0% - not started)
-  3. dashboard-v2 (100% - complete, suggest archive)
-```
 
 
 ### Recovery Patterns
@@ -1442,74 +1070,15 @@ For ANY unexpected error:
 
 ---
 
-## Workflow Navigation
+## Troubleshooting
 
-**You are here:** Refine (tweaking existing work)
+### Issue: "I don't know the codebase"
+**Cause**: Agent skipped Phase 1 (Context Analysis).
+**Fix**: Force the agent to run `ls -R` and read `package.json` before generating tasks.
 
-**Common flows:**
-- Update PRD → `/clavix-refine` → `/clavix-plan` → regenerate tasks
-- Improve prompt → `/clavix-refine` → `/clavix-implement --latest`
-- Keep polishing → `/clavix-refine` → `/clavix-refine` again
+### Issue: Tasks are too generic ("Add Auth")
+**Cause**: Agent ignored the "Implementation Note" requirement.
+**Fix**: Regenerate with: "Refine the plan. Add specific file paths and implementation details to every task."
 
-**Related commands:**
-- `/clavix-prd` - Create new PRD (not refinement)
-- `/clavix-improve` - Create new prompt (not refinement)
-- `/clavix-plan` - Make tasks from PRD
-- `/clavix-implement` - Build stuff
-
----
-
-## When Things Go Wrong
-
-### "Can't find anything to refine"
-
-You haven't created a PRD or saved prompt yet.
-
-**Create something first:**
-- `/clavix-prd` - Make a new PRD
-- `/clavix-improve [prompt]` - Save an optimized prompt
-- `/clavix-start` then `/clavix-summarize` - Extract from chat
-
-### "Can't find that project"
-
-The project name might not match or files got moved.
-
-**Check:**
-- Is it in `.clavix/outputs/`?
-- Does the project folder have a PRD file?
-- Project names are case-sensitive
-
-### "My changes disappeared"
-
-You might have skipped the tracking step.
-
-**Make sure to:**
-- Use change markers ([ADDED], [MODIFIED], etc.)
-- Add to Refinement History
-- Review with user before saving
-
-### "Tasks don't match the updated PRD"
-
-That's normal - tasks were from the old version.
-
-**Fix it:**
-- Run `/clavix-plan` to remake tasks
-- Or edit tasks.md manually
-
-### "Want to change multiple things at once"
-
-**Best approach:** Do one thing at a time
-- Change feature A
-- Save it
-- Then change feature B
-- Save that
-
-**If you really want to batch:**
-- Talk through all changes first
-- Group them clearly
-- Track each one separately
-
-**Stop and split if:**
-- You're changing 4+ different features
-- Changes affect different parts of the system
-- You're losing track of what changed
+### Issue: No PRD found
+**Fix**: Run `/clavix-prd` first.
