@@ -9,10 +9,13 @@ import asyncio
 import logging
 import sys
 
+import click
 from rich.console import Console
 from rich.prompt import Prompt
 from rich.traceback import install
 
+from weather_app.cli.errors import map_exception_to_exit_code
+from weather_app.cli.group import cli
 from weather_app.config import Config
 from weather_app.exceptions import (
     APIRequestError,
@@ -26,9 +29,6 @@ from weather_app.logging_config import (
     setup_default_logging,
 )
 from weather_app.services.ui_service import UIService
-import click
-from weather_app.cli.group import cli
-from weather_app.cli.errors import map_exception_to_exit_code
 
 # Global logger instance
 logger = None

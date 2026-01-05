@@ -5,8 +5,9 @@ and formatting in the epilog section, preventing Click's text wrapping from
 breaking up multi-line examples.
 """
 
-import click
 from typing import Any
+
+import click
 
 
 class PreserveEpilogFormatter(click.HelpFormatter):

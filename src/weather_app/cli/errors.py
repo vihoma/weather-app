@@ -14,7 +14,6 @@ from weather_app.exceptions import (
     WeatherAppError,
 )
 
-
 # POSIX exit codes
 EXIT_SUCCESS = 0
 EXIT_GENERAL_ERROR = 1

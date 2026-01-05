@@ -4,6 +4,7 @@
 - **Run application**: `poetry run weather`
 - **Lint with ruff**: `poetry run ruff check src/`
 - **Format imports**: `poetry run isort src/`
+- **Format code**: `poetry run black src/`
 - **Build package**: `poetry build`
 - **Install deps**: `poetry install`
 
@@ -19,6 +20,12 @@
 - **Error handling**: Specific exceptions with validation
 - **Documentation**: Google-style docstrings for public methods
 - **Dependencies**: Managed via Poetry in pyproject.toml
+
+## Code Correctness Guidelines
+- If available, use the context7-mcp MCP server for the latest
+  Rich/Click/PyOWM API Documentation and for other APIs as needed
+- Run the code formatter (black) after code generation and before
+  commits for consistent coding style
 
 ## Project Structure
 - Source code in `src/weather_app/` with package structure
@@ -36,6 +43,7 @@
 This project uses Clavix for prompt improvement and PRD generation.
 
 ### Setup Commands (CLI)
+
 | Command | Purpose |
 |---------|---------|
 | `clavix init` | Initialize Clavix in a project |
@@ -44,6 +52,7 @@ This project uses Clavix for prompt improvement and PRD generation.
 | `clavix version` | Show version |
 
 ### Workflow Commands (Slash Commands)
+
 | Slash Command | Purpose |
 |---------------|---------|
 | `/clavix:improve` | Optimize prompts (auto-selects depth) |

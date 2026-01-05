@@ -10,6 +10,8 @@
 conversation-*.md
 *-ses_*.md
 desktop.ini
+*test.py
+test*.py
 TODO.md
 weather.env
 weather_app.log

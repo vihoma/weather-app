@@ -65,8 +65,9 @@ def _load_custom_config_file(config: Config, config_file: str) -> None:
         config: Config instance to modify.
         config_file: Path to YAML configuration file.
     """
-    import yaml
     from pathlib import Path
+
+    import yaml
 
     path = Path(config_file).expanduser()
     if not path.is_file():

@@ -52,7 +52,7 @@ def api_key_set(interactive: bool, key: str | None) -> None:
     """
     console = Console()
     secure_config = SecureConfig()
-    
+
     if not secure_config.is_keyring_available():
         console.print(
             "[yellow]⚠️  Secure keyring storage is not available on this system[/yellow]",
@@ -62,17 +62,19 @@ def api_key_set(interactive: bool, key: str | None) -> None:
             sep="\n",
         )
         raise click.Abort()
-    
+
     api_key = key
     if interactive or not api_key:
         console.print("\n[bold blue]🔑 OpenWeatherMap API Key Setup[/bold blue]")
-        console.print("\nThis will securely store your API key in your system's keyring.")
+        console.print(
+            "\nThis will securely store your API key in your system's keyring."
+        )
         api_key = Prompt.ask("\nEnter your OpenWeatherMap API key", password=True)
-    
+
     if not api_key:
         console.print("\n[yellow]❌ No API key provided. Setup cancelled.[/yellow]")
         raise click.Abort()
-    
+
     try:
         secure_config.store_api_key(api_key, service_name="openweathermap")
         console.print("\n[green]✅ API key stored securely in keyring![/green]")
@@ -84,19 +86,21 @@ def api_key_set(interactive: bool, key: str | None) -> None:
         raise click.ClickException(f"Failed to store API key: {e}")
 
 
-@api_key_group.command(name="view", help="View the stored API key (masked for security).")
+@api_key_group.command(
+    name="view", help="View the stored API key (masked for security)."
+)
 def api_key_view() -> None:
     """View the stored API key (masked for security)."""
     console = Console()
     secure_config = SecureConfig()
-    
+
     if not secure_config.is_keyring_available():
         console.print(
             "[yellow]⚠️  Secure keyring storage is not available on this system[/yellow]",
             "\nCannot view stored API key.",
         )
         raise click.Abort()
-    
+
     try:
         api_key = secure_config.get_api_key(service_name="openweathermap")
         if api_key:
@@ -121,29 +125,33 @@ def api_key_remove(force: bool) -> None:
     """Remove the stored API key from secure storage."""
     console = Console()
     secure_config = SecureConfig()
-    
+
     if not secure_config.is_keyring_available():
         console.print(
             "[yellow]⚠️  Secure keyring storage is not available on this system[/yellow]",
             "\nCannot remove stored API key.",
         )
         raise click.Abort()
-    
+
     try:
         api_key = secure_config.get_api_key(service_name="openweathermap")
         if not api_key:
             console.print("\n[yellow]⚠️  No API key found in secure storage.[/yellow]")
             return
-        
+
         if not force:
-            console.print("\n[bold yellow]⚠️  Warning: This will remove your stored API key.[/bold yellow]")
+            console.print(
+                "\n[bold yellow]⚠️  Warning: This will remove your stored API key.[/bold yellow]"
+            )
             confirm = Prompt.ask(
-                "Are you sure you want to remove the API key?", choices=["y", "n"], default="n"
+                "Are you sure you want to remove the API key?",
+                choices=["y", "n"],
+                default="n",
             )
             if confirm.lower() != "y":
                 console.print("\n[green]Operation cancelled.[/green]")
                 return
-        
+
         secure_config.delete_api_key(service_name="openweathermap")
         console.print("\n[green]✅ API key removed from secure storage.[/green]")
     except Exception as e:

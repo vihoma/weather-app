@@ -4,20 +4,20 @@ import asyncio
 
 import click
 
+from weather_app.cli.errors import (
+    APIClickException,
+    ConfigurationClickException,
+    LocationClickException,
+)
 from weather_app.cli.help_formatter import apply_preserve_epilog_formatting
 from weather_app.cli.options import location_options, output_option
 from weather_app.cli.output_formatters import FormatterFactory
-from weather_app.cli.errors import (
-    ConfigurationClickException,
-    APIClickException,
-    LocationClickException,
-)
 from weather_app.exceptions import (
     APIRequestError,
     ConfigurationError,
+    DataParsingError,
     LocationNotFoundError,
     NetworkError,
-    DataParsingError,
     RateLimitError,
 )
 

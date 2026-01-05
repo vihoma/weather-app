@@ -5,12 +5,13 @@ This module defines the main CLI group with global options that apply to all sub
 
 import click
 
-# Import subcommands
-from weather_app.cli.commands.weather import weather_command
-from weather_app.cli.commands.setup import setup_group
 from weather_app.cli.commands.cache import cache_group
 from weather_app.cli.commands.config import config_group
+from weather_app.cli.commands.setup import setup_group
 from weather_app.cli.commands.version import version_command
+
+# Import subcommands
+from weather_app.cli.commands.weather import weather_command
 from weather_app.cli.help_formatter import apply_preserve_epilog_formatting
 from weather_app.config import Config
 
