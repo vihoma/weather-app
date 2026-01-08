@@ -22,7 +22,7 @@
 - **Dependencies**: Managed via Poetry in pyproject.toml
 
 ## Code Correctness Guidelines
-- If available, use the context7-mcp MCP server for the latest
+- If available, use the context7 MCP server for the latest
   Rich/Click/PyOWM API Documentation and for other APIs as needed
 - Run the code formatter (black) after code generation and before
   commits for consistent coding style
