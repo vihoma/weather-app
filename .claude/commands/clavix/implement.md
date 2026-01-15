@@ -17,6 +17,21 @@ When you run `/clavix:implement`, I:
 
 **You just say "implement" and I handle the rest.**
 
+### Command Variations
+
+**Parse the slash command content to determine implementation scope:**
+
+| Command Pattern | Interpretation | Action |
+|----------------|----------------|--------|
+| `/clavix:implement` or `/clavix:implement all` | All tasks | Implement all pending tasks |
+| `/clavix:implement task 3` | Single task | Implement only task #3 |
+| `/clavix:implement` (no qualifier) | Unspecified | Ask user to choose |
+
+**How to parse:**
+1. Check if command contains "task <number>" pattern
+2. Check if command contains "all" keyword
+3. If neither → ask user for selection
+
 ### Detection Priority
 
 ```
@@ -54,12 +69,42 @@ Found tasks.md with [N] pending tasks in summarize/ (legacy location). Starting 
 
 This confirmation ensures the user knows exactly what will be implemented before any code is written.
 
-### Explicit Flags
+### Task Selection (REQUIRED)
 
-Override auto-detection when needed:
-- `--tasks` - Force task mode (skip prompt check)
+**When Task Implementation Mode is detected, you MUST determine task scope BEFORE starting:**
+
+**Step 1: Parse the slash command**
+- Check command content for: `task <N>` pattern (e.g., "task 3", "task 5")
+- Check command content for: `all` keyword
+- If neither found → proceed to Step 2
+
+**Step 2: If no qualifier in command, ASK the user:**
+> "I found [N] pending tasks in [project-name]. How would you like to proceed?
+>
+> Options:
+> - **all** - Implement all pending tasks
+> - **task <N>** - Implement only task number N (e.g., "task 3")
+> - **list** - Show all tasks with numbers
+>
+> Which would you prefer?"
+
+**Step 3: Handle selection**
+- If "all" in command or user response → Implement all pending tasks
+- If "task N" detected → Validate N exists, implement only that task
+- If "list" requested → Show numbered list of incomplete tasks, ask again
+
+**Step 4: Confirm before starting**
+> "Found tasks.md with [N] pending tasks in [project-name].
+>
+> Mode: [ALL tasks | Single task #N: [task description]]
+> Starting task implementation..."
+
+### Prompt Execution Flags
+
+For prompt execution mode (when tasks.md not found):
 - `--prompt <id>` - Execute specific prompt by ID
 - `--latest` - Execute most recent prompt
+- `--tasks` - Force task mode (skip prompt check, use tasks.md)
 
 ---
 
@@ -98,6 +143,8 @@ If you catch yourself doing any of these, STOP and correct:
 4. **Batch Task Completion** - Marking multiple tasks done without implementing each
 5. **Ignoring Blocked Tasks** - Not reporting when a task cannot be completed
 6. **Capability Hallucination** - Claiming Clavix can do things it cannot
+7. **Not Parsing Command** - Not checking command content for "task N" or "all" before asking
+8. **Wrong Task Number** - Not validating task number is within range before implementing
 
 **DETECT → STOP → CORRECT → RESUME**
 
@@ -288,32 +335,54 @@ At the end of our session, I'll remind you:
 
 ## Example: What a Session Looks Like
 
+### Single Task Mode
+
 ```
-You:    /clavix:implement
+You:    /clavix:implement task 3
 
 Me:     "Found your task list! Let me see where we are..."
 
-        "📋 Progress: 0/8 tasks complete
+        "📋 8 total tasks, 0 complete
 
-        Starting with: Set up project structure (phase-1-setup-1)
-
-        Let me build this..."
-
-        [I create folders, initial files, configure package.json]
-
-        "✓ Done! Setting up next task..."
-
-        "Working on: Create database models (phase-1-database-1)
+        Implementing task 3: Create database models (phase-1-database-1)
 
         I see this needs PostgreSQL with Prisma. Let me check your .env..."
 
         [I create Prisma schema, run migrations]
 
-        "✓ Done! 2/8 tasks complete (25%)
+        "✓ Task 3 complete!
 
-        Next: Set up authentication..."
+        Progress: 1/8 tasks (12.5%)
+        Checkbox updated in tasks.md
 
-        [... continues through all tasks ...]
+        Would you like to continue with another task?"
+```
+
+### All Tasks Mode (with user prompt)
+
+```
+You:    /clavix:implement
+
+Me:     "Found your task list! Let me see where we are..."
+
+        "📋 8 total tasks, 0 complete
+
+        How would you like to proceed?
+        - **all** - Implement all pending tasks
+        - **task <N>** - Implement only task number N
+        - **list** - Show all tasks with numbers"
+
+You:    all
+
+Me:     "Implementing all 8 pending tasks...
+
+        Starting with task 1: Set up project structure (phase-1-setup-1)
+
+        [I create folders, initial files, configure package.json]
+
+        ✓ Done! Moving to task 2..."
+
+        [continues through all tasks]
 
 Me:     "🎉 All 8 tasks complete!
 
@@ -324,6 +393,28 @@ Me:     "🎉 All 8 tasks complete!
         - [... etc]
 
         Ready to test it out?"
+```
+
+### List Mode
+
+```
+You:    /clavix:implement
+
+Me:     "I found 8 pending tasks. How would you like to proceed?
+        - **all** - Implement all pending tasks
+        - **task <N>** - Implement only task number N
+        - **list** - Show all tasks with numbers"
+
+You:    list
+
+Me:     "Here are all pending tasks:
+        1. Set up project structure (phase-1-setup-1)
+        2. Create database models (phase-1-setup-2)
+        3. Set up authentication (phase-2-auth-1)
+        4. Build user registration (phase-2-auth-2)
+        ...
+
+        Which task would you like to implement?"
 ```
 
 ## How I Find Tasks
@@ -519,7 +610,7 @@ I'll explain what's wrong and what you might need to do:
 
 ---
 
-## Agent Transparency (v5.9.2)
+## Agent Transparency (v6.1.0)
 
 ### Agent Manual (Universal Protocols)
 # Clavix Agent Manual (v5.1)
@@ -1298,6 +1389,7 @@ These are commands the **user** runs in their terminal to set up Clavix:
 | **Archive project** | Use **Bash tool** to `mv .clavix/outputs/<project> .clavix/outputs/archive/` |
 | **List prompts** | Use **Glob/Bash** to list `.clavix/outputs/prompts/*.md` files |
 | **Read project** | Use **Read tool** on `.clavix/outputs/<project>/` files |
+| **Save review** | Use **Write tool** to create `.clavix/outputs/reviews/<id>.md` (with frontmatter metadata) |
 
 ---
 
@@ -1329,6 +1421,8 @@ These are commands the **user** runs in their terminal to set up Clavix:
 │   │   ├── full-prd.md      # Comprehensive PRD
 │   │   ├── quick-prd.md     # AI-optimized summary
 │   │   └── tasks.md         # Implementation tasks
+│   ├── reviews/             # PR review reports from /clavix:review
+│   │   └── *.md             # Individual reviews (metadata in frontmatter)
 │   └── archive/             # Archived projects
 └── commands/                # Slash command templates (managed by clavix update)
 ```

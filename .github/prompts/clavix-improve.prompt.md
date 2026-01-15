@@ -1,8 +1,8 @@
 ---
-name: "Clavix: Improve Your Prompt"
-description: Analyze and improve prompts with auto-detected depth
+name: clavix-improve
+description: "Analyze and improve prompts with auto-detected depth"
+agent: ask
 ---
-
 # Clavix: Improve Your Prompt
 
 ---

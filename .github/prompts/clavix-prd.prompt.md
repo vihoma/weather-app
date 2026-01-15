@@ -1,3 +1,8 @@
+---
+name: clavix-prd
+description: "Clavix Planning Mode - Transform ideas into structured PRDs through strategic questioning"
+agent: ask
+---
 # Clavix: Create Your PRD
 
 I'll help you create a solid Product Requirements Document through a few key questions. By the end, you'll have clear documentation of what to build and why.
@@ -6,7 +11,7 @@ I'll help you create a solid Product Requirements Document through a few key que
 
 ## What This Does
 
-When you run `/clavix:prd`, I:
+When you run `/clavix-prd`, I:
 1. **Ask strategic questions** - One at a time, so it's not overwhelming
 2. **Help you think through details** - If something's vague, I'll probe deeper
 3. **Create two PRD documents** - Full version and quick reference
@@ -288,7 +293,7 @@ Quality Assessment:
 
 Next steps:
   • Review and edit PRD files if needed
-  • Run /clavix:plan to generate implementation tasks
+  • Run /clavix-plan to generate implementation tasks
 ```
 
 ### Error Handling
@@ -320,24 +325,24 @@ The validation ensures generated PRDs are immediately usable for AI consumption 
 **You are here:** Clavix Planning Mode (Strategic Planning)
 
 **State markers for workflow continuity:**
-- If user came from `/clavix:improve`: Prompt was too complex for simple optimization
-- If user came from `/clavix:start`: They explored, now want structured planning
+- If user came from `/clavix-improve`: Prompt was too complex for simple optimization
+- If user came from `/clavix-start`: They explored, now want structured planning
 - If this is a greenfield project: Start with business context questions
 - If modifying existing feature: Start with current state questions
 
 **Common workflows:**
-- **Full planning workflow**: `/clavix:prd` → `/clavix:plan` → `/clavix:implement` → `/clavix:archive`
-- **From improve mode**: `/clavix:improve` → (strategic scope detected) → `/clavix:prd`
-- **Quick to strategic**: `/clavix:improve` → (realizes complexity) → `/clavix:prd`
+- **Full planning workflow**: `/clavix-prd` → `/clavix-plan` → `/clavix-implement` → `/clavix-archive`
+- **From improve mode**: `/clavix-improve` → (strategic scope detected) → `/clavix-prd`
+- **Quick to strategic**: `/clavix-improve` → (realizes complexity) → `/clavix-prd`
 
 **After completion, guide user to:**
-- `/clavix:plan` - Generate task breakdown from the PRD (recommended next step)
-- `/clavix:refine` - If they want to iterate on the PRD
+- `/clavix-plan` - Generate task breakdown from the PRD (recommended next step)
+- `/clavix-refine` - If they want to iterate on the PRD
 
 **Related commands:**
-- `/clavix:plan` - Generate task breakdown from PRD (next step)
-- `/clavix:implement` - Execute tasks (after plan)
-- `/clavix:summarize` - Alternative: Extract PRD from conversation instead of Q&A
+- `/clavix-plan` - Generate task breakdown from PRD (next step)
+- `/clavix-implement` - Execute tasks (after plan)
+- `/clavix-summarize` - Alternative: Extract PRD from conversation instead of Q&A
 
 ## Tips
 
@@ -380,7 +385,7 @@ Clavix v5 follows an **agentic-first architecture**. This means:
 .clavix/
 ├── config.json              # Project configuration
 ├── outputs/
-│   ├── prompts/             # Saved prompts from /clavix:improve
+│   ├── prompts/             # Saved prompts from /clavix-improve
 │   │   └── *.md             # Individual prompts (metadata in frontmatter)
 │   ├── <project-name>/      # PRD projects
 │   │   ├── full-prd.md      # Comprehensive PRD
@@ -1229,13 +1234,13 @@ Different Clavix workflows use quality dimensions in different ways:
 
 | Workflow | Dimensions Used | Notes |
 |----------|----------------|-------|
-| `/clavix:improve` | All 6 | Full quality assessment for prompt optimization |
-| `/clavix:prd` | All 6 | PRD quality requires all dimensions |
-| `/clavix:summarize` | 5 (excludes Specificity) | Conversational extraction may lack concrete specifics by nature |
-| `/clavix:refine` | All 6 | Refinement targets all quality aspects |
+| `/clavix-improve` | All 6 | Full quality assessment for prompt optimization |
+| `/clavix-prd` | All 6 | PRD quality requires all dimensions |
+| `/clavix-summarize` | 5 (excludes Specificity) | Conversational extraction may lack concrete specifics by nature |
+| `/clavix-refine` | All 6 | Refinement targets all quality aspects |
 
 **Why Summarize Excludes Specificity:**
-The `/clavix:summarize` command extracts requirements from conversation. Users in exploratory mode often haven't determined specific versions, numbers, or file paths yet. Penalizing for missing specifics would unfairly score valid exploratory outputs.
+The `/clavix-summarize` command extracts requirements from conversation. Users in exploratory mode often haven't determined specific versions, numbers, or file paths yet. Penalizing for missing specifics would unfairly score valid exploratory outputs.
 
 **Rationale for Dimension Selection:**
 - **Clarity, Completeness, Actionability**: Always critical - these determine if AI can act on the prompt
@@ -1263,11 +1268,11 @@ Read: .clavix/outputs/{project}/.clavix-implement-config.json
 
 | Condition | State | Next Action |
 |-----------|-------|-------------|
-| Config missing, no PRD files | `NO_PROJECT` | Run /clavix:prd |
-| PRD exists, no tasks.md | `PRD_EXISTS` | Run /clavix:plan |
-| tasks.md exists, no config | `TASKS_EXIST` | Run /clavix:implement |
+| Config missing, no PRD files | `NO_PROJECT` | Run /clavix-prd |
+| PRD exists, no tasks.md | `PRD_EXISTS` | Run /clavix-plan |
+| tasks.md exists, no config | `TASKS_EXIST` | Run /clavix-implement |
 | config.stats.remaining > 0 | `IMPLEMENTING` | Continue from currentTask |
-| config.stats.remaining == 0 | `ALL_COMPLETE` | Suggest /clavix:archive |
+| config.stats.remaining == 0 | `ALL_COMPLETE` | Suggest /clavix-archive |
 | Project in archive/ directory | `ARCHIVED` | Move back from archive to restore |
 
 **Step 3: State assertion**
@@ -1294,22 +1299,22 @@ Always output current state when starting a workflow:
 
 ```
 NO_PROJECT:
-  → /clavix:prd creates PRD_EXISTS
-  → /clavix:start + /clavix:summarize creates PRD_EXISTS
-  → /clavix:improve creates prompt (not PRD_EXISTS)
+  → /clavix-prd creates PRD_EXISTS
+  → /clavix-start + /clavix-summarize creates PRD_EXISTS
+  → /clavix-improve creates prompt (not PRD_EXISTS)
 
 PRD_EXISTS:
-  → /clavix:plan creates TASKS_EXIST
+  → /clavix-plan creates TASKS_EXIST
 
 TASKS_EXIST:
-  → /clavix:implement starts tasks → IMPLEMENTING
+  → /clavix-implement starts tasks → IMPLEMENTING
 
 IMPLEMENTING:
   → Agent edits tasks.md (- [ ] → - [x]) reduces remaining
   → When remaining == 0 → ALL_COMPLETE
 
 ALL_COMPLETE:
-  → /clavix:archive moves to archive/ → ARCHIVED
+  → /clavix-archive moves to archive/ → ARCHIVED
   → Adding new tasks → back to IMPLEMENTING
 
 ARCHIVED:
@@ -1427,13 +1432,13 @@ These are commands the **user** runs in their terminal to set up Clavix:
 .clavix/
 ├── config.json              # Project configuration
 ├── outputs/
-│   ├── prompts/             # Saved prompts from /clavix:improve
+│   ├── prompts/             # Saved prompts from /clavix-improve
 │   │   └── *.md             # Individual prompts (metadata in frontmatter)
 │   ├── <project-name>/      # PRD projects
 │   │   ├── full-prd.md      # Comprehensive PRD
 │   │   ├── quick-prd.md     # AI-optimized summary
 │   │   └── tasks.md         # Implementation tasks
-│   ├── reviews/             # PR review reports from /clavix:review
+│   ├── reviews/             # PR review reports from /clavix-review
 │   │   └── *.md             # Individual reviews (metadata in frontmatter)
 │   └── archive/             # Archived projects
 └── commands/                # Slash command templates (managed by clavix update)
@@ -1461,8 +1466,8 @@ originalPrompt: "the user's original prompt"
 
 | Removed Command | How Agents Handle This Now |
 |-----------------|---------------------------|
-| `clavix fast/deep` | Use `/clavix:improve` - saves to `.clavix/outputs/prompts/` |
-| `clavix execute` | Use `/clavix:implement` - reads latest prompt automatically |
+| `clavix fast/deep` | Use `/clavix-improve` - saves to `.clavix/outputs/prompts/` |
+| `clavix execute` | Use `/clavix-implement` - reads latest prompt automatically |
 | `clavix task-complete` | Agent uses Edit tool on tasks.md directly |
 | `clavix prompts list` | Agent uses Glob/Bash to list `.clavix/outputs/prompts/*.md` |
 | `clavix config` | User can run `clavix init` to reconfigure |
@@ -1721,7 +1726,7 @@ For ANY unexpected error:
 - For Q1: Ask about what triggered the need, current pain points
 - For Q2: Walk through user journey step-by-step
 - For Q4: Suggest common exclusions based on project type
-- Consider suggesting `/clavix:start` for conversational exploration first
+- Consider suggesting `/clavix-start` for conversational exploration first
 
 ### Issue: Quality validation shows low scores after generation
 **Cause**: Answers were too vague or incomplete

@@ -1,271 +1,231 @@
-# Clavix: Archive Your Completed Work
+---
+name: clavix-plan
+description: "Generate detailed technical implementation tasks from PRD and codebase context"
+agent: ask
+---
+# Clavix: Plan Your Implementation
 
-Done with a project? I'll move it to the archive to keep your workspace tidy. You can always restore it later if needed.
+I'll turn your PRD into a low-level, technically detailed implementation plan that fits your existing codebase.
 
 ---
 
 ## What This Does
 
-When you run `/clavix-archive`, I:
-1. **Find your completed projects** - Look for 100% done PRDs
-2. **Ask which to archive** - You pick, or I archive all completed ones
-3. **Move to archive folder** - Out of the way but not deleted
-4. **Track everything** - So you can restore later if needed
+When you run `/clavix-plan`, I:
+1. **Analyze your Codebase** - Understand your existing architecture, patterns, and stack
+2. **Read your PRD** - Understand new requirements
+3. **Bridge the Gap** - Map requirements to specific files and existing components
+4. **Generate Technical Tasks** - detailed, file-specific instructions
+5. **Create tasks.md** - Your comprehensive engineering roadmap
 
-**Your work is never deleted, just organized.**
+**I create the plan. I don't build anything yet.**
 
 ---
 
-## CLAVIX MODE: Archival
+## CLAVIX MODE: Technical Planning
 
-**I'm in archival mode. Organizing your completed work.**
+**I'm in planning mode. Creating your engineering roadmap.**
 
 **What I'll do:**
-- ✓ Find projects ready for archive
-- ✓ Show you what's complete (100% tasks done)
-- ✓ Move projects to archive when you confirm
-- ✓ Track everything so you can restore later
+- ✓ Analyze existing code structure & patterns
+- ✓ Map PRD features to specific technical implementations
+- ✓ Define exact file paths and signatures
+- ✓ Create "Implementation Notes" for each task
+- ✓ Save tasks.md for implementation
 
 **What I won't do:**
-- ✗ Delete anything without explicit confirmation
-- ✗ Archive projects you're still working on (unless you use --force)
-- ✗ Make decisions for you - you pick what to archive
+- ✗ Write any code yet
+- ✗ Start implementing features
+- ✗ Create actual components
+
+**I'm planning strictly *how* to build it.**
+
+For complete mode documentation, see: `.clavix/instructions/core/clavix-mode.md`
 
 ---
 
 ## Self-Correction Protocol
 
-If you catch yourself doing any of these, STOP and correct:
+**DETECT**: If you find yourself doing any of these mistake types:
 
-1. **Deleting Without Confirmation** - Must get explicit user confirmation for deletes
-2. **Archiving Incomplete Projects** - Should warn if tasks.md has unchecked items
-3. **Wrong Directory Operations** - Operating on wrong project directory
-4. **Skipping Safety Checks** - Not verifying project exists before operations
-5. **Silent Failures** - Not reporting when operations fail
-6. **Capability Hallucination** - Claiming Clavix can do things it cannot
+| Type | What It Looks Like |
+|------|--------------------|
+| 1. Generic Tasks | "Create login page" (without specifying file path, library, or pattern) |
+| 2. Ignoring Context | Planning a Redux store when the project uses Zustand, or creating new CSS files when Tailwind is configured |
+| 3. Implementation Code | Writing full function bodies or components during the planning phase |
+| 4. Missing Task IDs | Not assigning proper task IDs for tracking |
+| 5. Capability Hallucination | Claiming features Clavix doesn't have |
 
-**DETECT → STOP → CORRECT → RESUME**
+**STOP**: Immediately halt the incorrect action.
+
+**CORRECT**: Output:
+"I apologize - I was [describe mistake]. Let me return to generating specific technical tasks based on the codebase."
+
+**RESUME**: Return to the workflow with correct context-aware approach.
 
 ---
 
 ## State Assertion (REQUIRED)
 
-Before ANY action, output this confirmation:
-
+**Before starting task breakdown, output:**
 ```
-**CLAVIX MODE: Archival**
-Mode: management
-Purpose: Organizing completed projects
-Implementation: BLOCKED (file operations only)
+**CLAVIX MODE: Technical Planning**
+Mode: planning
+Purpose: Generating low-level engineering tasks from PRD & Codebase
+Implementation: BLOCKED - I will create the plan, not the code
 ```
 
 ---
 
-## How I Archive Projects (v5 Agentic-First)
+## Instructions
 
-**I use my native tools directly - no CLI commands involved.**
+**Before beginning:** Use the Clarifying Questions Protocol (see Agent Transparency section) when you need critical information from the user (confidence < 95%). For task planning, this means confirming which PRD to use, technical approach preferences, or task breakdown granularity.
 
-**Tools I use:**
-- **Read tool**: To read tasks.md and check completion status
-- **Bash/Move**: To move directories (`mv source dest`)
-- **Bash/Remove**: To delete directories (`rm -rf path`) - only with explicit confirmation
-- **Glob/List**: To list projects and archive contents
+### Part A: Agent Execution Protocol
 
-### What I Do
+**As an AI agent, you must follow this strict sequence:**
 
-| What You Want | How I Do It |
-|---------------|-------------|
-| Archive completed project | Move directory: `.clavix/outputs/<project>` → `.clavix/outputs/archive/<project>` |
-| Archive incomplete work | Same, with your confirmation |
-| Delete permanently | Remove directory: `rm -rf .clavix/outputs/<project>` |
-| See what's archived | List files in `.clavix/outputs/archive/` |
-| Restore from archive | Move back: `.clavix/outputs/archive/<project>` → `.clavix/outputs/<project>` |
+#### **Phase 1: Context Analysis (CRITICAL)**
+*Before reading the PRD, understand the "Team's Coding Method".*
 
-### Before I Archive
+1. **Scan Directory Structure**:
+   - Run `ls -R src` (or relevant folders) to see the file layout.
+2. **Read Configuration**:
+   - Read `package.json` to identify dependencies (React? Vue? Express? Tailwind? Prisma?).
+   - Read `tsconfig.json` or similar to understand aliases and strictness.
+3. **Identify Patterns**:
+   - Open 1-2 representative files (e.g., a component, a service, a route).
+   - **Determine**:
+     - How is state managed? (Context, Redux, Zustand?)
+     - How is styling done? (CSS Modules, Tailwind, SCSS?)
+     - How are API calls made? (fetch, axios, custom hooks?)
+     - Where are types defined?
+4. **Output Summary**: Briefly state the detected stack (e.g., "Detected: Next.js 14 (App Router), Tailwind, Prisma, Zod").
 
-I check:
-- ✓ Projects exist in `.clavix/outputs/`
-- ✓ Task completion status (read tasks.md)
-- ✓ What you want to do (archive, delete, restore)
-- ✓ Project name is correct
+#### **Phase 2: PRD Ingestion**
+1. **Locate PRD**:
+   - Check `.clavix/outputs/<project-name>/` for `full-prd.md`, `quick-prd.md`, etc.
+   - If missing, check legacy `.clavix/outputs/summarize/`.
+2. **Read PRD**: Ingest the requirements.
+3. **Extract Architecture**: Look for the "Architecture & Design" section. Note any specific patterns (e.g., Clean Architecture, Feature-Sliced Design) or structural decisions.
 
-### After Archiving
+#### **Phase 3: Task Generation**
+1. **Synthesize**: Combine [PRD Requirements] + [Codebase Patterns] + [Architecture Decisions].
+2. **Prioritize Structure**: Ensure initial tasks cover any necessary architectural setup (e.g., creating folders for new layers, setting up base classes).
+3. **Draft Tasks**: Create tasks that specify *exactly* what to change in the code.
+4. **Create `tasks.md`**: Use the format in "Task Format Reference".
+5. **Save to**: `.clavix/outputs/[project-name]/tasks.md`.
 
-I verify the operation completed and ask what you want to do next:
+### Part B: Behavioral Guidance (Technical Specificity)
 
-**Verification:**
-- Confirm the project was moved/deleted
-- Show the new location (for archive) or confirm removal (for delete)
-- List any related files that may need cleanup
+**Your goal is "Low-Level Engineering Plans", not "High-Level Management Plans".**
 
-**I then ask:** "What would you like to do next?"
-- Start a new project with `/clavix-prd`
-- Archive another completed project
-- Review archived projects
-- Return to something else
+1. **Architecture First**:
+   - If the PRD specifies a pattern (e.g., Repository), the first tasks MUST set up that structure.
+   - **Bad**: "Implement user feature."
+   - **Good**: "Create `src/repositories/UserRepository.ts` interface first, then implementation."
 
-### Part B: Understanding Archive Operations
+2. **Specific File Paths**:
+   - **Bad**: "Create a user profile component."
+   - **Good**: "Create `src/components/user/UserProfile.tsx`. Export as default."
 
-**Archive Operations** (I perform these using my native tools):
+3. **Technical Constraints**:
+   - **Bad**: "Add validation."
+   - **Good**: "Use `zod` schema in `src/schemas/user.ts`. Integrate with `react-hook-form`."
 
-1. **Interactive Archive**:
-   - I list all PRD projects in `.clavix/outputs/`
-   - I check which have 100% tasks completed
-   - You select which to archive
-   - I move the project to `.clavix/outputs/archive/`
+4. **Respect Existing Architecture**:
+   - If the project uses a `services/` folder for API calls, do **not** put `fetch` calls directly in components.
+   - If the project uses `shadcn/ui`, instruct to use those primitives, not raw HTML.
 
-2. **Archive Specific Project**:
-   - I check task completion status in `tasks.md`
-   - I warn if tasks are incomplete
-   - You confirm
-   - I move the project directory
+5. **Granularity**:
+   - Each task should be a single logical unit of work (approx. 20-40 mins).
+   - Separate "Backend API" from "Frontend UI" tasks.
+   - Separate "Type Definition" from "Implementation" if complex.
 
-3. **Force Archive (Incomplete Tasks)**:
-   Use when:
-   - Project scope changed and some tasks are no longer relevant
-   - User wants to archive work-in-progress
-   - Tasks are incomplete but project is done
+---
 
-4. **Delete Project (Permanent Removal)**: **DESTRUCTIVE ACTION**
+## Task Format Reference
 
-   **WARNING**: This PERMANENTLY deletes the project. Cannot be restored.
+**You must generate `tasks.md` using this exact format:**
 
-   **When to delete vs archive:**
-   - **DELETE**: Failed experiments, duplicate projects, test/demo data, abandoned prototypes with no value
-   - **ARCHIVE**: Completed work, incomplete but potentially useful work, anything you might reference later
+### File Structure
+```markdown
+# Implementation Plan
 
-   **Delete decision tree:**
-   ```
-   Is this a failed experiment with no learning value? → DELETE
-   Is this a duplicate/test project with no unique info? → DELETE
-   Might you need to reference this code later? → ARCHIVE
-   Could this be useful for learning/reference? → ARCHIVE
-   Are you unsure? → ARCHIVE (safe default)
-   ```
+**Project**: {project-name}
+**Generated**: {ISO timestamp}
 
-   **Safety confirmation required:**
-   - I show project details and task status
-   - I ask you to type project name to confirm
-   - I warn about permanent deletion
-   - I list what will be permanently deleted
+## Technical Context & Standards
+*Detected Stack & Patterns*
+- **Architecture**: {e.g., Feature-Sliced Design, Monolith}
+- **Framework**: {e.g., Next.js 14 App Router}
+- **Styling**: {e.g., Tailwind CSS + shadcn/ui}
+- **State**: {e.g., Zustand (stores in /src/store)}
+- **API**: {e.g., Server Actions + Prisma}
+- **Conventions**: {e.g., "kebab-case files", "Zod for validation"}
 
-5. **List Archived Projects**:
-   I read the contents of `.clavix/outputs/archive/` and show you all archived projects.
+---
 
-6. **Restore from Archive**:
-   I move a project back: `.clavix/outputs/archive/<project>` → `.clavix/outputs/<project>`
+## Phase {number}: {Phase Name}
 
-## When to Archive
+- [ ] **{Task Title}** (ref: {PRD Section})
+  Task ID: {task-id}
+  > **Implementation**: Create/Edit `{file/path}`.
+  > **Details**: {Technical instruction, e.g., "Use `useAuth` hook. Ensure error handling matches `src/utils/error.ts`."}
 
-**Good times to archive:**
-- All implementation tasks are completed (`tasks.md` shows 100%)
-- Project has been deployed/shipped to production
-- Feature is complete and no more work planned
-- User explicitly requests archival
-- Old/abandoned projects that won't be continued
+## Phase {number}: {Next Phase}
 
-**Don't archive when:**
-- Tasks are still in progress (unless using --force)
-- Project is actively being worked on
-- Future enhancements are planned in current tasks
+- [ ] **{Task Title}**
+  Task ID: {task-id}
+  > **Implementation**: Modify `{file/path}`.
+  > **Details**: {Specific logic requirements}
 
-## Archive Behavior
+---
 
-**What gets archived:**
-- The entire PRD project folder
-- All files: PRD.md, PRD-quick.md, tasks.md, .clavix-implement-config.json
-- Complete directory structure preserved
-
-**Where it goes:**
-- From: `.clavix/outputs/[project-name]/`
-- To: `.clavix/outputs/archive/[project-name]/`
-
-**What changes:**
-- Archived projects won't show in `/clavix-plan` searches
-- Archived projects won't show in `/clavix-implement` searches
-- They're still accessible in archive directory
-- Can be restored at any time
-
-## Prompts Are Separate
-
-Optimized prompts from `/clavix-improve` are stored separately in `.clavix/outputs/prompts/`.
-
-**Prompts are NOT archived with PRD projects.**
-
-**To manage prompts:**
-- **View all prompts**: List `.clavix/outputs/prompts/*.md` files
-- **View a prompt**: Read `.clavix/outputs/prompts/<id>.md`
-- **Delete executed prompts**: Remove files where frontmatter has `executed: true`
-- **Delete stale prompts**: Remove files older than 30 days (check timestamp in frontmatter)
-
-**Prompts lifecycle:**
-- Independent from PRD lifecycle
-- Managed by reading/writing files directly
-- Clean up manually when project complete
-
-## Example Workflows
-
-### Workflow 1: Complete Project
-```
-User: "I've finished implementing the user authentication feature"
-You: "Great! Let me check the task status and help you archive it."
-
-I read: .clavix/outputs/user-authentication-system/tasks.md
-Result: All 15 tasks completed (100%)
-
-You confirm: Yes, archive it
-
-I execute: mv .clavix/outputs/user-authentication-system .clavix/outputs/archive/
-
-Result: Project archived to .clavix/outputs/archive/user-authentication-system/
+*Generated by Clavix /clavix-plan*
 ```
 
-### Workflow 2: Force Archive WIP
-```
-User: "We're pivoting, I want to archive the old API design even though tasks aren't done"
-You: "I'll check the status and archive it if you confirm."
+### Task ID Format
+**Pattern**: `phase-{phase-number}-{sanitized-phase-name}-{task-counter}`
+(e.g., `phase-1-setup-01`, `phase-2-auth-03`)
 
-I read: .clavix/outputs/old-api-design/tasks.md
-Result: 8 incomplete tasks
+### Checklist Rules
+- Use `- [ ]` for pending.
+- Use `- [x]` for completed.
+- **Implementation Note**: The `> **Implementation**` block is REQUIRED. It forces you to think about *where* the code goes.
 
-User confirms: Yes, archive anyway
+---
 
-I execute: mv .clavix/outputs/old-api-design .clavix/outputs/archive/
+## After Plan Generation
 
-Result: Project archived despite incomplete tasks
-```
+Present the plan and ask:
+> "I've generated a technical implementation plan based on your PRD and existing codebase (detected: {stack}).
+>
+> **Please Verify**:
+> 1. Did I correctly identify the file structure and patterns?
+> 2. Are the specific file paths correct?
+> 3. Is the order of operations logical (e.g., Database -> API -> UI)?
+>
+> Type `/clavix-implement` to start coding, or tell me what to adjust."
 
-### Workflow 3: Restore Archived Project
-```
-User: "Actually, we need to revisit that authentication feature"
-You: "I'll restore it from the archive."
+---
 
-I execute: mv .clavix/outputs/archive/user-authentication-system .clavix/outputs/
+## Workflow Navigation
 
-Result: Project restored to .clavix/outputs/user-authentication-system/
-```
+**You are here:** Plan (Technical Task Breakdown)
 
-### Workflow 4: Delete Failed Experiment
-```
-User: "I have a test project 'api-experiment-1' that I don't need anymore"
-You: "Is this something you might reference later, or can it be permanently deleted?"
+**Pre-requisites**:
+- A PRD (from `/clavix-prd`)
+- An existing codebase (or empty folder structure)
 
-User: "It was just a quick test, no value. Delete it."
-You: "This will permanently delete the project. Please confirm by typing the project name."
+**Next Steps**:
+- `/clavix-implement`: Execute the tasks one by one.
+- **Manual Edit**: You can edit `.clavix/outputs/.../tasks.md` directly if you want to change the architecture.
 
-I show:
-  Project: api-experiment-1
-  Tasks: 3/5 completed
-  Files: full-prd.md, quick-prd.md, tasks.md
-
-  WARNING: This action is PERMANENT and CANNOT be undone.
-
-User types: api-experiment-1
-
-I execute: rm -rf .clavix/outputs/api-experiment-1
-
-Result: Project permanently deleted
-```
+## Tips for Agents
+- **Don't guess**. If you don't see a directory, don't reference it.
+- **Check imports**. If `src/components/Button` exists, tell the user to reuse it.
+- **Be pedantic**. Developers prefer specific instructions like "Export interface `User`" over "Create a type".
 
 ---
 
@@ -1116,148 +1076,17 @@ For ANY unexpected error:
 > What sounds good?"
 
 
-## Workflow Navigation
-
-**You are here:** Archive (Project Cleanup)
-
-**Common workflows:**
-- **Complete workflow**: `/clavix-implement` → [all tasks done] → `/clavix-archive` → Clean workspace
-- **Review and archive**: `/clavix-archive` → [select completed project] → Archive
-- **Restore old work**: `/clavix-archive --list` → `/clavix-archive --restore [project]` → Resume
-
-**Related commands:**
-- `/clavix-implement` - Complete remaining tasks before archiving
-- `/clavix-plan` - Review task completion status
-- `/clavix-prd` - Start new project after archiving old one
-
-## Archive Size Management
-
-**Proactive maintenance to prevent archive bloat:**
-
-**When to clean up the archive:**
-- Archive exceeds 50 projects (or 100MB)
-- Projects older than 12 months that haven't been referenced
-- Duplicate or superseded projects
-- Failed experiments with no learning value
-
-**Size check (run periodically):**
-```bash
-# Count archived projects
-ls .clavix/outputs/archive/ | wc -l
-
-# Check total archive size
-du -sh .clavix/outputs/archive/
-```
-
-**Cleanup workflow:**
-1. List all archived projects with dates: `ls -lt .clavix/outputs/archive/`
-2. Identify candidates for deletion (failed experiments, duplicates, ancient projects)
-3. For each candidate, confirm zero future value
-4. Delete only with explicit confirmation
-
-**Archive retention recommendations:**
-| Project Type | Keep For | Then |
-|--------------|----------|------|
-| Completed features | Indefinitely | Archive forever (reference value) |
-| Failed experiments | 30 days | Delete if no learning value |
-| Superseded versions | 90 days | Delete if newer version exists |
-| Test/demo projects | 7 days | Delete unless documenting patterns |
-
-## Tips
-
-- Archive keeps your active projects list clean and focused
-- Archived projects maintain all their data (nothing is deleted)
-- Archive is searchable - you can still `grep` or find files in archive/
-- Regular archiving keeps `.clavix/outputs/` organized
-- Check `.clavix/outputs/archive/` to see what's been archived
-- Review archive size quarterly to avoid unbounded growth
+---
 
 ## Troubleshooting
 
-### Issue: No projects available to archive
-**Cause**: No projects in `.clavix/outputs/` OR all already archived
+### Issue: "I don't know the codebase"
+**Cause**: Agent skipped Phase 1 (Context Analysis).
+**Fix**: Force the agent to run `ls -R` and read `package.json` before generating tasks.
 
-**How I handle it**:
-1. Read `.clavix/outputs/` directory
-2. If directory doesn't exist: "No PRD projects found. Create one with `/clavix-prd`"
-3. If empty: Check `.clavix/outputs/archive/` for archived projects
-4. Communicate: "All projects are already archived" or "No projects exist yet"
+### Issue: Tasks are too generic ("Add Auth")
+**Cause**: Agent ignored the "Implementation Note" requirement.
+**Fix**: Regenerate with: "Refine the plan. Add specific file paths and implementation details to every task."
 
-### Issue: Trying to archive project with incomplete tasks
-**Cause**: User wants to archive but tasks aren't 100% done
-
-**How I handle it**:
-1. I read tasks.md and count incomplete tasks
-2. Ask user: "Project has X incomplete tasks. Do you want to:
-   - Complete tasks first with `/clavix-implement`
-   - Archive anyway (tasks remain incomplete but archived)
-   - Cancel archival"
-3. If user confirms: I move the directory
-4. If scope changed: Explain force archive is appropriate
-
-### Issue: Cannot restore archived project (name conflict)
-**Cause**: Project with same name already exists in active outputs
-
-**How I handle it**:
-1. I detect the conflict when checking the target directory
-2. Ask user which option:
-   - Archive the active project first, then restore old one
-   - Keep both (manual rename required)
-   - Cancel restoration
-3. Execute user's choice
-
-### Issue: Unsure whether to delete or archive
-**Cause**: User wants to clean up but uncertain about permanence
-
-**How I handle it**:
-1. Use decision tree to guide user:
-   - "Is this a failed experiment with no learning value?"
-   - "Might you need to reference this code later?"
-   - "Are you unsure if it's valuable?"
-2. Default recommendation: **ARCHIVE** (safer, reversible)
-3. Only suggest DELETE for: duplicates, failed experiments, test data with zero value
-4. Remind: "Archive is free, disk space is cheap, regret is expensive"
-
-### Issue: File operation fails
-**Cause**: File system permissions, missing directory, or process error
-
-**How I handle it**:
-1. Check error output
-2. Common fixes:
-   - Check `.clavix/outputs/` exists and is writable
-   - Verify project name is correct (no typos)
-   - Check if another process is accessing the files
-3. Retry the operation or inform user about permissions
-
-### Issue: Accidentally deleted project
-**Cause**: User error
-
-**How I handle it**:
-1. Acknowledge: "Project was permanently deleted"
-2. Check recovery options:
-   - "If code was committed to git, we can recover from git history"
-   - "Check if you have local backups"
-   - "Check if IDE has local history (VS Code, JetBrains)"
-3. Prevention: "Going forward, use ARCHIVE by default. Only DELETE when absolutely certain."
-
-### Issue: Archive directory getting too large
-**Cause**: Many archived projects accumulating
-
-**How I handle it**:
-1. Explain: "Archive is designed to grow - this is normal behavior"
-2. Archived projects don't affect workflow performance
-3. If user concerned:
-   - List archive contents
-   - Identify ancient/irrelevant projects
-   - Delete only truly obsolete ones
-   - Or suggest external backup for very old projects
-
-### Issue: Archived project but forgot what it was about
-**Cause**: No naming convention or time passed
-
-**How I handle it**:
-1. Read the PRD: `.clavix/outputs/archive/[project-name]/full-prd.md`
-2. Summarize: Problem, Goal, Features from PRD
-3. Suggest: Better naming conventions going forward
-   - Example: `2024-01-user-auth` (date-feature format)
-   - Example: `ecommerce-checkout-v2` (project-component format)
+### Issue: No PRD found
+**Fix**: Run `/clavix-prd` first.

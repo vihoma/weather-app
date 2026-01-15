@@ -1,3 +1,12 @@
+---
+name: clavix-archive
+description: "Archive completed PRD projects"
+agent: agent
+tools:
+  - editFiles
+  - runCommands
+  - codebase
+---
 # Clavix: Archive Your Completed Work
 
 Done with a project? I'll move it to the archive to keep your workspace tidy. You can always restore it later if needed.

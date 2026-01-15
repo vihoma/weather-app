@@ -1,11 +1,12 @@
 {
-  "version": "5.9.0",
+  "version": "6.1.0",
   "integrations": [
     "agents-md",
     "claude-code",
     "gemini",
     "opencode",
     "qwen",
+    "copilot",
     "roocode"
   ],
   "templates": {

@@ -269,7 +269,7 @@ Result: Project permanently deleted
 
 ---
 
-## Agent Transparency (v5.9.2)
+## Agent Transparency (v6.1.0)
 
 ### Agent Manual (Universal Protocols)
 # Clavix Agent Manual (v5.1)
@@ -821,6 +821,7 @@ These are commands the **user** runs in their terminal to set up Clavix:
 | **Archive project** | Use **Bash tool** to `mv .clavix/outputs/<project> .clavix/outputs/archive/` |
 | **List prompts** | Use **Glob/Bash** to list `.clavix/outputs/prompts/*.md` files |
 | **Read project** | Use **Read tool** on `.clavix/outputs/<project>/` files |
+| **Save review** | Use **Write tool** to create `.clavix/outputs/reviews/<id>.md` (with frontmatter metadata) |
 
 ---
 
@@ -852,6 +853,8 @@ These are commands the **user** runs in their terminal to set up Clavix:
 │   │   ├── full-prd.md      # Comprehensive PRD
 │   │   ├── quick-prd.md     # AI-optimized summary
 │   │   └── tasks.md         # Implementation tasks
+│   ├── reviews/             # PR review reports from /clavix:review
+│   │   └── *.md             # Individual reviews (metadata in frontmatter)
 │   └── archive/             # Archived projects
 └── commands/                # Slash command templates (managed by clavix update)
 ```
