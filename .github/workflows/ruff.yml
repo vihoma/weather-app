@@ -37,6 +37,10 @@ jobs:
     name: Ruff on Python 3.xx and windows-latest
     runs-on: windows-latest
     steps:
-    - name: Analysing the code with Ruff
+    - name: Checkout
+      uses: actions/checkout@v2
+      with:
+        path: "weather-app"
+    - name: Analyzing the code with Ruff
       run: |
-        ruff check $(git ls-files '*.py')
+          Set-Location .\weather-app\ && ruff check $(git ls-files '*.py')
