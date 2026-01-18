@@ -38,7 +38,7 @@ Examples:
   weather weather --city "Paris,FR" --output markdown
 
   # Use imperial units
-  weather weather --city "New York" --units imperial
+  weather --units imperial weather --city "New York"
 
   # Combine with global options
   weather --verbose --no-cache weather --city "Tokyo,JP" --output json

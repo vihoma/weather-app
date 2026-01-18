@@ -151,7 +151,7 @@ weather weather --city "London,GB" --output json
 weather weather --coordinates "51.5074,-0.1278" --output markdown
 
 # Use metric units with TUI output (default)
-weather weather --city "Paris,FR" --units metric --output tui
+weather --units metric weather --city "Paris,FR" --output tui
 
 # Force async mode and disable caching
 weather weather --city "Tokyo,JP" --use-async --no-cache
