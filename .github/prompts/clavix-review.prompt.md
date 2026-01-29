@@ -447,7 +447,7 @@ consistent with the project's conventions.
 
 ---
 
-## Agent Transparency (v6.1.0)
+## Agent Transparency (v7.2.2)
 
 ### Agent Manual (Universal Protocols)
 # Clavix Agent Manual (v5.1)
@@ -666,7 +666,7 @@ BEFORE completing response:
 ## What You Should NEVER Do
 
 ❌ **Don't silently skip tasks** - Always tell user if something was skipped
-❌ **Don't make assumptions** - When in doubt, ask
+❌ **Don't make assumptions** - When in doubt, use the AskUserQuestion tool
 ❌ **Don't give up too easily** - Try to recover first
 ❌ **Don't overwhelm with options** - Max 3 choices
 ❌ **Don't use technical language** - Keep it friendly
