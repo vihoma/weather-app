@@ -1,7 +1,11 @@
-**/**/__pycache__/*
+venv/
+MagicMock/
+__pycache__/
+.cocoindex_code/
+.ruff_cache/
+.venv/
 .vscode/
-**/**/.ruff_cache
-**/**/*.log
+*.log
 .env
 .*.env
 *.bak
@@ -16,6 +20,3 @@ TODO.md
 weather.env
 weather_app.log
 weather_app.log.json
-**/**/venv/**
-**/**/.venv/**
-MagicMock/

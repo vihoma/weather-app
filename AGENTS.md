@@ -23,6 +23,8 @@
 - **Dependencies**: Managed via Poetry in pyproject.toml
 
 ## Code Correctness Guidelines
+- If available, use the cocoindex-code MCP server for code comprehension
+  and correctness checks
 - If available, use the context7 MCP server for the latest
   Rich/Click/PyOWM API Documentation and for other APIs as needed
 - Run the code formatter (ruff format) after code generation and before
