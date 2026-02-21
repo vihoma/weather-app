@@ -2,9 +2,10 @@
 
 ## Build/Lint/Test Commands
 - **Run application**: `poetry run weather`
+- **Run tests**: `poetry run pytest tests/`
 - **Lint with ruff**: `poetry run ruff check src/`
 - **Format imports**: `poetry run isort src/`
-- **Format code**: `poetry run black src/`
+- **Format code**: `poetry run ruff format src/`
 - **Build package**: `poetry build`
 - **Install deps**: `poetry install`
 
@@ -24,7 +25,7 @@
 ## Code Correctness Guidelines
 - If available, use the context7 MCP server for the latest
   Rich/Click/PyOWM API Documentation and for other APIs as needed
-- Run the code formatter (black) after code generation and before
+- Run the code formatter (ruff format) after code generation and before
   commits for consistent coding style
 
 ## Project Structure
