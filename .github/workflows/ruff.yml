@@ -34,6 +34,7 @@ jobs:
     - name: Analyzing the code with Ruff
       run: |
         ruff check $(git ls-files '*.py')
+        ruff format --check --diff $(git ls-files '*.py')
   local-ruff:
     if: ${{ github.event.act }} # run during local actions testing
     name: Ruff on Python 3.xx and windows-latest
@@ -46,3 +47,4 @@ jobs:
     - name: Analyzing the code with Ruff
       run: |
           Set-Location .\weather-app\ && ruff check $(git ls-files '*.py')
+          Set-Location .\weather-app\ && ruff format --check --diff $(git ls-files '*.py')
