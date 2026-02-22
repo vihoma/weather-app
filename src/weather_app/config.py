@@ -54,8 +54,10 @@ class Config(BaseSettings):
     LOG_LEVEL: str = Field(default="INFO", env="LOG_LEVEL")
     LOG_FORMAT: str = Field(default="text", env="LOG_FORMAT")
     CACHE_DIR: str = Field(
-        default_factory=lambda: os.getenv("CACHE_DIR")
-        or os.path.join(os.getenv("HOME", ""), ".cache", "weather_app"),
+        default_factory=lambda: (
+            os.getenv("CACHE_DIR")
+            or os.path.join(os.getenv("HOME", ""), ".cache", "weather_app")
+        ),
         env="CACHE_DIR" or os.getenv("TEMP"),
     )
     CACHE_FILE: Optional[str] = Field(default=None, env="CACHE_FILE")
