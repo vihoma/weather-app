@@ -35,8 +35,8 @@ def _get_yaml_config_path() -> Optional[Path]:
         Path to the YAML file, or None if no YAML file is found.
     """
     locations = [
-        Path(".weather.yaml").expanduser(),
-        Path(os.getenv("HOME", "")).expanduser() / ".weather.yaml",
+        Path(".weather.yaml"),
+        Path.home() / ".weather.yaml",
     ]
     for path in locations:
         if path.is_file():

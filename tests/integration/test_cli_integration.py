@@ -158,7 +158,7 @@ cache_file: /tmp/test_cache.json
             result = runner.invoke(
                 cli,
                 [
-                    "--use-async",
+                    "--async",
                     "weather",
                     "--coordinates", "51.5074,-0.1278",
                     "--output", "json"

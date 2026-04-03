@@ -65,12 +65,26 @@ Examples:
     help="Temperature units: metric (°C), imperial (°F), standard (K).",
 )
 @click.option(
-    "--use-async",
+    "--async",
+    "use_async",
     is_flag=True,
     help="Force asynchronous mode (default: from config).",
 )
 @click.option(
+    "--no-async",
+    "no_async",
+    is_flag=True,
+    help="Force synchronous mode (default: from config).",
+)
+@click.option(
+    "--cache",
+    "use_cache",
+    is_flag=True,
+    help="Enable caching for this request (default: from config).",
+)
+@click.option(
     "--no-cache",
+    "no_cache",
     is_flag=True,
     help="Disable caching for this request.",
 )
@@ -81,6 +95,8 @@ def cli(
     config_file: str | None,
     units: str | None,
     use_async: bool,
+    no_async: bool,
+    use_cache: bool,
     no_cache: bool,
 ) -> None:
     """Weather App CLI - Get weather forecasts from OpenWeatherMap.
@@ -92,7 +108,13 @@ def cli(
     ctx.obj["verbose"] = verbose
     ctx.obj["config_file"] = config_file
     ctx.obj["units"] = units
-    ctx.obj["use_async"] = use_async
+    # Resolve --async / --no-async: explicit flag wins, else leave as None
+    if use_async:
+        ctx.obj["use_async"] = True
+    elif no_async:
+        ctx.obj["use_async"] = False
+    else:
+        ctx.obj["use_async"] = None
     ctx.obj["no_cache"] = no_cache
 
     # Apply overrides to config instance (will be created lazily when needed)

@@ -4,19 +4,30 @@ This module applies command-line argument overrides to the configuration,
 ensuring the precedence: CLI > environment > YAML > keyring.
 """
 
+import logging
 from typing import Any
 
 from weather_app.config import Config
 
+logger = logging.getLogger(__name__)
+
 
 def apply_cli_overrides(config: Config, **kwargs: Any) -> None:
     """Apply CLI argument overrides to a Config instance.
+
+    Overrides are collected first, then applied via ``model_validate`` so that
+    Pydantic validators (type coercion, boolean parsing, etc.) are invoked.
 
     Args:
         config: The Config instance to modify.
         **kwargs: CLI arguments mapping from argument names to values.
             Supported keys: verbose, config_file, units, use_async, no_cache.
     """
+    # Load custom config file first (lowest CLI priority – explicit flags win)
+    config_file = kwargs.get("config_file")
+    if config_file:
+        _load_custom_config_file(config, config_file)
+
     # Map CLI argument names to Config field names
     field_map = {
         "units": "OWM_UNITS",
@@ -28,31 +39,27 @@ def apply_cli_overrides(config: Config, **kwargs: Any) -> None:
         "cache_persist": "CACHE_PERSIST",
     }
 
-    # Apply direct field mappings
+    # Collect overrides that the user actually supplied
+    overrides: dict[str, Any] = {}
     for cli_key, field_name in field_map.items():
         if cli_key in kwargs and kwargs[cli_key] is not None:
-            setattr(config, field_name, kwargs[cli_key])
+            overrides[field_name] = kwargs[cli_key]
 
     # Special handling for verbose flag (sets log level to DEBUG)
     if kwargs.get("verbose"):
-        config.LOG_LEVEL = "DEBUG"
+        overrides["LOG_LEVEL"] = "DEBUG"
 
     # Special handling for no_cache flag (disables caching)
     if kwargs.get("no_cache"):
-        config.CACHE_TTL = 0
+        overrides["CACHE_TTL"] = 0
 
-    # Special handling for config_file (load YAML from custom path)
-    config_file = kwargs.get("config_file")
-    if config_file:
-        _load_custom_config_file(config, config_file)
-
-    # Update derived fields (CACHE_FILE, LOG_FILE) after changes
-    # Pydantic validators will be triggered on attribute assignment.
-    # We need to manually trigger validation? The Config model uses
-    # field validators that run when fields are set. Since we set fields
-    # directly, the validators should run automatically.
-    # However, we need to ensure cache_dir is set before CACHE_FILE.
-    # We'll rely on the existing validator.
+    # Apply overrides with validation via model_validate
+    if overrides:
+        current = config.model_dump()
+        current.update(overrides)
+        validated = Config.model_validate(current)
+        for field_name in overrides:
+            setattr(config, field_name, getattr(validated, field_name))
 
 
 def _load_custom_config_file(config: Config, config_file: str) -> None:
@@ -76,11 +83,22 @@ def _load_custom_config_file(config: Config, config_file: str) -> None:
     with open(path, "r", encoding="utf-8") as f:
         data = yaml.safe_load(f) or {}
 
-    # Normalize keys to uppercase
+    known_fields = set(Config.model_fields.keys())
+    overrides: dict[str, Any] = {}
     for key, value in data.items():
         upper_key = key.upper()
-        if hasattr(config, upper_key):
-            setattr(config, upper_key, value)
+        if upper_key in known_fields:
+            overrides[upper_key] = value
         else:
-            # Extra fields allowed via extra="allow"
-            setattr(config, key, value)
+            logger.warning(
+                "Unknown configuration key in custom YAML '%s': '%s' (ignored)",
+                config_file,
+                key,
+            )
+
+    if overrides:
+        current = config.model_dump()
+        current.update(overrides)
+        validated = Config.model_validate(current)
+        for field_name in overrides:
+            setattr(config, field_name, getattr(validated, field_name))

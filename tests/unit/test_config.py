@@ -3,9 +3,11 @@
 import os
 import tempfile
 from pathlib import Path
-from unittest.mock import Mock, patch, MagicMock
+from unittest.mock import Mock, patch
+
 import pytest
-from src.weather_app.config import Config
+
+from src.weather_app.config import Config, _default_cache_dir
 from src.weather_app.exceptions import APIKeyError
 from src.weather_app.security import KeyringUnavailableError
 
@@ -26,18 +28,17 @@ class TestConfig:
                 with patch.object(Config, '_load_environment_variables'):
                     config = Config()
                     
+                    expected_cache_dir = _default_cache_dir()
                     assert config.api_key is None
                     assert config.owm_units == "metric"
                     assert config.cache_ttl == 600
                     assert config.request_timeout == 30
                     assert config.use_async is True
                     assert config.log_level == "INFO"
-                    # LOG_FILE defaults to .cache/weather_app/weather_app.log
-                    assert config.log_file == ".cache\\weather_app\\weather_app.log"
+                    assert config.log_file == os.path.join(expected_cache_dir, "weather_app.log")
                     assert config.log_format == "text"
                     assert config.cache_persist is False
-                    # CACHE_FILE defaults to .cache/weather_app/weather_app_cache.json
-                    assert config.cache_file == ".cache\\weather_app\\weather_app_cache.json"
+                    assert config.cache_file == os.path.join(expected_cache_dir, "weather_app_cache.json")
 
     def test_config_initialization_with_environment_variables(self):
         """Test that Config reads environment variables correctly."""
@@ -274,8 +275,8 @@ class TestConfig:
 
     def test_boolean_environment_variables_parsing(self):
         """Test that boolean environment variables are parsed correctly."""
-        # Test various true values (only lowercase "true" should work based on implementation)
-        true_values = ["true"]
+        # Test various true values (lowercase "true", "yes", "1", "on" should all work)
+        true_values = ["true", "True", "TRUE", "yes", "1", "on"]
         for value in true_values:
             with patch.dict(os.environ, {"USE_ASYNC": value, "CACHE_PERSIST": value}):
                 # Mock secure storage to avoid keyring issues
@@ -285,11 +286,11 @@ class TestConfig:
                     MockSecureConfig.return_value = mock_secure
                     
                     config = Config()
-                    assert config.use_async is True
-                    assert config.cache_persist is True
+                    assert config.use_async is True, f"Expected True for '{value}'"
+                    assert config.cache_persist is True, f"Expected True for '{value}'"
         
         # Test various false values
-        false_values = ["false", "False", "FALSE", "0", "no", "No", "NO", "anything_else"]
+        false_values = ["false", "False", "FALSE", "0", "no", "No", "NO", "off", "anything_else"]
         for value in false_values:
             with patch.dict(os.environ, {"USE_ASYNC": value, "CACHE_PERSIST": value}):
                 # Mock secure storage to avoid keyring issues
@@ -299,8 +300,8 @@ class TestConfig:
                     MockSecureConfig.return_value = mock_secure
                     
                     config = Config()
-                    assert config.use_async is False
-                    assert config.cache_persist is False
+                    assert config.use_async is False, f"Expected False for '{value}'"
+                    assert config.cache_persist is False, f"Expected False for '{value}'"
 
     def test_numeric_environment_variables_parsing(self):
         """Test that numeric environment variables are parsed correctly."""
@@ -313,95 +314,178 @@ class TestConfig:
             assert config.request_timeout == 45
 
     def test_config_file_loading_with_multiple_locations(self):
-        """Test that config file loading tries multiple locations."""
+        """Test that .weather.env file loading tries multiple locations."""
         with tempfile.TemporaryDirectory() as temp_dir:
-            # Create a config file in temp directory (second location: HOME/.weather.env)
-            config_file = Path(temp_dir) / ".weather.env"
-            config_file.write_text("OWM_API_KEY=file_api_key\nOWM_UNITS=kelvin\n")
-            
-            with patch('src.weather_app.config.load_dotenv') as mock_load_dotenv:
-                # Mock secure storage to avoid keyring issues
+            # Create a .weather.env file in temp directory
+            env_file = Path(temp_dir) / ".weather.env"
+            env_file.write_text("OWM_API_KEY=file_api_key\nOWM_UNITS=kelvin\n")
+
+            # Mock Path.home() to return our temp dir so the home-based
+            # .weather.env location resolves to our test file.
+            with patch('src.weather_app.config.Path') as MockPath:
+                # Path(".weather.env") → non-existent mock
+                mock_cwd_env = Mock()
+                mock_cwd_env.is_file.return_value = False
+
+                # Path.home() / ".weather.env" → our real temp file
+                mock_home = Mock()
+                mock_home.__truediv__ = lambda self, name: Path(temp_dir) / name
+
+                def path_side_effect(arg=None):
+                    if arg == ".weather.env":
+                        return mock_cwd_env
+                    if arg == ".weather.yaml":
+                        m = Mock()
+                        m.is_file.return_value = False
+                        return m
+                    return Path(arg) if arg else Mock()
+
+                MockPath.side_effect = path_side_effect
+                MockPath.home.return_value = mock_home
+
                 with patch('src.weather_app.config.SecureConfig') as MockSecureConfig:
                     mock_secure = Mock()
                     mock_secure.get_api_key.return_value = None
                     MockSecureConfig.return_value = mock_secure
-                    
-                    # Mock the first location (project root .weather.env) to not exist
-                    with patch('src.weather_app.config.Path') as MockPath:
-                        # First call: Path(".weather.env")
-                        mock_first = Mock()
-                        mock_first_expand = Mock()
-                        mock_first_expand.is_file.return_value = False
-                        mock_first.expanduser.return_value = mock_first_expand
-                        
-                        # Second call: Path(HOME) - we'll let the real Path be used
-                        # We'll use side_effect to return mock for ".weather.env" and real Path for temp_dir
-                        def path_side_effect(arg):
-                            if arg == ".weather.env":
-                                return mock_first
-                            # For the home directory, return a real Path object
-                            from pathlib import Path as RealPath
-                            return RealPath(arg)
-                        
-                        MockPath.side_effect = path_side_effect
-                        
-                        # Set HOME environment variable to temp_dir
-                        with patch.dict(os.environ, {"HOME": temp_dir}, clear=True):
-                            config = Config()
-                            
-                            # Debug
-                            print(f"load_dotenv calls: {mock_load_dotenv.call_args_list}")
-                            print(f"config.owm_api_key={config.owm_api_key}, config.owm_units={config.owm_units}")
-                            
-                            # Verify load_dotenv was called with our config file
-                            mock_load_dotenv.assert_any_call(dotenv_path=config_file, override=False)
-                            # Verify config values were loaded from the file
-                            assert config.owm_api_key == "file_api_key"
-                            assert config.owm_units == "kelvin"
+
+                    with patch.dict(os.environ, {}, clear=True):
+                        config = Config()
+                        # The env file values should be loaded
+                        assert config.owm_api_key == "file_api_key"
+                        assert config.owm_units == "kelvin"
 
     def test_config_file_loading_errors_handled_gracefully(self):
         """Test that errors during config file loading are handled gracefully."""
-        with patch('src.weather_app.config.Path') as MockPath:
-            # Mock a path that raises PermissionError
-            mock_path = Mock()
-            mock_path.expanduser.return_value = Mock(
-                exists=Mock(side_effect=PermissionError("Permission denied"))
-            )
-            MockPath.return_value = mock_path
-            
-            # Should not raise any exception
-            config = Config()
-            assert config is not None
+        # Mock SecureConfig to avoid keyring interference
+        with patch('src.weather_app.config.SecureConfig') as MockSecureConfig:
+            mock_secure = Mock()
+            mock_secure.get_api_key.return_value = None
+            MockSecureConfig.return_value = mock_secure
+
+            # Mock dotenv_values to raise an exception
+            with patch('src.weather_app.config.dotenv_values', side_effect=PermissionError("Permission denied")):
+                # Should not raise any exception — Config handles errors gracefully
+                config = Config()
+                assert config is not None
 
     def test_environment_variables_override_config_files(self):
         """Test that environment variables override config file values."""
-        with tempfile.NamedTemporaryFile(mode='w', suffix='.env', delete=False) as f:
-            f.write("OWM_API_KEY=file_api_key\n")
-            f.write("OWM_UNITS=kelvin\n")
-            config_file = f.name
+        with patch.dict(os.environ, {"OWM_API_KEY": "env_api_key"}):
+            # Mock secure storage to avoid keyring issues
+            with patch('src.weather_app.config.SecureConfig') as MockSecureConfig:
+                mock_secure = Mock()
+                mock_secure.get_api_key.return_value = None
+                MockSecureConfig.return_value = mock_secure
 
-        try:
-            with patch.dict(os.environ, {"OWM_API_KEY": "env_api_key"}):
-                # Mock the Path object to properly simulate file existence
+                # Mock YAML source to return a lower-priority value
+                with patch.object(
+                    Config, '_yaml_settings_source',
+                    return_value={"OWM_API_KEY": "yaml_api_key"},
+                ):
+                    config = Config()
+
+                    # Environment variable should take precedence over YAML
+                    assert config.api_key == "env_api_key"
+
+    def test_yaml_settings_source_loads_values(self):
+        """Test that YAML settings source correctly loads and uppercases keys."""
+        yaml_content = "owm_units: imperial\ncache_ttl: 120\nuse_async: false\n"
+        with tempfile.TemporaryDirectory() as temp_dir:
+            yaml_file = Path(temp_dir) / ".weather.yaml"
+            yaml_file.write_text(yaml_content)
+
+            with patch('src.weather_app.config.SecureConfig') as MockSecureConfig:
+                mock_secure = Mock()
+                mock_secure.get_api_key.return_value = None
+                MockSecureConfig.return_value = mock_secure
+
+                # Point the YAML source to our temp file
                 with patch('src.weather_app.config.Path') as MockPath:
-                    mock_path = Mock()
-                    # Create a mock that has exists() method returning True
-                    mock_expanded = Mock()
-                    mock_expanded.exists.return_value = True
-                    mock_path.expanduser.return_value = mock_expanded
-                    MockPath.return_value = mock_path
-                    
-                    # Mock secure storage to avoid keyring issues
-                    with patch('src.weather_app.config.SecureConfig') as MockSecureConfig:
-                        mock_secure = Mock()
-                        mock_secure.get_api_key.return_value = None
-                        MockSecureConfig.return_value = mock_secure
-                        
-                        # Mock load_dotenv to prevent actual file loading
-                        with patch('src.weather_app.config.load_dotenv') as mock_load_dotenv:
+                    mock_cwd_yaml = Mock()
+                    mock_cwd_yaml.is_file.return_value = True
+                    mock_cwd_yaml.__fspath__ = lambda self: str(yaml_file)
+
+                    def path_side_effect(arg=None):
+                        if arg == ".weather.yaml":
+                            return yaml_file
+                        if arg == ".weather.env":
+                            m = Mock()
+                            m.is_file.return_value = False
+                            return m
+                        return Path(arg) if arg else Mock()
+
+                    MockPath.side_effect = path_side_effect
+                    MockPath.home.return_value = Path(temp_dir)
+
+                    with patch.dict(os.environ, {}, clear=True):
+                        config = Config()
+                        assert config.owm_units == "imperial"
+                        assert config.cache_ttl == 120
+                        assert config.use_async is False
+
+    def test_yaml_unknown_keys_logged_as_warning(self):
+        """Test that unknown YAML keys trigger a warning log."""
+        yaml_content = "owm_units: imperial\nunknown_key: some_value\n"
+        with tempfile.TemporaryDirectory() as temp_dir:
+            yaml_file = Path(temp_dir) / ".weather.yaml"
+            yaml_file.write_text(yaml_content)
+
+            with patch('src.weather_app.config.SecureConfig') as MockSecureConfig:
+                mock_secure = Mock()
+                mock_secure.get_api_key.return_value = None
+                MockSecureConfig.return_value = mock_secure
+
+                with patch('src.weather_app.config.Path') as MockPath:
+                    def path_side_effect(arg=None):
+                        if arg == ".weather.yaml":
+                            return yaml_file
+                        if arg == ".weather.env":
+                            m = Mock()
+                            m.is_file.return_value = False
+                            return m
+                        return Path(arg) if arg else Mock()
+
+                    MockPath.side_effect = path_side_effect
+                    MockPath.home.return_value = Path(temp_dir)
+
+                    with patch.dict(os.environ, {}, clear=True):
+                        with patch('src.weather_app.config.logger') as mock_logger:
                             config = Config()
-                            
-                            # Environment variable should take precedence over config file
-                            assert config.api_key == "env_api_key"
-        finally:
-            os.unlink(config_file)
+                            # Verify warning was logged for unknown key
+                            mock_logger.warning.assert_any_call(
+                                "Unknown configuration key in YAML: '%s' (will be ignored)",
+                                "unknown_key",
+                            )
+                            # The known key should still be loaded
+                            assert config.owm_units == "imperial"
+
+    def test_env_file_source_returns_parsed_values(self):
+        """Test that _env_file_settings_source returns values directly."""
+        env_content = "OWM_API_KEY=env_file_key\nOWM_UNITS=standard\n"
+        with tempfile.TemporaryDirectory() as temp_dir:
+            env_file = Path(temp_dir) / ".weather.env"
+            env_file.write_text(env_content)
+
+            with patch('src.weather_app.config.Path') as MockPath:
+                def path_side_effect(arg=None):
+                    if arg == ".weather.env":
+                        return env_file
+                    if arg == ".weather.yaml":
+                        m = Mock()
+                        m.is_file.return_value = False
+                        return m
+                    return Path(arg) if arg else Mock()
+
+                MockPath.side_effect = path_side_effect
+                MockPath.home.return_value = Path(temp_dir)
+
+                # Call the source method directly
+                result = Config._env_file_settings_source(Config)
+                assert result.get("OWM_API_KEY") == "env_file_key"
+                assert result.get("OWM_UNITS") == "standard"
+
+    def test_cache_dir_cross_platform_default(self):
+        """Test that CACHE_DIR default resolves to an absolute path."""
+        expected = os.path.join(os.path.expanduser("~"), ".cache", "weather_app")
+        assert _default_cache_dir() == expected
+        assert os.path.isabs(expected)
