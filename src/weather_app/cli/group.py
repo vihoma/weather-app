@@ -115,7 +115,13 @@ def cli(
         ctx.obj["use_async"] = False
     else:
         ctx.obj["use_async"] = None
-    ctx.obj["no_cache"] = no_cache
+    # Resolve --cache / --no-cache: explicit flag wins, else leave as None
+    if use_cache:
+        ctx.obj["cache_persist"] = True
+    elif no_cache:
+        ctx.obj["cache_persist"] = False
+    else:
+        ctx.obj["cache_persist"] = None
 
     # Apply overrides to config instance (will be created lazily when needed)
     # Actual override logic will be applied in config_override module

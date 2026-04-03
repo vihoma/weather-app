@@ -229,9 +229,16 @@ def config_show(ctx: click.Context) -> None:
     # CLI overrides
     if ctx.obj:
         overrides = []
-        for key in ["units", "use_async", "no_cache"]:
-            if key in ctx.obj and ctx.obj[key] is not None:
-                overrides.append(f"--{key.replace('_', '-')}")
+        if ctx.obj.get("units") is not None:
+            overrides.append("--units")
+        if ctx.obj.get("use_async") is True:
+            overrides.append("--async")
+        elif ctx.obj.get("use_async") is False:
+            overrides.append("--no-async")
+        if ctx.obj.get("cache_persist") is True:
+            overrides.append("--cache")
+        elif ctx.obj.get("cache_persist") is False:
+            overrides.append("--no-cache")
         if overrides:
             console.print(f"  • CLI overrides applied: {', '.join(overrides)}")
 

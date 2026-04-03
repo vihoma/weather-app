@@ -21,7 +21,7 @@ def apply_cli_overrides(config: Config, **kwargs: Any) -> None:
     Args:
         config: The Config instance to modify.
         **kwargs: CLI arguments mapping from argument names to values.
-            Supported keys: verbose, config_file, units, use_async, no_cache.
+            Supported keys: verbose, config_file, units, use_async, cache_persist.
     """
     # Load custom config file first (lowest CLI priority – explicit flags win)
     config_file = kwargs.get("config_file")
@@ -49,8 +49,12 @@ def apply_cli_overrides(config: Config, **kwargs: Any) -> None:
     if kwargs.get("verbose"):
         overrides["LOG_LEVEL"] = "DEBUG"
 
-    # Special handling for no_cache flag (disables caching)
-    if kwargs.get("no_cache"):
+    # Special handling for --cache / --no-cache (resolved tri-state)
+    cache_persist = kwargs.get("cache_persist")
+    if cache_persist is True:
+        overrides["CACHE_PERSIST"] = True
+    elif cache_persist is False:
+        overrides["CACHE_PERSIST"] = False
         overrides["CACHE_TTL"] = 0
 
     # Apply overrides with validation via model_validate
