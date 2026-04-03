@@ -5,7 +5,6 @@ import json
 import logging
 from pathlib import Path
 from typing import Any, Dict, Optional
-from urllib.parse import quote
 
 import aiohttp
 from async_timeout import timeout
@@ -121,29 +120,25 @@ class AsyncWeatherService:
 
     async def _fetch_weather_data(self, location: str, units: str) -> WeatherData:
         """Fetch weather data from OpenWeatherMap API."""
-        # Determine if location is coordinates or city name
+        url = f"{self.base_url}/weather"
+        params: Dict[str, str] = {"appid": self.api_key, "units": units}
+
         if self._is_coordinates(location):
             lat, lon = location.split(",")
-            # URL encode all parameters for security
-            encoded_lat = quote(lat.strip())
-            encoded_lon = quote(lon.strip())
-            encoded_units = quote(units)
-            # Build URL with API key as query parameter (OpenWeatherMap requirement)
-            url = f"{self.base_url}/weather?lat={encoded_lat}&lon={encoded_lon}&appid={self.api_key}&units={encoded_units}"
+            params["lat"] = lat.strip()
+            params["lon"] = lon.strip()
         else:
-            # URL encode the location query
-            encoded_location = quote(location.strip())
-            encoded_units = quote(units)
-            url = f"{self.base_url}/weather?q={encoded_location}&appid={self.api_key}&units={encoded_units}"
+            params["q"] = location.strip()
 
         try:
             session = await self._ensure_session()
             async with timeout(self.timeout):
-                # Create a safe URL for logging (without API key)
-                safe_url = url.replace(f"appid={self.api_key}", "appid=***")
-                logger.debug(f"Making API request to: {safe_url}")
+                safe_params = {
+                    k: ("***" if k == "appid" else v) for k, v in params.items()
+                }
+                logger.debug("Making API request to: %s params=%s", url, safe_params)
 
-                async with session.get(url) as response:
+                async with session.get(url, params=params) as response:
                     return await self._handle_response(response, location, units)
 
         except asyncio.TimeoutError:

@@ -79,6 +79,17 @@ class TestAsyncWeatherService:
         assert result.detailed_status == "Clear sky"
         assert result.humidity == 65
 
+        # Verify params dict is used instead of embedding key in URL
+        mock_get.assert_called_once()
+        call_args = mock_get.call_args
+        called_url = call_args[0][0] if call_args[0] else call_args[1].get("url", "")
+        assert "appid" not in called_url, "API key should not be in the URL string"
+        call_kwargs = call_args[1] if call_args[1] else {}
+        assert "params" in call_kwargs, "params dict should be passed to session.get"
+        assert call_kwargs["params"]["appid"] == "test_api_key"
+        assert call_kwargs["params"]["q"] == "London,GB"
+        assert call_kwargs["params"]["units"] == "metric"
+
     @pytest.mark.asyncio
     @patch("aiohttp.ClientSession.get")
     async def test_get_weather_location_not_found(self, mock_get, weather_service):
@@ -167,3 +178,13 @@ class TestAsyncWeatherService:
         # Verify result
         assert result.city == "51.5074,-0.1278"
         assert result.temperature == 20.5
+
+        # Verify params dict uses lat/lon for coordinates
+        mock_get.assert_called_once()
+        call_kwargs = mock_get.call_args[1]
+        assert "params" in call_kwargs, "params dict should be passed to session.get"
+        assert call_kwargs["params"]["lat"] == "51.5074"
+        assert call_kwargs["params"]["lon"] == "-0.1278"
+        assert call_kwargs["params"]["appid"] == "test_api_key"
+        assert call_kwargs["params"]["units"] == "metric"
+        assert "q" not in call_kwargs["params"], "City query param should not be present for coordinates"
