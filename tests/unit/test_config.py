@@ -169,7 +169,7 @@ class TestConfig:
         config._api_key = "valid_api_key"
         
         # Should not raise any exception
-        config.validate()
+        config.validate_config()
 
     def test_validate_method_without_api_key(self):
         """Test validate method when API key is missing."""
@@ -182,7 +182,7 @@ class TestConfig:
         config._secure = mock_secure  # type: ignore
         
         with pytest.raises(APIKeyError) as exc_info:
-            config.validate()
+            config.validate_config()
         
         assert "API key not found" in str(exc_info.value)
         assert "keyring" in str(exc_info.value).lower()
@@ -198,7 +198,7 @@ class TestConfig:
         config._secure = mock_secure  # type: ignore
         
         with pytest.raises(APIKeyError) as exc_info:
-            config.validate()
+            config.validate_config()
         
         assert "API key not found" in str(exc_info.value)
         assert "keyring storage is not available" in str(exc_info.value)

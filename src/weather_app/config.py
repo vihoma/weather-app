@@ -25,7 +25,7 @@ from typing import Any, Dict, Optional
 
 import yaml
 from dotenv import dotenv_values
-from pydantic import Field, field_validator
+from pydantic import Field, PrivateAttr, field_validator
 from pydantic_settings import BaseSettings, SettingsConfigDict
 
 from .exceptions import APIKeyError
@@ -69,8 +69,8 @@ class Config(BaseSettings):
     # ---------------------------------------------------------------------
     # Compatibility helpers (private attributes used by the legacy API)
     # ---------------------------------------------------------------------
-    _secure: SecureConfig | None = None
-    _api_key: Optional[str] = None
+    _secure: SecureConfig = PrivateAttr(default_factory=SecureConfig)
+    _api_key: Optional[str] = PrivateAttr(default=None)
 
     model_config = SettingsConfigDict(env_file=None, extra="allow")
 
@@ -313,11 +313,11 @@ class Config(BaseSettings):
         """Return ``True`` if the underlying keyring backend is functional."""
         return self._secure.is_keyring_available()
 
-    def validate(self) -> None:
+    def validate_config(self) -> None:
         """Validate that a usable API key is present.
 
         If the key is missing, the error message mentions the preferred
-        environment variable and, when possible, suggests the key‑ring fallback.
+        environment variable and, when possible, suggests the keyring fallback.
         """
         if not self.api_key:
             keyring_available = self.is_keyring_available()

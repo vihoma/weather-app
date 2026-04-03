@@ -325,14 +325,15 @@ def config_sources() -> None:
         ("Log File", config.log_file),
     ]
 
-    for name, value in effective_fields:
-        if "API" in name and value:
-            if len(value) > 8:
-                value_str = f"{value[:4]}...{value[-4:]}"
+    for name, field_value in effective_fields:
+        if "API" in name and field_value:
+            value_as_str = str(field_value)
+            if len(value_as_str) > 8:
+                value_str = f"{value_as_str[:4]}...{value_as_str[-4:]}"
             else:
                 value_str = "***"
         else:
-            value_str = str(value) if value is not None else "None"
+            value_str = str(field_value) if field_value is not None else "None"
         table.add_row(name, value_str)
 
     console.print(table)

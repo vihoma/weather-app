@@ -27,7 +27,7 @@ class TestMainModule:
     
             # Mock config
             mock_config = Mock()
-            mock_config.validate.return_value = None
+            mock_config.validate_config.return_value = None
             mock_config.use_async = True
             MockConfig.return_value = mock_config
     
@@ -44,7 +44,7 @@ class TestMainModule:
     
             # Verify setup
             MockConfig.assert_called_once()
-            mock_config.validate.assert_called_once()
+            mock_config.validate_config.assert_called_once()
             MockSetupLogging.assert_called_once_with(mock_config)
             MockInstall.assert_called_once_with(show_locals=True)
     
@@ -67,7 +67,7 @@ class TestMainModule:
     
             # Mock config
             mock_config = Mock()
-            mock_config.validate.return_value = None
+            mock_config.validate_config.return_value = None
             mock_config.use_async = False
             MockConfig.return_value = mock_config
     
@@ -100,7 +100,7 @@ class TestMainModule:
     
             # Mock config
             mock_config = Mock()
-            mock_config.validate.return_value = None
+            mock_config.validate_config.return_value = None
             mock_config.use_async = True
             MockConfig.return_value = mock_config
     
@@ -135,7 +135,7 @@ class TestMainModule:
             
             # Mock config that raises ConfigurationError
             mock_config = Mock()
-            mock_config.validate.side_effect = ConfigurationError("API key missing")
+            mock_config.validate_config.side_effect = ConfigurationError("API key missing")
             MockConfig.return_value = mock_config
             
             # Mock logger
@@ -167,7 +167,7 @@ class TestMainModule:
             
             # Mock config
             mock_config = Mock()
-            mock_config.validate.return_value = None
+            mock_config.validate_config.return_value = None
             mock_config.use_async = True
             MockConfig.return_value = mock_config
             
@@ -203,7 +203,7 @@ class TestMainModule:
             
             # Mock config
             mock_config = Mock()
-            mock_config.validate.return_value = None
+            mock_config.validate_config.return_value = None
             mock_config.use_async = True
             MockConfig.return_value = mock_config
             
@@ -239,7 +239,7 @@ class TestMainModule:
             
             # Mock config
             mock_config = Mock()
-            mock_config.validate.return_value = None
+            mock_config.validate_config.return_value = None
             mock_config.use_async = True
             MockConfig.return_value = mock_config
             
@@ -275,7 +275,7 @@ class TestMainModule:
             
             # Mock config
             mock_config = Mock()
-            mock_config.validate.return_value = None
+            mock_config.validate_config.return_value = None
             mock_config.use_async = True
             MockConfig.return_value = mock_config
             
@@ -311,7 +311,7 @@ class TestMainModule:
             
             # Mock config
             mock_config = Mock()
-            mock_config.validate.return_value = None
+            mock_config.validate_config.return_value = None
             mock_config.use_async = True
             MockConfig.return_value = mock_config
             
@@ -346,7 +346,7 @@ class TestMainModule:
             
             # Mock config
             mock_config = Mock()
-            mock_config.validate.return_value = None
+            mock_config.validate_config.return_value = None
             mock_config.use_async = True
             MockConfig.return_value = mock_config
             
@@ -379,7 +379,7 @@ class TestMainModule:
             
             # Mock config
             mock_config = Mock()
-            mock_config.validate.return_value = None
+            mock_config.validate_config.return_value = None
             mock_config.use_async = True
             MockConfig.return_value = mock_config
             

@@ -1,7 +1,7 @@
 """Rich-based user interface components with async support."""
 
 import asyncio
-from typing import Union
+from typing import Union, cast
 
 from rich.console import Console
 from rich.progress import Progress, SpinnerColumn, TextColumn
@@ -35,14 +35,12 @@ class UIService:
         """
         self.console = Console()
         self.config = Config()
-        self.config.validate()
+        self.config.validate_config()
         self.use_async = use_async
 
-        # Initialize weather service with proper type annotation
+        self.weather_service: Union[AsyncWeatherService, WeatherService]
         if use_async:
-            self.weather_service: Union[AsyncWeatherService, WeatherService] = (
-                AsyncWeatherService(self.config)
-            )
+            self.weather_service = AsyncWeatherService(self.config)
         else:
             self.weather_service = WeatherService(self.config)
 
@@ -112,15 +110,13 @@ class UIService:
 
             try:
                 if self.use_async:
-                    # In async mode, we should have an async service
-                    weather_data = await self.weather_service.get_weather(
-                        location, self.current_units
-                    )
+                    weather_data = await cast(
+                        AsyncWeatherService, self.weather_service
+                    ).get_weather(location, self.current_units)
                 else:
-                    # In sync mode, we should have a sync service
-                    weather_data = self.weather_service.get_weather(
-                        location, self.current_units
-                    )
+                    weather_data = cast(
+                        WeatherService, self.weather_service
+                    ).get_weather(location, self.current_units)
                 progress.update(
                     task, completed=True, description="[green]Data received!"
                 )
@@ -153,15 +149,15 @@ class UIService:
 
             try:
                 if self.use_async:
-                    # For async service, we need to run the coroutine
                     weather_data = asyncio.run(
-                        self.weather_service.get_weather(location, self.current_units)
+                        cast(AsyncWeatherService, self.weather_service).get_weather(
+                            location, self.current_units
+                        )
                     )
                 else:
-                    # In sync mode, we should have a sync service
-                    weather_data = self.weather_service.get_weather(
-                        location, self.current_units
-                    )
+                    weather_data = cast(
+                        WeatherService, self.weather_service
+                    ).get_weather(location, self.current_units)
                 progress.update(
                     task, completed=True, description="[green]Data received!"
                 )
@@ -321,7 +317,7 @@ class UIService:
         """Handle unit system selection."""
         self.console.print("\n[bold]🌡️ Measurement Units[/bold]")
         choice = Prompt.ask(
-            "Choose units ([1] Metric °C/[2] Imperial °F/[3] Kelvin)",
+            "Choose units ([1] Metric °C/[2] Imperial °F/[3] Kelvin (Scientific/Default))",
             choices=["1", "2", "3"],
             default="1",
         )

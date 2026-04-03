@@ -42,13 +42,12 @@ class FormatterFactory:
         from weather_app.cli.formatters.markdown_formatter import MarkdownFormatter
         from weather_app.cli.formatters.tui_formatter import TUIFormatter
 
-        cls._formatters.update(
-            {
-                "tui": TUIFormatter,
-                "json": JSONFormatter,
-                "markdown": MarkdownFormatter,
-            }
-        )
+        formatter_map: Dict[str, Type[BaseFormatter]] = {
+            "tui": TUIFormatter,
+            "json": JSONFormatter,
+            "markdown": MarkdownFormatter,
+        }
+        cls._formatters.update(formatter_map)
 
     @classmethod
     def get_formatter(cls, output_format: str, **kwargs) -> BaseFormatter:

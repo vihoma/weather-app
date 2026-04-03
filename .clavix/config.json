@@ -3,9 +3,7 @@
   "integrations": [
     "agents-md",
     "claude-code",
-    "gemini",
     "opencode",
-    "qwen",
     "copilot",
     "roocode"
   ],

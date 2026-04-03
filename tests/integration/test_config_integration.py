@@ -95,7 +95,7 @@ class TestConfigIntegration:
         try:
             config = Config()
             # Validation should pass with API key
-            config.validate()
+            config.validate_config()
         finally:
             # Clean up
             if "OWM_API_KEY" in os.environ:
@@ -114,7 +114,7 @@ class TestConfigIntegration:
         
         # Validation should fail without API key
         with pytest.raises(APIKeyError):
-            config.validate()
+            config.validate_config()
 
     def test_secure_config_api_key_storage(self):
         """Test secure API key storage integration."""
@@ -252,7 +252,7 @@ class TestConfigIntegration:
         
         # Test validation error message
         try:
-            config.validate()
+            config.validate_config()
             pytest.fail("Validation should have failed without API key")
         except APIKeyError as e:
             error_message = str(e)

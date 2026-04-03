@@ -81,12 +81,13 @@ All keys are **lower‑case**.
 
 ```yaml
 # weather.yaml
-owm_api_key: your_api_key_here
-owm_units: metric          # options: metric, imperial, kelvin
-cache_persist: true        # default: false
-cache_ttl: 120             # seconds, default: 600
-log_level: INFO            # DEBUG, INFO, WARNING, ERROR
-log_format: json           # text or json (default: text)
+owm_api_key: "your_api_key_here"  # required, will be securely stored if
+                                  # keyring is available
+owm_units: "metric"               # options: metric, imperial, kelvin
+cache_persist: true               # default: false
+cache_ttl: 120                    # seconds, default: 600
+log_level: "INFO"                 # DEBUG, INFO, WARNING, ERROR
+log_format: "json"                # text or json (default: text)
 ```
 
 > **Note:** The same settings can still be provided via environment variables;
@@ -154,7 +155,7 @@ weather weather --coordinates "51.5074,-0.1278" --output markdown
 weather --units metric weather --city "Paris,FR" --output tui
 
 # Force async mode and disable caching
-weather weather --city "Tokyo,JP" --use-async --no-cache
+weather weather --city "Tokyo,JP" --async --no-cache
 ```
 
 ### Subcommands Reference
@@ -179,8 +180,8 @@ All commands support these global options:
 - `--verbose, -v` - Enable verbose output (debug logging)
 - `--config-file FILE` - Path to custom configuration file (YAML)
 - `--units [metric|imperial|standard]` - Temperature units
-- `--use-async` - Force asynchronous mode
-- `--no-cache` - Disable caching for this request
+- `--async` & `--no-async` - Force/disable asynchronous mode
+- `--cache` & `--no-cache` - Force/Disable caching for this request
 
 ### Output Formats
 
@@ -217,8 +218,11 @@ poetry run pytest tests/ -v
 # Linting
 poetry run ruff check src/
 
-# Formatting imports  
-poetry run isort src/
+# Formatting
+poetry run ruff format src/
+
+# Type checking
+poetry run ty src/
 ```
 
 ### Building package

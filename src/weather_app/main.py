@@ -106,7 +106,7 @@ async def main_async() -> None:
         except KeyboardInterrupt:
             console.print("\n[yellow]Setup cancelled by user.[/yellow]")
 
-    config.validate()
+    config.validate_config()
     setup_default_logging(config)
     global logger
     logger = LoggingConfig.get_logger(__name__)

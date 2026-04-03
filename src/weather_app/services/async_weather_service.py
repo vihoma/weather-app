@@ -37,10 +37,11 @@ class AsyncWeatherService:
             ValueError: If API key is not provided
 
         """
-        self.api_key = config.api_key
-        if not self.api_key:
+        api_key = config.api_key
+        if not api_key:
             logger.error("API key is required but not provided")
             raise ValueError("API key is required")
+        self.api_key: str = api_key
 
         self.base_url = "https://api.openweathermap.org/data/2.5"
         self.timeout = config.request_timeout
