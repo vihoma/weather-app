@@ -1,3 +1,6 @@
+/dist/
+/docs/
+/site/
 venv/
 MagicMock/
 __pycache__/

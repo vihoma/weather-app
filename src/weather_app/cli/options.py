@@ -73,6 +73,31 @@ def async_option():
     )
 
 
+def no_async_option():
+    """Decorator for adding a --no-async option to a command.
+
+    Overrides the global async setting to disable asynchronous mode for this specific command.
+    """
+    return click.option(
+        "--no-async",
+        "no_async",
+        is_flag=True,
+        help="Disable asynchronous mode for this command.",
+    )
+
+
+def cache_option():
+    """Decorator for adding a --cache option to a command.
+
+    Overrides the global cache setting for this specific command.
+    """
+    return click.option(
+        "--cache",
+        is_flag=True,
+        help="Enable caching for this request.",
+    )
+
+
 def no_cache_option():
     """Decorator for adding a --no-cache option to a command.
 
