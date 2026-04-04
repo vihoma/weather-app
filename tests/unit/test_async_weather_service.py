@@ -188,3 +188,44 @@ class TestAsyncWeatherService:
         assert call_kwargs["params"]["appid"] == "test_api_key"
         assert call_kwargs["params"]["units"] == "metric"
         assert "q" not in call_kwargs["params"], "City query param should not be present for coordinates"
+
+    @pytest.mark.asyncio
+    async def test_async_context_manager(self, mock_config):
+        """Test AsyncWeatherService as async context manager."""
+        async with AsyncWeatherService(mock_config) as svc:
+            assert isinstance(svc, AsyncWeatherService)
+        # After exiting, any open session should be closed
+
+    @pytest.mark.asyncio
+    async def test_async_context_manager_closes_session(self, mock_config):
+        """Test that __aexit__ closes the aiohttp session."""
+        svc = AsyncWeatherService(mock_config)
+        mock_session = AsyncMock()
+        mock_session.closed = False
+        svc._session = mock_session
+
+        await svc.__aexit__(None, None, None)
+        mock_session.close.assert_awaited_once()
+
+    @pytest.mark.asyncio
+    async def test_ensure_session_uses_connector_and_timeout(self, weather_service):
+        """Test that _ensure_session creates session with TCPConnector and ClientTimeout."""
+        with patch("weather_app.services.async_weather_service.aiohttp.ClientSession") as mock_session_cls, \
+             patch("weather_app.services.async_weather_service.aiohttp.TCPConnector") as mock_connector_cls, \
+             patch("weather_app.services.async_weather_service.aiohttp.ClientTimeout") as mock_timeout_cls:
+            mock_session_cls.return_value = MagicMock()
+            mock_connector = MagicMock()
+            mock_connector_cls.return_value = mock_connector
+            mock_timeout = MagicMock()
+            mock_timeout_cls.return_value = mock_timeout
+
+            # Force new session creation
+            weather_service._session = None
+            await weather_service._ensure_session()
+
+            mock_connector_cls.assert_called_once_with(limit=10, limit_per_host=5)
+            mock_timeout_cls.assert_called_once_with(total=weather_service.timeout)
+            mock_session_cls.assert_called_once_with(
+                connector=mock_connector,
+                timeout=mock_timeout,
+            )

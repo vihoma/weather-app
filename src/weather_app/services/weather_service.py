@@ -210,9 +210,3 @@ class WeatherService:
         """Explicitly save cache to disk."""
         if hasattr(self, "config") and self.config.cache_persist:
             self._save_cache_to_disk(self.config.cache_file)
-
-    def __del__(self):
-        """Save cache to disk when service is destroyed."""
-        # Note: __del__ methods are unreliable for persistence
-        # Use save_cache() method explicitly instead
-        pass

@@ -241,8 +241,16 @@ class AsyncWeatherService:
     async def _ensure_session(self) -> aiohttp.ClientSession:
         """Get or create a shared aiohttp session."""
         if self._session is None or self._session.closed:
-            self._session = aiohttp.ClientSession()
-            logger.debug("Created new aiohttp session")
+            connector = aiohttp.TCPConnector(
+                limit=10,
+                limit_per_host=5,
+            )
+            client_timeout = aiohttp.ClientTimeout(total=self.timeout)
+            self._session = aiohttp.ClientSession(
+                connector=connector,
+                timeout=client_timeout,
+            )
+            logger.debug("Created new aiohttp session with pool limits and timeout")
         return self._session
 
     async def close(self) -> None:
@@ -253,6 +261,14 @@ class AsyncWeatherService:
 
         if hasattr(self, "config") and self.config.cache_persist:
             self._save_cache_to_disk(self.config.cache_file)
+
+    async def __aenter__(self) -> "AsyncWeatherService":
+        """Enter async context manager."""
+        return self
+
+    async def __aexit__(self, exc_type, exc_val, exc_tb) -> None:
+        """Exit async context manager, closing resources."""
+        await self.close()
 
     def _load_cache_from_disk(self, cache_file_path: str) -> None:
         """Load cache from JSON file."""
@@ -302,9 +318,3 @@ class AsyncWeatherService:
         """Explicitly save cache to disk."""
         if hasattr(self, "config") and self.config.cache_persist:
             self._save_cache_to_disk(self.config.cache_file)
-
-    def __del__(self):
-        """Save cache to disk when service is destroyed."""
-        # Note: __del__ methods are unreliable for persistence
-        # Use save_cache() method explicitly instead
-        pass
