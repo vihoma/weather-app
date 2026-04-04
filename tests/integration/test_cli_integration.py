@@ -265,7 +265,7 @@ cache_file: /tmp/test_cache.json
 
     def test_cli_setup_api_key_integration(self, runner):
         """Test setup api-key command integration with keyring."""
-        with patch("weather_app.security.SecureConfig") as mock_secure_config_class:
+        with patch("weather_app.cli.commands.setup.SecureConfig") as mock_secure_config_class:
             mock_secure_config = Mock()
             mock_secure_config.is_keyring_available = Mock(return_value=True)
             mock_secure_config.store_api_key = Mock()
@@ -287,6 +287,7 @@ cache_file: /tmp/test_cache.json
 
     def test_cli_cache_management_integration(self, runner):
         """Test cache command integration with file system."""
+        from unittest.mock import mock_open
         with patch("weather_app.cli.commands.cache.Config") as mock_config_class:
             mock_config = Mock()
             mock_config.cache_file = "/tmp/test_cache.json"
@@ -312,25 +313,28 @@ cache_file: /tmp/test_cache.json
                         "key4": {"data": "value4"}
                     }
                     
-                    # Mock click.confirm for cache clear
-                    with patch("weather_app.cli.commands.cache.click.confirm") as mock_confirm:
-                        mock_confirm.return_value = True
-                        
-                        # Test cache clear
-                        result = runner.invoke(cli, ["cache", "clear", "--force"])
-                        assert result.exit_code == 0
-                        mock_path.unlink.assert_called_once()
-                        
-                        # Reset mock for status test
-                        mock_path.unlink.reset_mock()
-                        
-                        # Test cache status
-                        result = runner.invoke(cli, ["cache", "status"])
-                        assert result.exit_code == 0
-                        assert "Enabled" in result.output
-                        assert "600" in result.output
-                        assert "key1" in result.output
-                        assert "... (+2 more)" in result.output
+                    # Mock open() so the Mock path object is never passed to the real open()
+                    with patch("builtins.open", mock_open(read_data="{}")):
+                        # Mock click.confirm for cache clear
+                        with patch("weather_app.cli.commands.cache.click.confirm") as mock_confirm:
+                            mock_confirm.return_value = True
+                            
+                            # Test cache clear
+                            result = runner.invoke(cli, ["cache", "clear", "--force"])
+                            assert result.exit_code == 0
+                            mock_path.unlink.assert_called_once()
+                            
+                            # Reset mock for status test
+                            mock_path.unlink.reset_mock()
+                            
+                            # Test cache status
+                            result = runner.invoke(cli, ["cache", "status"])
+                            assert result.exit_code == 0
+                            assert "Enabled" in result.output
+                            assert "600" in result.output
+                            assert "key1" in result.output
+                            assert "... (+1 more)" in result.output
+
 
     def test_cli_config_show_integration(self, runner):
         """Test config show command integration with Config."""

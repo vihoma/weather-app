@@ -403,7 +403,8 @@ class TestMainModule:
     def test_main_function(self):
         """Test main function wrapper."""
         with patch('weather_app.main.asyncio') as MockAsyncio:
-            main()
+            with patch('sys.argv', ['weather']):
+                main()
             MockAsyncio.run.assert_called_once()
             # Verify main_async was called
             call_args = MockAsyncio.run.call_args[0]
