@@ -1,6 +1,5 @@
 """JSON formatter for weather data."""
 
-import dataclasses
 import json
 
 from weather_app.cli.output_formatters import BaseFormatter
@@ -24,6 +23,5 @@ class JSONFormatter(BaseFormatter):
         Returns:
             JSON string with indentation.
         """
-        # Convert WeatherData dataclass to dict
-        data = dataclasses.asdict(weather_data)
+        data = weather_data.model_dump()
         return json.dumps(data, indent=2, default=str)

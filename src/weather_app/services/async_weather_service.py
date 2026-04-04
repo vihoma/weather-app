@@ -264,8 +264,13 @@ class AsyncWeatherService:
 
                 # Convert loaded data back to WeatherData objects
                 for cache_key, weather_dict in cache_data.items():
-                    weather_data = WeatherData(**weather_dict)
-                    self.cache[cache_key] = weather_data
+                    try:
+                        weather_data = WeatherData.model_validate(weather_dict)
+                        self.cache[cache_key] = weather_data
+                    except Exception as e:
+                        logger.warning(
+                            "Skipping corrupt cache entry %s: %s", cache_key, e
+                        )
 
                 logger.info(
                     "Loaded %d cache items from %s", len(cache_data), cache_path
@@ -284,7 +289,7 @@ class AsyncWeatherService:
             # Convert cache to serializable format
             cache_data = {}
             for cache_key, weather_data in self.cache.items():
-                cache_data[cache_key] = weather_data.__dict__
+                cache_data[cache_key] = weather_data.model_dump()
 
             with open(cache_path, "w", encoding="utf-8") as f:
                 json.dump(cache_data, f, indent=2)

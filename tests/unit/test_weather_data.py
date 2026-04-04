@@ -155,3 +155,151 @@ class TestWeatherData:
         )
 
         assert weather_data.get_emoji() == expected_emoji
+
+
+class TestWeatherDataSerialization:
+    """Test Pydantic model_dump / model_validate serialization."""
+
+    @pytest.fixture
+    def sample_weather_data(self) -> WeatherData:
+        """Create a fully populated WeatherData instance for testing."""
+        return WeatherData(
+            city="London,GB",
+            units="metric",
+            status="Clear",
+            detailed_status="clear sky",
+            temperature=20.5,
+            feels_like=19.8,
+            humidity=65,
+            wind_speed=3.2,
+            wind_direction_deg=180.0,
+            precipitation_probability=10,
+            clouds=20,
+            visibility_distance=10000.0,
+            pressure_hpa=1013.0,
+            icon_code=800,
+        )
+
+    def test_model_dump_returns_all_fields(self, sample_weather_data):
+        """Test that model_dump() returns a dict with all field values."""
+        d = sample_weather_data.model_dump()
+
+        assert d["city"] == "London,GB"
+        assert d["temperature"] == 20.5
+        assert d["humidity"] == 65
+        assert d["icon_code"] == 800
+        assert d["wind_direction_deg"] == 180.0
+        assert "WEATHER_EMOJI_MAP" not in d
+
+    def test_model_validate_round_trip(self, sample_weather_data):
+        """Test model_dump -> model_validate produces an equal object."""
+        d = sample_weather_data.model_dump()
+        restored = WeatherData.model_validate(d)
+
+        assert restored == sample_weather_data
+
+    def test_model_validate_ignores_unknown_keys(self, sample_weather_data):
+        """Test that unknown keys are silently ignored (forward-compat)."""
+        d = sample_weather_data.model_dump()
+        d["unknown_future_field"] = "should be ignored"
+        d["another_extra"] = 42
+
+        restored = WeatherData.model_validate(d)
+        assert restored == sample_weather_data
+
+    def test_model_validate_missing_optional_fields(self):
+        """Test that missing Optional fields default to None."""
+        minimal = {
+            "city": "Oslo",
+            "units": "metric",
+            "status": "Clear",
+            "detailed_status": "clear sky",
+            "temperature": 5.0,
+            "feels_like": 3.0,
+            "humidity": 70,
+            "wind_speed": 2.0,
+            "wind_direction_deg": None,
+            "precipitation_probability": None,
+            "clouds": None,
+            "visibility_distance": None,
+            "pressure_hpa": 1013.0,
+        }
+        wd = WeatherData.model_validate(minimal)
+
+        assert wd.icon_code is None
+
+    def test_model_validate_missing_required_field_raises(self):
+        """Test that omitting a required field raises ValidationError."""
+        from pydantic import ValidationError
+
+        incomplete = {
+            "units": "metric",
+            "status": "Clear",
+            "detailed_status": "clear sky",
+            "temperature": 5.0,
+            "feels_like": 3.0,
+            "humidity": 70,
+            "wind_speed": 2.0,
+            "wind_direction_deg": None,
+            "precipitation_probability": None,
+            "clouds": None,
+            "visibility_distance": None,
+            "pressure_hpa": 1013.0,
+        }
+        with pytest.raises(ValidationError, match="city"):
+            WeatherData.model_validate(incomplete)
+
+    def test_model_validate_type_coercion(self):
+        """Test that int temperature is coerced to float."""
+        data = {
+            "city": "Oslo",
+            "units": "metric",
+            "status": "Clear",
+            "detailed_status": "clear sky",
+            "temperature": 5,  # int, should become float
+            "feels_like": 3,
+            "humidity": 70,
+            "wind_speed": 2,
+            "wind_direction_deg": None,
+            "precipitation_probability": None,
+            "clouds": None,
+            "visibility_distance": None,
+            "pressure_hpa": 1013,
+        }
+        wd = WeatherData.model_validate(data)
+
+        assert isinstance(wd.temperature, float)
+        assert wd.temperature == 5.0
+
+    def test_model_validate_invalid_type_raises(self):
+        """Test that a non-numeric temperature raises ValidationError."""
+        from pydantic import ValidationError
+
+        data = {
+            "city": "Oslo",
+            "units": "metric",
+            "status": "Clear",
+            "detailed_status": "clear sky",
+            "temperature": "not_a_number",
+            "feels_like": 3.0,
+            "humidity": 70,
+            "wind_speed": 2.0,
+            "wind_direction_deg": None,
+            "precipitation_probability": None,
+            "clouds": None,
+            "visibility_distance": None,
+            "pressure_hpa": 1013.0,
+        }
+        with pytest.raises(ValidationError, match="temperature"):
+            WeatherData.model_validate(data)
+
+    def test_json_round_trip(self, sample_weather_data):
+        """Test model_dump -> json.dumps -> json.loads -> model_validate."""
+        import json
+
+        d = sample_weather_data.model_dump()
+        json_str = json.dumps(d)
+        loaded = json.loads(json_str)
+        restored = WeatherData.model_validate(loaded)
+
+        assert restored == sample_weather_data

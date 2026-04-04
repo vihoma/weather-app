@@ -1,12 +1,18 @@
 """Data models for weather information."""
 
-from dataclasses import dataclass
-from typing import Optional
+from typing import ClassVar, Optional
+
+from pydantic import BaseModel, ConfigDict
 
 
-@dataclass
-class WeatherData:
-    """Structured weather data container."""
+class WeatherData(BaseModel):
+    """Structured weather data container.
+
+    Uses Pydantic BaseModel for built-in validation, type coercion,
+    and serialization via model_dump() / model_validate().
+    """
+
+    model_config = ConfigDict(extra="ignore")
 
     city: str
     units: str
@@ -23,7 +29,7 @@ class WeatherData:
     pressure_hpa: float
     icon_code: Optional[int] = None
 
-    WEATHER_EMOJI_MAP = {
+    WEATHER_EMOJI_MAP: ClassVar[dict[str, str]] = {
         "clear": "☀️",
         "scattered clouds": "🌤️",
         "broken clouds": "🌥️",
