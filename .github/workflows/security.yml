@@ -15,6 +15,7 @@ on:
 
 jobs:
   bandit:
+    if: ${{ !github.event.act }} # skip during local actions testing
     name: Bandit security analysis
     runs-on: ubuntu-latest
     steps:
@@ -29,6 +30,7 @@ jobs:
         run: bandit -r src/ -c pyproject.toml
 
   pip-audit:
+    if: ${{ !github.event.act }} # skip during local actions testing
     name: Dependency vulnerability scan
     runs-on: ubuntu-latest
     steps:
