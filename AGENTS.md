@@ -5,6 +5,7 @@
 - **Run tests**: `poetry run pytest tests/`
 - **Lint with ruff**: `poetry run ruff check src/`
 - **Format imports**: `poetry run isort src/`
+- **Type check**: `poetry run mypy src/`
 - **Format code**: `poetry run ruff format src/`
 - **Build package**: `poetry build`
 - **Install deps**: `poetry install`

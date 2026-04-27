@@ -1,6 +1,6 @@
 [project]
 name = "weather-app"
-version = "0.7.1"
+version = "0.7.2"
 description = "A CLI weather app using OpenWeatherMap API, written in Python 3"
 authors = [
     {name = "Lord Sohron",email = "29570082+vihoma@users.noreply.github.com"}
@@ -10,7 +10,7 @@ readme = "README.md"
 requires-python = ">=3.13"
 dependencies = [
     "pyowm (>=3.4.0,<4.0.0)",
-    "rich (>=14.1.0,<15.0.0)",
+    "rich (>=15.0.0,<16.0.0)",
     "cachetools (>=7.0.0,<8.0.0)",
     "geopy (>=2.4.0,<3.0.0)",
     "setuptools (>=80.9.0, <83.0.0)",
