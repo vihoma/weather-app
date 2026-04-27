@@ -1,9 +1,16 @@
 """Weather subcommand for one-shot weather retrieval."""
 
 import asyncio
+import logging
 
 import click
 
+from weather_app.cli.command_logging import (
+    get_command_logger,
+    log_command_failure,
+    log_command_start,
+    log_command_success,
+)
 from weather_app.cli.errors import (
     APIClickException,
     ConfigurationClickException,
@@ -20,6 +27,8 @@ from weather_app.exceptions import (
     NetworkError,
     RateLimitError,
 )
+
+logger = get_command_logger(__name__)
 
 
 @apply_preserve_epilog_formatting
@@ -75,12 +84,22 @@ def weather_command(
     from weather_app.cli.group import get_config_from_context
 
     config = get_config_from_context(ctx)
+    location_source = "city" if city else "coordinates" if coordinates else "none"
+    log_command_start(
+        logger,
+        ctx,
+        location_source=location_source,
+        output_format=output_format,
+        use_async=config.use_async,
+    )
 
     # Validate that at least one location method is provided
     if not city and not coordinates:
-        raise click.UsageError(
+        error = click.UsageError(
             "You must specify a location using --city or --coordinates."
         )
+        log_command_failure(logger, ctx, error, level=logging.WARNING)
+        raise error
 
     try:
         # Determine location string for API
@@ -115,16 +134,27 @@ def weather_command(
 
         # Print output
         click.echo(output)
+        log_command_success(
+            logger,
+            ctx,
+            location_source=location_source,
+            output_format=output_format,
+        )
 
     except LocationNotFoundError as e:
+        log_command_failure(logger, ctx, e, level=logging.WARNING)
         raise LocationClickException(f"Location not found: {e}")
     except ConfigurationError as e:
+        log_command_failure(logger, ctx, e)
         raise ConfigurationClickException(f"Configuration error: {e}")
     except (APIRequestError, NetworkError, DataParsingError, RateLimitError) as e:
+        log_command_failure(logger, ctx, e, exc_info=True)
         raise APIClickException(f"API request failed: {e}")
-    except click.BadParameter:
+    except click.BadParameter as e:
+        log_command_failure(logger, ctx, e, level=logging.WARNING)
         raise  # Re-raise click.BadParameter to preserve its exit code
     except Exception as e:
+        log_command_failure(logger, ctx, e, exc_info=True)
         raise click.ClickException(f"Unexpected error: {e}")
 
 

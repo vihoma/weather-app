@@ -7,7 +7,8 @@
 - **Format imports**: `poetry run isort src/`
 - **Type check**: `poetry run mypy src/`
 - **Format code**: `poetry run ruff format src/`
-- **Build package**: `poetry build`
+- **Build package**: `poetry build`, but do not run this command during
+  development to avoid unnecessary builds and overwritten release builds.
 - **Install deps**: `poetry install`
 
 ## Code Style Guidelines

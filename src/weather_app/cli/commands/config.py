@@ -9,8 +9,15 @@ import yaml
 from rich.console import Console
 from rich.table import Table
 
+from weather_app.cli.command_logging import (
+    get_command_logger,
+    log_command_start,
+    log_command_success,
+)
 from weather_app.cli.help_formatter import apply_preserve_epilog_formatting
 from weather_app.config import Config
+
+logger = get_command_logger(__name__)
 
 
 @apply_preserve_epilog_formatting
@@ -143,6 +150,7 @@ def _get_source_hint(config_field: str, config: Config) -> List[str]:
 def config_show(ctx: click.Context) -> None:
     """Show current configuration with source indications."""
     console = Console()
+    log_command_start(logger, ctx)
 
     # Get config with CLI overrides applied
     from weather_app.cli.group import get_config_from_context
@@ -244,14 +252,17 @@ def config_show(ctx: click.Context) -> None:
 
     console.print("\n[dim]Note: Source hints indicate where a value *could* be from.")
     console.print("[dim]Actual precedence: CLI > env > YAML > keyring > default</dim>")
+    log_command_success(logger, ctx)
 
 
 @config_group.command(
     name="sources", help="Show detailed configuration source information."
 )
-def config_sources() -> None:
+@click.pass_context
+def config_sources(ctx: click.Context) -> None:
     """Show detailed configuration source information."""
     console = Console()
+    log_command_start(logger, ctx)
     config = Config()
 
     console.print("[bold]Configuration Source Analysis[/bold]\n")
@@ -341,3 +352,4 @@ def config_sources() -> None:
     console.print(
         "\n[dim]Precedence order: CLI arguments > environment variables > YAML file > keyring > defaults</dim>"
     )
+    log_command_success(logger, ctx)

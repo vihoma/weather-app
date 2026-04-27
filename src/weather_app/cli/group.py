@@ -1,7 +1,10 @@
 """Click command group for weather application.
 
-This module defines the main CLI group with global options that apply to all subcommands.
+This module defines the main CLI group with global options that apply to all
+subcommands.
 """
+
+import logging
 
 import click
 
@@ -13,11 +16,87 @@ from weather_app.cli.commands.version import version_command
 # Import subcommands
 from weather_app.cli.commands.weather import weather_command
 from weather_app.cli.help_formatter import apply_preserve_epilog_formatting
+from weather_app.cli.config_override import apply_cli_overrides
 from weather_app.config import Config
+from weather_app.logging_config import (
+    LoggingConfig,
+    log_with_context,
+    setup_default_logging,
+)
+
+logger = logging.getLogger(__name__)
+
+CONFIG_KEY = "config"
+LOGGER_KEY = "logger"
+LOGGING_INITIALIZED_KEY = "logging_initialized"
+HELP_REQUESTED_KEY = "help_requested"
+
+
+class WeatherCLIGroup(click.Group):
+    """Click group that marks help-only invocations before callbacks run."""
+
+    def parse_args(self, ctx: click.Context, args: list[str]) -> list[str]:
+        help_option_names = set(ctx.help_option_names or ["--help"])
+        ctx.meta[HELP_REQUESTED_KEY] = any(arg in help_option_names for arg in args)
+        return super().parse_args(ctx, args)
+
+
+def _create_effective_config(ctx: click.Context) -> Config:
+    """Build and cache the effective configuration for the current CLI run."""
+    root_ctx = ctx.find_root()
+    root_ctx.ensure_object(dict)
+
+    cached_config = root_ctx.obj.get(CONFIG_KEY)
+    if isinstance(cached_config, Config):
+        return cached_config
+
+    config = Config()
+    if root_ctx.obj:
+        apply_cli_overrides(config, **root_ctx.obj)
+
+    root_ctx.obj[CONFIG_KEY] = config
+    return config
+
+
+def _should_bootstrap_logging(ctx: click.Context) -> bool:
+    """Return True when the current invocation should initialize subcommand logging."""
+    return bool(
+        ctx.invoked_subcommand is not None
+        and not ctx.meta.get(HELP_REQUESTED_KEY, False)
+    )
+
+
+def _bootstrap_subcommand_logging(ctx: click.Context) -> None:
+    """Initialize logging for Click-based subcommand execution."""
+    root_ctx = ctx.find_root()
+    root_ctx.ensure_object(dict)
+
+    if root_ctx.obj.get(LOGGING_INITIALIZED_KEY) or not _should_bootstrap_logging(
+        root_ctx
+    ):
+        return
+
+    config = _create_effective_config(root_ctx)
+    setup_default_logging(config, enable_console=False)
+
+    command_logger = LoggingConfig.get_logger(__name__)
+    root_ctx.obj[LOGGER_KEY] = command_logger
+    root_ctx.obj[LOGGING_INITIALIZED_KEY] = True
+
+    log_with_context(
+        command_logger,
+        logging.DEBUG,
+        "CLI logging configured",
+        subcommand=root_ctx.invoked_subcommand,
+        log_level=config.log_level,
+        log_format=config.log_format,
+        log_file=config.log_file,
+    )
 
 
 @apply_preserve_epilog_formatting
 @click.group(
+    cls=WeatherCLIGroup,
     context_settings={"help_option_names": ["-h", "--help"]},
     epilog="""
 Examples:
@@ -125,7 +204,7 @@ def cli(
 
     # Apply overrides to config instance (will be created lazily when needed)
     # Actual override logic will be applied in config_override module
-    pass
+    _bootstrap_subcommand_logging(ctx)
 
 
 def get_config_from_context(ctx: click.Context) -> Config:
@@ -137,12 +216,7 @@ def get_config_from_context(ctx: click.Context) -> Config:
     Returns:
         Config instance with CLI overrides applied.
     """
-    from weather_app.cli.config_override import apply_cli_overrides
-
-    config = Config()
-    if ctx.obj:
-        apply_cli_overrides(config, **ctx.obj)
-    return config
+    return _create_effective_config(ctx)
 
 
 # Register subcommands

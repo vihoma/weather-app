@@ -28,6 +28,7 @@ class LoggingConfig:
         log_level: int = logging.INFO,
         log_file: Optional[str] = None,
         log_format: str = "text",
+        enable_console: bool = True,
     ):
         """Initialize logging configuration.
 
@@ -35,11 +36,13 @@ class LoggingConfig:
             log_level: Logging level (e.g., logging.INFO, logging.DEBUG)
             log_file: Optional path to log file
             log_format: Log format ("text" or "json")
+            enable_console: Whether to attach a console handler
 
         """
         self.log_level = log_level
         self.log_file = log_file
         self.log_format = log_format.lower()
+        self.enable_console = enable_console
 
     def setup_logging(self) -> None:
         """Configure the root logger with console and optional file handlers."""
@@ -59,11 +62,11 @@ class LoggingConfig:
             console_formatter = self._create_text_formatter()
             file_formatter = self._create_text_formatter(include_file_info=True)
 
-        # Console handler
-        console_handler = logging.StreamHandler()
-        console_handler.setLevel(self.log_level)
-        console_handler.setFormatter(console_formatter)
-        root_logger.addHandler(console_handler)
+        if self.enable_console:
+            console_handler = logging.StreamHandler()
+            console_handler.setLevel(self.log_level)
+            console_handler.setFormatter(console_formatter)
+            root_logger.addHandler(console_handler)
 
         # File handler (if specified)
         if self.log_file:
@@ -159,7 +162,7 @@ def log_with_context(
         **context: Additional context data to include in log
 
     """
-    if JSON_LOGGER_AVAILABLE and logger.isEnabledFor(level):
+    if _root_uses_json_formatter() and logger.isEnabledFor(level):
         # For JSON logging, include context as extra data
         extra_data = {"context": context} if context else {}
         logger.log(level, message, extra=extra_data, exc_info=exc_info, stacklevel=2)
@@ -171,11 +174,30 @@ def log_with_context(
         logger.log(level, message, exc_info=exc_info, stacklevel=2)
 
 
-def setup_default_logging(config: Optional["Config"] = None) -> None:
+def _root_uses_json_formatter() -> bool:
+    """Return True when the configured root handlers use JSON formatting."""
+    if not JSON_LOGGER_AVAILABLE:
+        return False
+
+    json_formatter_type = getattr(jsonlogger, "JsonFormatter", None)
+    if json_formatter_type is None:
+        return False
+
+    root_logger = logging.getLogger()
+    return any(
+        isinstance(getattr(handler, "formatter", None), json_formatter_type)
+        for handler in root_logger.handlers
+    )
+
+
+def setup_default_logging(
+    config: Optional["Config"] = None, enable_console: bool = True
+) -> None:
     """Set up logging configuration for the application.
 
     Args:
         config: Optional Config object for custom logging settings
+        enable_console: Whether to attach a console handler
 
     """
     if config:
@@ -186,11 +208,17 @@ def setup_default_logging(config: Optional["Config"] = None) -> None:
         if log_file is None and config.log_format == "json":
             log_file = "weather_app.json"
         logging_config = LoggingConfig(
-            log_level=log_level, log_file=log_file, log_format=config.log_format
+            log_level=log_level,
+            log_file=log_file,
+            log_format=config.log_format,
+            enable_console=enable_console,
         )
     else:
         logging_config = LoggingConfig(
-            log_level=logging.INFO, log_file="weather_app.log", log_format="text"
+            log_level=logging.INFO,
+            log_file="weather_app.log",
+            log_format="text",
+            enable_console=enable_console,
         )
 
     logging_config.setup_logging()
