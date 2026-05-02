@@ -1,3 +1,4 @@
+target-version = "py314"
 respect-gitignore = true
 force-exclude = true
 exclude = [
