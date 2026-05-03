@@ -7,6 +7,13 @@
 #
 # To enable this hook, rename this file to "pre-commit.ps1".
 
+# Error action preference to stop the commit if any command fails.
+$ErrorActionPreference = "Stop"
+
+# Enable native command error action preference to ensure that errors from
+# native commands are also treated as terminating errors.
+$PSNativeCommandUseErrorActionPreference = $true
+
 $against = ""
 $git_status = (git rev-parse --verify HEAD 2>&1 > $null)
 if ($git_status -eq $true) {
@@ -31,7 +38,7 @@ if ($allownonascii -eq $false) {
 	# the square bracket bytes happen to fall in the designated range.
 	test.exe ($env:LC_ALL = "C"; git diff-index --cached --name-only --diff-filter=A -z $against |
   tr.exe -d '[ -~]\0' | wc.exe -c) -ne 0 {
-    Write-Host "
+    Write-Error "
     Error: Attempt to add a non-ASCII file name.
     This can cause problems if you want to work with people on other platforms.
     To be portable it is advisable to rename the file.
@@ -39,23 +46,31 @@ if ($allownonascii -eq $false) {
     If you know what you are doing you can disable this check using
     git config hooks.allownonascii true
     "
-    exit 1
   }
 }
+
+# Error suffix to use in the error messages.
+$error_suffix = "Please fix the issues before committing."
 
 # Run Ruff linter on the files to be committed, and fail if there are any differences.
 git diff --cached --name-only --diff-filter=ACM $against -- |
 grep 'src/weather_app/.*\.py$' | xargs ruff check --quiet ||
-(Write-Host "Error: ruff found issues in the files to be committed.
-Please fix them before committing." && exit 1)
+Write-Error "Error: Ruff linter found issues in the files to be committed:
+$_
 
-# If there are whitespace errors, print the offending file names and fail.
-git diff-index --check --cached $against -- ||
-(Write-Host "Error: whitespace errors found in the files to be committed.
-Please fix them before committing." && exit 1)
+$error_suffix"
 
 # Run Ruff formatting check on the files to be committed, and fail if there are any differences.
 git diff --cached --name-only --diff-filter=ACM $against -- |
 grep 'src/weather_app/.*\.py$' | xargs ruff format --check --quiet ||
-(Write-Host "Error: ruff found formatting issues in the files to be committed.
-Please fix them before committing." && exit 1)
+Write-Error "Error: ruff formatter found issues in the files to be committed:
+$_
+
+$error_suffix"
+# If there are whitespace errors, print the offending file names and fail.
+git diff-index --check --cached $against -- ||
+Write-Error "Error: whitespace errors found in the files to be committed:
+$_
+
+$error_suffix"
+
