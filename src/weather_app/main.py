@@ -5,7 +5,7 @@ This module initializes the application and handles top-level exceptions.
 Uses Rich for enhanced terminal output and structured logging.
 """
 
-import asyncio  
+import asyncio
 import logging
 import sys
 
