@@ -115,7 +115,7 @@ class SecureConfig:
             retrieved = keyring.get_password(self.SERVICE_NAME, test_key)
             keyring.delete_password(self.SERVICE_NAME, test_key)
             return retrieved == test_value
-        except (KeyringError, PermissionError, OSError, ImportError):
+        except KeyringError, PermissionError, OSError, ImportError:
             return False
 
     def is_keyring_available(self) -> bool:

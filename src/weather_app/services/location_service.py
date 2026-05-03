@@ -199,7 +199,7 @@ class LocationService:
                 "Reverse geocoding request timed out after %d seconds", self.timeout
             )
             return None
-        except (GeocoderUnavailable, GeocoderServiceError):
+        except GeocoderUnavailable, GeocoderServiceError:
             logger.warning("Reverse geocoding service unavailable")
             return None
         except (ValueError, TypeError) as e:
