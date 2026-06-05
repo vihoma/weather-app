@@ -16,6 +16,7 @@ __pycache__/
 .coverage
 conversation-*.md
 *-ses_*.md
+custom.json
 desktop.ini
 /*test.py
 /test*.py
