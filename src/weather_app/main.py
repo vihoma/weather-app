@@ -117,13 +117,13 @@ async def main_async() -> None:
             log_with_context(
                 logger, logging.INFO, "Starting Weather Application", mode="async"
             )
-            ui = UIService(use_async=True)
+            ui = UIService(use_async=True, config=config)
             await ui.run_async()
         else:
             log_with_context(
                 logger, logging.INFO, "Starting Weather Application", mode="sync"
             )
-            ui = UIService(use_async=False)
+            ui = UIService(use_async=False, config=config)
             ui.run()
         log_with_context(
             logger, logging.INFO, "Weather Application completed successfully"

@@ -27,15 +27,17 @@ from .weather_service import WeatherService
 class UIService:
     """Handles all user interaction and display."""
 
-    def __init__(self, use_async: bool = True):
+    def __init__(self, use_async: bool = True, config: Config | None = None):
         """Initialize the UI service.
 
         Args:
             use_async: Whether to use async mode for weather service
+            config: Pre-configured Config instance. If None, a new Config is created.
         """
         self.console = Console()
-        self.config = Config()
-        self.config.validate_config()
+        self.config = config if config is not None else Config()
+        if config is None:
+            self.config.validate_config()
         self.use_async = use_async
 
         self.weather_service: Union[AsyncWeatherService, WeatherService]

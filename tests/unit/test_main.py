@@ -49,7 +49,7 @@ class TestMainModule:
             MockInstall.assert_called_once_with(show_locals=True)
     
             # Verify async mode was used
-            MockUIService.assert_called_once_with(use_async=True)
+            MockUIService.assert_called_once_with(use_async=True, config=mock_config)
             mock_ui.run_async.assert_called_once()
     
             # Verify logging
@@ -83,7 +83,7 @@ class TestMainModule:
             await main_async()
     
             # Verify sync mode was used
-            MockUIService.assert_called_once_with(use_async=False)
+            MockUIService.assert_called_once_with(use_async=False, config=mock_config)
             mock_ui.run.assert_called_once()
 
     @pytest.mark.asyncio

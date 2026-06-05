@@ -1,5 +1,10 @@
 """Unit tests for WeatherService with caching."""
 
+import json
+import tempfile
+from datetime import datetime, timedelta, timezone
+from pathlib import Path
+
 import pytest
 from unittest.mock import Mock, patch
 from src.weather_app.services.weather_service import WeatherService
@@ -159,3 +164,169 @@ class TestWeatherService:
         assert result_imperial.units == "imperial"
         assert result_metric.temperature == 20.0
         assert result_imperial.temperature == 68.0
+
+    # ------------------------------------------------------------------
+    # Cache persistence with fetched_at timestamps
+    # ------------------------------------------------------------------
+
+    @staticmethod
+    def _make_weather_data(location: str = "London,GB", units: str = "metric") -> WeatherData:
+        """Create a minimal WeatherData fixture for cache tests."""
+        return WeatherData(
+            city=location,
+            units=units,
+            status="Clear",
+            detailed_status="clear sky",
+            temperature=20.0,
+            feels_like=19.0,
+            humidity=65,
+            wind_speed=3.2,
+            wind_direction_deg=180.0,
+            precipitation_probability=10,
+            clouds=20,
+            visibility_distance=10000.0,
+            pressure_hpa=1013.0,
+        )
+
+    def test_save_cache_writes_timestamped_format(self, weather_service):
+        """_save_cache_to_disk writes entries in {data, fetched_at} format."""
+        wd = self._make_weather_data()
+        cache_key = "London,GB:metric"
+        weather_service.cache[cache_key] = wd
+        weather_service._cache_metadata[cache_key] = datetime.now(timezone.utc)
+
+        with tempfile.NamedTemporaryFile(
+            mode="w", suffix=".json", delete=False
+        ) as f:
+            path = f.name
+
+        try:
+            weather_service.config.cache_persist = True
+            weather_service.config.cache_file = path
+            weather_service._save_cache_to_disk(path)
+
+            with open(path, "r", encoding="utf-8") as f:
+                saved = json.load(f)
+
+            assert cache_key in saved
+            entry = saved[cache_key]
+            assert "data" in entry
+            assert "fetched_at" in entry
+            assert entry["data"]["city"] == "London,GB"
+        finally:
+            Path(path).unlink()
+
+    def test_load_cache_loads_fresh_entries(self, weather_service):
+        """Fresh entries (within TTL) are loaded with their metadata."""
+        wd = self._make_weather_data()
+        cache_key = "London,GB:metric"
+        now = datetime.now(timezone.utc)
+
+        cache_content = {
+            cache_key: {
+                "data": wd.model_dump(),
+                "fetched_at": now.isoformat(),
+            }
+        }
+
+        with tempfile.NamedTemporaryFile(
+            mode="w", suffix=".json", delete=False
+        ) as f:
+            json.dump(cache_content, f)
+            path = f.name
+
+        try:
+            weather_service.config.cache_file = path
+            weather_service.config.cache_ttl = 600
+            weather_service._load_cache_from_disk(path)
+
+            assert cache_key in weather_service.cache
+            assert cache_key in weather_service._cache_metadata
+            loaded = weather_service.cache[cache_key]
+            assert loaded.city == "London,GB"
+            assert loaded.temperature == 20.0
+        finally:
+            Path(path).unlink()
+
+    def test_load_cache_skips_expired_entries(self, weather_service):
+        """Entries older than TTL are skipped on load."""
+        wd = self._make_weather_data()
+        cache_key = "London,GB:metric"
+        expired_time = datetime.now(timezone.utc) - timedelta(seconds=1200)
+
+        cache_content = {
+            cache_key: {
+                "data": wd.model_dump(),
+                "fetched_at": expired_time.isoformat(),
+            }
+        }
+
+        with tempfile.NamedTemporaryFile(
+            mode="w", suffix=".json", delete=False
+        ) as f:
+            json.dump(cache_content, f)
+            path = f.name
+
+        try:
+            weather_service.config.cache_file = path
+            weather_service.config.cache_ttl = 600
+            weather_service._load_cache_from_disk(path)
+
+            assert cache_key not in weather_service.cache
+            assert cache_key not in weather_service._cache_metadata
+        finally:
+            Path(path).unlink()
+
+    def test_load_cache_skips_legacy_format(self, weather_service):
+        """Old-format entries (bare dict, no 'data' key) are discarded."""
+        wd = self._make_weather_data()
+        cache_key = "London,GB:metric"
+
+        # Legacy format: bare WeatherData dict directly
+        cache_content = {cache_key: wd.model_dump()}
+
+        with tempfile.NamedTemporaryFile(
+            mode="w", suffix=".json", delete=False
+        ) as f:
+            json.dump(cache_content, f)
+            path = f.name
+
+        try:
+            weather_service.config.cache_file = path
+            weather_service.config.cache_ttl = 600
+            weather_service._load_cache_from_disk(path)
+
+            assert cache_key not in weather_service.cache
+        finally:
+            Path(path).unlink()
+
+    def test_save_cache_skips_expired_entries(self, weather_service):
+        """_save_cache_to_disk filters out already-expired entries."""
+        wd = self._make_weather_data()
+        fresh_key = "London,GB:metric"
+        expired_key = "Paris,FR:metric"
+        expired_time = datetime.now(timezone.utc) - timedelta(seconds=1200)
+
+        weather_service.cache[fresh_key] = wd
+        weather_service._cache_metadata[fresh_key] = datetime.now(timezone.utc)
+        weather_service.cache[expired_key] = wd
+        weather_service._cache_metadata[expired_key] = expired_time
+
+        weather_service.config.cache_ttl = 600
+
+        with tempfile.NamedTemporaryFile(
+            mode="w", suffix=".json", delete=False
+        ) as f:
+            path = f.name
+
+        try:
+            weather_service.config.cache_file = path
+            weather_service._save_cache_to_disk(path)
+
+            with open(path, "r", encoding="utf-8") as f:
+                saved = json.load(f)
+
+            assert fresh_key in saved
+            assert expired_key not in saved
+        finally:
+            Path(path).unlink()
