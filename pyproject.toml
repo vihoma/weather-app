@@ -89,6 +89,10 @@ markers = [
     "skip: Tests that should be skipped"
 ]
 
+[tool.bandit]
+test-targets = ["src/weather_app"]
+skips = ["B101", "B110"]
+
 [build-system]
 requires = ["poetry-core>=2.0.0,<3.0.0"]
 build-backend = "poetry.core.masonry.api"
