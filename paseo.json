@@ -1,0 +1,6 @@
+{
+  "worktree": {
+    "setup": "poetry install",
+    "teardown": "poetry env remove"
+  }
+}
