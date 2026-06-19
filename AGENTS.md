@@ -1,11 +1,16 @@
 # Agent Guidelines for Weather App
 
+**Always start the conversation by calling:
+`mcp_prism-mcp_session_load_context(project='weather-app', level='deep')`.
+When wrapping up, always call:
+`mcp_prism-mcp_session_save_ledger` and `mcp_prism-mcp_session_save_handoff`.**
+
 ## Build/Lint/Test Commands
 - **Run application**: `poetry run weather`
 - **Run tests**: `poetry run pytest tests/`
 - **Lint with ruff**: `poetry run ruff check src/`
 - **Format imports**: `poetry run isort src/`
-- **Type check**: `poetry run mypy src/`
+- **Type check**: `poetry run mypy src/` and `poetry run pyrefly src/`
 - **Format code**: `poetry run ruff format src/`
 - **Build package**: `poetry build`, but do not run this command during
   development to avoid unnecessary builds and overwritten release builds.
@@ -25,20 +30,26 @@
 - **Dependencies**: Managed via Poetry in pyproject.toml
 
 ## Code Correctness Guidelines
-- If available, use the cocoindex-code MCP server for code comprehension
+- Write unit tests for all public methods and critical paths, using pytest
+- Use type hints and mypy & pyrefly for static type checking
+- Use ruff for linting and code formatting to maintain consistency
+- Ensure all tests pass before committing code
+- If available, use the prism-mcp server for weather-app for domain-specific
+  knowledge and decision-making related developer preferences and best practices
+- If available, use the cocoindex-code (ccc) MCP server for code comprehension
   and correctness checks
-- If available, use the context7 MCP server for the latest
-  Rich/Click/PyOWM API Documentation and for other APIs as needed
+- If available, use the context7 MCP server for the latest Rich/Click/PyOWM API
+  Documentation and for other APIs as needed
 - Run the code formatter (ruff format) after code generation and before
   commits for consistent coding style
 
 ## Project Structure
-- Source code in `src/weather_app/` with package structure
-- Models in `models/`, services in `services/`
+- Source code in `src/weather_app/` with package structure (MVC or similar)
+- Models in `models/`, services in `services/` and CLI in `cli/`
 - Tests in `tests/` with pytest structure
-- Configuration handled via CLI arguments, environment variables
-  and a YAML configuration file, in the precedence order, CLI
-  arguments override anything else in configuration
+- Configuration handled via CLI arguments, environment variables and a YAML
+  configuration file, in the precedence order, CLI arguments override anything
+  else in configuration
 - Uses Rich for terminal UI, PyOWM for weather data
 
 
