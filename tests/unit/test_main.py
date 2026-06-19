@@ -402,11 +402,13 @@ class TestMainModule:
 
     def test_main_function(self):
         """Test main function wrapper."""
-        with patch('weather_app.main.asyncio') as MockAsyncio:
-            with patch('sys.argv', ['weather']):
+        with patch("weather_app.main.asyncio") as MockAsyncio:
+            with patch("sys.argv", ["weather"]):
                 main()
             MockAsyncio.run.assert_called_once()
-            # Verify main_async was called
+            # Verify main_async was called by checking the coroutine name,
+            # then close the coroutine to prevent "never awaited" warnings.
             call_args = MockAsyncio.run.call_args[0]
             assert len(call_args) == 1
-            assert call_args[0].__name__ == 'main_async'
+            assert call_args[0].__name__ == "main_async"
+            call_args[0].close()

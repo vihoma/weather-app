@@ -409,14 +409,31 @@ class TestCLICommands:
         # API key should be masked
         assert "test_api_key_masked" not in result.output
 
-    def test_global_options_verbose(self, runner):
+    @patch("weather_app.cli.commands.weather.FormatterFactory")
+    def test_global_options_verbose(
+        self, mock_formatter_factory, runner, mock_weather_data
+    ):
         """Test global --verbose flag."""
-        # Just test that the option is accepted (doesn't cause error)
-        result = runner.invoke(cli, ["--verbose", "weather", "--city", "London,GB", "--output", "tui"])
-        # Should fail because we didn't mock, but verbose flag should be accepted
-        # We expect location validation to fail because no mock setup
-        assert result.exit_code != EXIT_SUCCESS  # Some error expected
-        # But not a usage error from --verbose
+        mock_formatter = Mock()
+        mock_formatter.format.return_value = "Formatted TUI output"
+        mock_formatter_factory.get_formatter.return_value = mock_formatter
+
+        with (
+            runner.isolated_filesystem(),
+            patch(
+                "weather_app.cli.commands.weather._fetch_weather_data",
+                return_value=mock_weather_data,
+            ) as mock_fetch,
+        ):
+            result = runner.invoke(
+                cli,
+                ["--verbose", "weather", "--city", "London,GB", "--output", "tui"],
+                env={"LOG_FILE": "verbose.log", "OWM_API_KEY": "test_api_key"},
+            )
+
+        assert result.exit_code == EXIT_SUCCESS
+        assert "Formatted TUI output" in result.output
+        mock_fetch.assert_called_once()
 
     def test_global_options_units(self, runner):
         """Test global --units flag."""
