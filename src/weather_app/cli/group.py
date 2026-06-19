@@ -60,9 +60,8 @@ def _create_effective_config(ctx: click.Context) -> Config:
 
 def _should_bootstrap_logging(ctx: click.Context) -> bool:
     """Return True when the current invocation should initialize subcommand logging."""
-    return bool(
-        ctx.invoked_subcommand is not None
-        and not ctx.meta.get(HELP_REQUESTED_KEY, False)
+    return ctx.invoked_subcommand is not None and not ctx.meta.get(
+        HELP_REQUESTED_KEY, False
     )
 
 

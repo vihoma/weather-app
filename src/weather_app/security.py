@@ -78,7 +78,7 @@ class SensitiveDataFilter(logging.Filter):
 
         # If it's a key-value pair, mask just the value
         if "=" in full_match or ":" in full_match:
-            parts = re.split(r"[=:]", full_match, 1)
+            parts = re.split(r"[=:]", full_match, maxsplit=1)
             if len(parts) == 2:
                 key_part = parts[0].strip()
                 value_part = parts[1].strip()
@@ -115,7 +115,7 @@ class SecureConfig:
             retrieved = keyring.get_password(self.SERVICE_NAME, test_key)
             keyring.delete_password(self.SERVICE_NAME, test_key)
             return retrieved == test_value
-        except KeyringError, PermissionError, OSError, ImportError:
+        except (KeyringError, PermissionError, OSError, ImportError):
             return False
 
     def is_keyring_available(self) -> bool:

@@ -5,9 +5,11 @@ and formatting in the epilog section, preventing Click's text wrapping from
 breaking up multi-line examples.
 """
 
-from typing import Any
+from typing import Any, TypeVar
 
 import click
+
+CommandT = TypeVar("CommandT", bound=click.Command)
 
 
 class PreserveEpilogFormatter(click.HelpFormatter):
@@ -54,7 +56,7 @@ def get_preserve_epilog_context_settings() -> dict[str, Any]:
     }
 
 
-def apply_preserve_epilog_formatting(command: click.Command) -> click.Command:
+def apply_preserve_epilog_formatting(command: CommandT) -> CommandT:
     """Apply PreserveEpilogContext to a Click command.
 
     This function modifies the command to use the custom context class

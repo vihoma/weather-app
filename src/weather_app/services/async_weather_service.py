@@ -313,7 +313,7 @@ class AsyncWeatherService:
                         if now - fetched_at > ttl_delta:
                             skipped_expired += 1
                             continue
-                    except ValueError, TypeError:
+                    except (ValueError, TypeError):
                         skipped_legacy += 1
                         continue
 

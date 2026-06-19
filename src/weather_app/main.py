@@ -234,9 +234,10 @@ async def main_async() -> None:
         )
     finally:
         # Ensure cache is saved on application exit
-        if ui and hasattr(ui, "weather_service") and ui.weather_service:
+        weather_service = vars(ui).get("weather_service") if ui else None
+        if weather_service:
             try:
-                ui.weather_service.save_cache()
+                weather_service.save_cache()
                 log_with_context(logger, logging.DEBUG, "Cache saved successfully")
             except Exception as e:
                 log_with_context(

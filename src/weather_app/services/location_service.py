@@ -2,7 +2,7 @@
 
 import logging
 import re
-from typing import Optional, Tuple
+from typing import Any, Optional, Tuple, cast
 
 from geopy.exc import GeocoderServiceError, GeocoderTimedOut, GeocoderUnavailable
 from geopy.geocoders import Nominatim
@@ -112,7 +112,9 @@ class LocationService:
                 return (lat, lon)
 
             # Geocode city,country format
-            location_obj = self.geolocator.geocode(location, exactly_one=True)
+            location_obj = cast(
+                Any, self.geolocator.geocode(location, exactly_one=True)
+            )
 
             if location_obj:
                 logger.debug(
@@ -192,14 +194,17 @@ class LocationService:
 
         """
         try:
-            location = self.geolocator.reverse((latitude, longitude), exactly_one=True)
+            location = cast(
+                Any,
+                self.geolocator.reverse((latitude, longitude), exactly_one=True),
+            )
             return location.address if location else None
         except GeocoderTimedOut:
             logger.warning(
                 "Reverse geocoding request timed out after %d seconds", self.timeout
             )
             return None
-        except GeocoderUnavailable, GeocoderServiceError:
+        except (GeocoderUnavailable, GeocoderServiceError):
             logger.warning("Reverse geocoding service unavailable")
             return None
         except (ValueError, TypeError) as e:

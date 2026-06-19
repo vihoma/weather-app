@@ -4,7 +4,7 @@ import json
 import logging
 from datetime import datetime, timedelta, timezone
 from pathlib import Path
-from typing import Any
+from typing import Any, cast
 
 from cachetools import TTLCache
 from pyowm.commons.exceptions import NotFoundError, PyOWMError
@@ -32,7 +32,7 @@ class WeatherService:
             ValueError: If API key is not provided
 
         """
-        self.config_dict = get_default_config()
+        self.config_dict: dict[str, Any] = cast(dict[str, Any], get_default_config())
         self.config_dict["use_ssl"] = True
 
         if not config.api_key:
@@ -90,6 +90,10 @@ class WeatherService:
                 sanitize_string_for_logging(location),
             )
             observation = self.weather_manager.weather_at_place(location)
+            if observation is None:
+                raise LocationNotFoundError(
+                    f"Location '{location}' not found. Please check the spelling and format (City,CC)."
+                )
             weather = observation.weather
             logger.debug(
                 "Successfully retrieved weather data for %s",
@@ -205,7 +209,7 @@ class WeatherService:
                         if now - fetched_at > ttl_delta:
                             skipped_expired += 1
                             continue
-                    except ValueError, TypeError:
+                    except (ValueError, TypeError):
                         skipped_legacy += 1
                         continue
 

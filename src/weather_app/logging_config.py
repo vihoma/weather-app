@@ -12,7 +12,7 @@ if TYPE_CHECKING:
 
 # Try to import python-json-logger, fallback to standard logging if not available
 try:
-    from pythonjsonlogger import jsonlogger
+    from pythonjsonlogger import json as jsonlogger
 
     JSON_LOGGER_AVAILABLE = True
 except ImportError:
