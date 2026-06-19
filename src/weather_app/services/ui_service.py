@@ -132,7 +132,7 @@ class UIService:
             ) as e:
                 progress.update(task, completed=True, description=f"[red]Error: {e}")
                 raise
-            except Exception as e:
+            except (ConnectionError, OSError, RuntimeError, TypeError) as e:
                 progress.update(
                     task, completed=True, description=f"[red]Unexpected error: {e}"
                 )
@@ -173,7 +173,7 @@ class UIService:
             ) as e:
                 progress.update(task, completed=True, description=f"[red]Error: {e}")
                 raise
-            except Exception as e:
+            except (ConnectionError, OSError, RuntimeError, TypeError) as e:
                 progress.update(
                     task, completed=True, description=f"[red]Unexpected error: {e}"
                 )

@@ -13,7 +13,7 @@ from weather_app.cli.command_logging import (
     log_command_success,
 )
 from weather_app.cli.help_formatter import apply_preserve_epilog_formatting
-from weather_app.security import SecureConfig
+from weather_app.security import KeyringUnavailableError, SecureConfig, SecurityError
 
 logger = get_command_logger(__name__)
 
@@ -47,28 +47,16 @@ def api_key_group() -> None:
     is_flag=True,
     help="Interactive mode (prompt for API key).",
 )
-@click.option(
-    "--key",
-    "-k",
-    type=str,
-    help="API key value (use with caution as it may be visible in shell history).",
-)
 @click.pass_context
-def api_key_set(ctx: click.Context, interactive: bool, key: str | None) -> None:
+def api_key_set(ctx: click.Context, interactive: bool) -> None:
     """Set or update the OpenWeatherMap API key.
 
-    If interactive flag is set, prompts for API key securely.
-    If key is provided via --key, stores it directly.
-    If neither, defaults to interactive mode.
+    Prompts for the API key securely (masked input) so the value is never
+    visible in terminal output or shell history.
     """
     console = Console()
     secure_config = SecureConfig()
-    log_command_start(
-        logger,
-        ctx,
-        interactive=interactive or not key,
-        key_provided=key is not None,
-    )
+    log_command_start(logger, ctx)
 
     if not secure_config.is_keyring_available():
         console.print(
@@ -82,13 +70,11 @@ def api_key_set(ctx: click.Context, interactive: bool, key: str | None) -> None:
         log_command_failure(logger, ctx, error, level=logging.WARNING)
         raise error
 
-    api_key = key
-    if interactive or not api_key:
-        console.print("\n[bold blue]🔑 OpenWeatherMap API Key Setup[/bold blue]")
-        console.print(
-            "\nThis will securely store your API key in your system's keyring."
-        )
-        api_key = Prompt.ask("\nEnter your OpenWeatherMap API key", password=True)
+    console.print("\n[bold blue]🔑 OpenWeatherMap API Key Setup[/bold blue]")
+    console.print(
+        "\nThis will securely store your API key in your system's keyring."
+    )
+    api_key = Prompt.ask("\nEnter your OpenWeatherMap API key", password=True)
 
     if not api_key:
         console.print("\n[yellow]❌ No API key provided. Setup cancelled.[/yellow]")
@@ -102,8 +88,8 @@ def api_key_set(ctx: click.Context, interactive: bool, key: str | None) -> None:
         console.print(
             "\nYou can now run the weather app without setting environment variables."
         )
-        log_command_success(logger, ctx, interactive=interactive or not key)
-    except Exception as e:
+        log_command_success(logger, ctx)
+    except (SecurityError, KeyringUnavailableError, ValueError) as e:
         log_command_failure(logger, ctx, e, exc_info=True)
         console.print(f"\n[red]❌ Failed to store API key: {e}[/red]")
         raise click.ClickException(f"Failed to store API key: {e}")
@@ -137,7 +123,7 @@ def api_key_view(ctx: click.Context) -> None:
         else:
             console.print("\n[yellow]⚠️  No API key found in secure storage.[/yellow]")
         log_command_success(logger, ctx, key_present=bool(api_key))
-    except Exception as e:
+    except (SecurityError, KeyringUnavailableError, ValueError) as e:
         log_command_failure(logger, ctx, e, exc_info=True)
         console.print(f"\n[red]❌ Failed to retrieve API key: {e}[/red]")
         raise click.ClickException(f"Failed to retrieve API key: {e}")
@@ -190,7 +176,7 @@ def api_key_remove(ctx: click.Context, force: bool) -> None:
         secure_config.delete_api_key(service_name="openweathermap")
         console.print("\n[green]✅ API key removed from secure storage.[/green]")
         log_command_success(logger, ctx, removed=True)
-    except Exception as e:
+    except (SecurityError, KeyringUnavailableError, ValueError) as e:
         log_command_failure(logger, ctx, e, exc_info=True)
         console.print(f"\n[red]❌ Failed to remove API key: {e}[/red]")
         raise click.ClickException(f"Failed to remove API key: {e}")

@@ -7,6 +7,7 @@ Uses Rich for enhanced terminal output and structured logging.
 
 import asyncio
 import logging
+import os
 import sys
 
 import click
@@ -23,6 +24,7 @@ from weather_app.exceptions import (
     LocationNotFoundError,
     WeatherAppError,
 )
+from weather_app.security import KeyringUnavailableError, SecurityError
 from weather_app.logging_config import (
     LoggingConfig,
     log_with_context,
@@ -70,14 +72,18 @@ def setup_api_key() -> bool:
         )
         return True
 
-    except Exception as e:
+    except (KeyringUnavailableError, SecurityError, ValueError) as e:
         console.print(f"\n[red]❌ Failed to store API key: {e}[/red]")
         return False
 
 
 async def main_async() -> None:
     """Initialize and run the weather application in async mode."""
-    install(show_locals=True)  # Rich traceback handler
+    # Only expose local variables in tracebacks when WEATHER_DEBUG is set.
+    # show_locals=True would leak API keys, tokens, and other secrets.
+    install(
+        show_locals=os.environ.get("WEATHER_DEBUG", "").lower() in ("1", "true", "yes")
+    )
 
     # Set up configuration and logging
     config = Config()
@@ -239,7 +245,7 @@ async def main_async() -> None:
             try:
                 weather_service.save_cache()
                 log_with_context(logger, logging.DEBUG, "Cache saved successfully")
-            except Exception as e:
+            except (OSError, PermissionError, TypeError, AttributeError) as e:
                 log_with_context(
                     logger, logging.WARNING, "Failed to save cache", error=str(e)
                 )

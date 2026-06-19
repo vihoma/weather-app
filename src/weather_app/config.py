@@ -57,7 +57,7 @@ class Config(BaseSettings):
     OWM_API_KEY: Optional[str] = Field(default=None)
     OWM_UNITS: str = Field(default="metric")
     CACHE_TTL: int = Field(default=600)
-    REQUEST_TIMEOUT: int = Field(default=30)
+    REQUEST_TIMEOUT: int = Field(default=30, ge=1)
     USE_ASYNC: bool = Field(default=True)
     LOG_LEVEL: str = Field(default="INFO")
     LOG_FORMAT: str = Field(default="text")
@@ -72,7 +72,7 @@ class Config(BaseSettings):
     _secure: SecureConfig = PrivateAttr(default_factory=SecureConfig)
     _api_key: Optional[str] = PrivateAttr(default=None)
 
-    model_config = SettingsConfigDict(env_file=None, extra="allow")
+    model_config = SettingsConfigDict(env_file=None, extra="ignore")
 
     # ---------------------------------------------------------------------
     # Custom source order (pydantic-settings v2 API)

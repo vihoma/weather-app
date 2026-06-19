@@ -16,6 +16,7 @@ from weather_app.cli.command_logging import (
 )
 from weather_app.cli.help_formatter import apply_preserve_epilog_formatting
 from weather_app.config import Config
+from weather_app.security import KeyringUnavailableError, SecurityError
 
 logger = get_command_logger(__name__)
 
@@ -95,7 +96,7 @@ def _get_keyring_status(config: Config) -> Tuple[bool, Optional[str]]:
             else:
                 masked = "***"
             return True, masked
-    except Exception:
+    except (SecurityError, KeyringUnavailableError):
         pass
     return False, None
 
@@ -122,7 +123,7 @@ def _get_source_hint(config_field: str, config: Config) -> List[str]:
             yaml_key = config_field.lower()
             if yaml_key in yaml_data:
                 hints.append(f"yaml:{yaml_path.name}")
-        except Exception:
+        except (OSError, PermissionError):
             pass
 
     # Check environment variable
@@ -276,7 +277,7 @@ def config_sources(ctx: click.Context) -> None:
                 yaml_data = yaml.safe_load(f) or {}
             yaml_fields = [k for k in yaml_data.keys()]
             console.print(f"   Contains fields: {', '.join(yaml_fields)}")
-        except Exception as e:
+        except (OSError, PermissionError) as e:
             console.print(f"   [red]Error reading YAML: {e}[/red]")
     else:
         console.print("[dim]✗[/dim] No YAML configuration file found")

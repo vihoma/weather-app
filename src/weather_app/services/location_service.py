@@ -149,7 +149,7 @@ class LocationService:
                 "Invalid coordinate format during geocoding: %s", e, exc_info=True
             )
             return None
-        except Exception as e:
+        except (ConnectionError, OSError, RuntimeError) as e:
             logger.error("Unexpected error during geocoding: %s", e, exc_info=True)
             raise GeocodingError(f"Unexpected error during geocoding: {e}") from e
 
@@ -167,6 +167,11 @@ class LocationService:
 
         """
         location = location.strip()
+
+        if len(location) > 256:
+            raise InvalidLocationError(
+                "Location string is too long (maximum 256 characters)."
+            )
 
         if not location:
             raise InvalidLocationError("Location cannot be empty")
@@ -212,7 +217,7 @@ class LocationService:
                 "Invalid coordinate format in reverse geocoding: %s", e, exc_info=True
             )
             return None
-        except Exception as e:
+        except (ConnectionError, OSError, RuntimeError) as e:
             logger.error("Unexpected error in reverse geocoding: %s", e, exc_info=True)
             raise GeocodingError(
                 f"Unexpected error during reverse geocoding: {e}"

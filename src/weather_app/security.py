@@ -44,9 +44,6 @@ class SensitiveDataFilter(logging.Filter):
             r"(?i)(password)[\s\"\']*[=:][\s\"\']*([^\s\"\']+)",
             r"(?i)(token)[\s\"\']*[=:][\s\"\']*([^\s\"\']+)",
             r"(?i)(secret)[\s\"\']*[=:][\s\"\']*([^\s\"\']+)",
-            r"[a-fA-F0-9]{32}",  # MD5-like hashes
-            r"[a-fA-F0-9]{40}",  # SHA-1-like hashes
-            r"[a-fA-F0-9]{64}",  # SHA-256-like hashes
         ]
 
     def filter(self, record: logging.LogRecord) -> bool:
@@ -144,7 +141,7 @@ class SecureConfig:
 
         try:
             keyring.set_password(self.SERVICE_NAME, service_name, api_key)
-        except Exception as e:
+        except (KeyringError, PermissionError, OSError, RuntimeError) as e:
             raise SecurityError(f"Failed to store API key: {e}") from e
 
     def get_api_key(self, service_name: str = "openweathermap") -> Optional[str]:

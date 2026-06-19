@@ -27,6 +27,7 @@ from weather_app.exceptions import (
     NetworkError,
     RateLimitError,
 )
+from weather_app.models.weather_data import WeatherData
 
 logger = get_command_logger(__name__)
 
@@ -158,7 +159,7 @@ def weather_command(
         raise click.ClickException(f"Unexpected error: {e}")
 
 
-def _fetch_weather_data(config, location: str):
+def _fetch_weather_data(config, location: str) -> WeatherData:
     """Fetch weather data using appropriate service based on config."""
     # Use async service if config.use_async is True or if location is coordinates
     # (since sync service doesn't support coordinates)

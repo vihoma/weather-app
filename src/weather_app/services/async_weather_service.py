@@ -1,10 +1,8 @@
 """Async weather data operations using aiohttp and OpenWeatherMap API."""
 
 import asyncio
-import json
 import logging
-from datetime import datetime, timedelta, timezone
-from pathlib import Path
+from datetime import datetime, timezone
 from typing import Any, Dict, Optional
 
 import aiohttp
@@ -88,7 +86,7 @@ class AsyncWeatherService:
 
         logger.info(
             "Fetching fresh weather data for location: %s with units: %s",
-            location,
+            sanitize_string_for_logging(location),
             units,
         )
 
@@ -126,6 +124,10 @@ class AsyncWeatherService:
     async def _fetch_weather_data(self, location: str, units: str) -> WeatherData:
         """Fetch weather data from OpenWeatherMap API."""
         url = f"{self.base_url}/weather"
+        # NOTE: OpenWeatherMap 2.5 API requires the API key as a query parameter
+        # (``appid``). The free-tier API does not support bearer-token or
+        # ``x-api-key`` header authentication.  This means the key appears in
+        # request URLs — mitigated by HTTPS encryption in transit.
         params: Dict[str, str] = {"appid": self.api_key, "units": units}
 
         if self._is_coordinates(location):
@@ -281,59 +283,16 @@ class AsyncWeatherService:
         - New (timestamped): ``{"data": {...}, "fetched_at": "ISO..."}``
         - Old (legacy): bare weather dict — treated as expired, discarded.
         """
-        try:
-            cache_path = Path(cache_file_path).expanduser()
-            if not cache_path.exists():
-                logger.debug("Cache file does not exist: %s", cache_path)
-                return
+        from .cache_persistence import load_cache_from_disk as _load
 
-            with open(cache_path, "r", encoding="utf-8") as f:
-                cache_data = json.load(f)
-
-            now = datetime.now(timezone.utc)
-            ttl_delta = timedelta(seconds=self.config.cache_ttl)
-            loaded = 0
-            skipped_expired = 0
-            skipped_legacy = 0
-
-            for cache_key, entry in cache_data.items():
-                # Detect legacy format (bare dict, no "data" wrapper)
-                if not isinstance(entry, dict) or "data" not in entry:
-                    skipped_legacy += 1
-                    continue
-
-                # Check fetched_at expiry
-                fetched_at: datetime | None = None
-                fetched_at_str = entry.get("fetched_at")
-                if fetched_at_str:
-                    try:
-                        fetched_at = datetime.fromisoformat(fetched_at_str)
-                        if fetched_at.tzinfo is None:
-                            fetched_at = fetched_at.replace(tzinfo=timezone.utc)
-                        if now - fetched_at > ttl_delta:
-                            skipped_expired += 1
-                            continue
-                    except (ValueError, TypeError):
-                        skipped_legacy += 1
-                        continue
-
-                try:
-                    weather_data = WeatherData.model_validate(entry["data"])
-                    self.cache[cache_key] = weather_data
-                    self._cache_metadata[cache_key] = fetched_at or now
-                    loaded += 1
-                except Exception as e:
-                    logger.warning("Skipping corrupt cache entry %s: %s", cache_key, e)
-
-            logger.info(
-                "Loaded %d cache items from %s (skipped: %d expired, %d legacy)",
-                loaded,
-                cache_path,
-                skipped_expired,
-                skipped_legacy,
-            )
-        except (json.JSONDecodeError, IOError, PermissionError) as e:
-            logger.warning("Failed to load cache from %s: %s", cache_file_path, e)
+        _load(
+            cache_file_path=cache_file_path,
+            cache_dir=self.config.cache_dir,
+            cache_ttl=self.config.cache_ttl,
+            in_memory_cache=self.cache,
+            cache_metadata=self._cache_metadata,
+            model_validate=WeatherData.model_validate,
+        )
 
     def _save_cache_to_disk(self, cache_file_path: str) -> None:
         """Save cache to JSON file with fetched_at timestamps.
@@ -341,30 +300,15 @@ class AsyncWeatherService:
         Only saves non-expired entries. Uses the ``_cache_metadata`` dict
         for accurate fetch timestamps.
         """
-        try:
-            cache_path = Path(cache_file_path).expanduser()
-            cache_path.parent.mkdir(parents=True, exist_ok=True)
+        from .cache_persistence import save_cache_to_disk as _save
 
-            now = datetime.now(timezone.utc)
-            ttl = self.config.cache_ttl
-
-            cache_data: dict[str, dict[str, Any]] = {}
-            for cache_key, weather_data in self.cache.items():
-                fetched_at = self._cache_metadata.get(cache_key)
-                # Skip entries that are already expired
-                if fetched_at is not None and (now - fetched_at).total_seconds() >= ttl:
-                    continue
-                cache_data[cache_key] = {
-                    "data": weather_data.model_dump(),
-                    "fetched_at": (fetched_at or now).isoformat(),
-                }
-
-            with open(cache_path, "w", encoding="utf-8") as f:
-                json.dump(cache_data, f, indent=2)
-
-            logger.debug("Saved %d cache items to %s", len(cache_data), cache_path)
-        except (IOError, PermissionError) as e:
-            logger.warning("Failed to save cache to %s: %s", cache_file_path, e)
+        _save(
+            cache_file_path=cache_file_path,
+            cache_dir=self.config.cache_dir,
+            cache_ttl=self.config.cache_ttl,
+            in_memory_cache=self.cache,
+            cache_metadata=self._cache_metadata,
+        )
 
     def save_cache(self) -> None:
         """Explicitly save cache to disk."""

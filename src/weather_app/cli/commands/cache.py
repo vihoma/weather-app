@@ -71,7 +71,7 @@ def cache_clear(ctx: click.Context, force: bool) -> None:
         cache_file.unlink()
         console.print("[green]✅ Cache file deleted successfully.[/green]")
         log_command_success(logger, ctx, status="deleted", cache_file=str(cache_file))
-    except Exception as e:
+    except (OSError, PermissionError) as e:
         log_command_failure(logger, ctx, e, exc_info=True)
         console.print(f"[red]❌ Failed to delete cache file: {e}[/red]")
         raise click.ClickException(f"Failed to delete cache file: {e}")
