@@ -46,7 +46,7 @@ class TestMainModule:
             MockConfig.assert_called_once()
             mock_config.validate_config.assert_called_once()
             MockSetupLogging.assert_called_once_with(mock_config)
-            MockInstall.assert_called_once_with(show_locals=True)
+            MockInstall.assert_called_once_with(show_locals=False)
     
             # Verify async mode was used
             MockUIService.assert_called_once_with(use_async=True, config=mock_config)
@@ -391,7 +391,7 @@ class TestMainModule:
             mock_ui = AsyncMock()
             mock_ui.run_async = AsyncMock()
             mock_ui.weather_service = Mock()
-            mock_ui.weather_service.save_cache = Mock(side_effect=Exception("Cache save failed"))
+            mock_ui.weather_service.save_cache = Mock(side_effect=OSError("Cache save failed"))
             MockUIService.return_value = mock_ui
             
             await main_async()

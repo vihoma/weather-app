@@ -161,14 +161,12 @@ class TestConfigCommandE2E:
     def test_config_sources(self, runner):
         """Full stack: config sources displays source information."""
         with patch("weather_app.cli.commands.config.Config") as mock_config_cls, \
-             patch("weather_app.cli.commands.config.Path") as mock_path_cls:
+             patch("weather_app.cli.commands.config._get_yaml_config_path", return_value=None):
             mock_config = Mock()
             mock_config.api_key = None
+            mock_config.is_keyring_available.return_value = True
+            mock_config._secure.get_api_key.return_value = None
             mock_config_cls.return_value = mock_config
-            mock_path = Mock()
-            mock_path.exists.return_value = False
-            mock_path.expanduser.return_value = mock_path
-            mock_path_cls.return_value = mock_path
 
             result = runner.invoke(cli, ["config", "sources"])
             assert result.exit_code == 0, result.output

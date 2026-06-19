@@ -214,7 +214,7 @@ class TestLocationService:
         service = LocationService()
         
         # Mock unexpected error
-        mock_nominatim.return_value.geocode.side_effect = Exception("Unexpected error")
+        mock_nominatim.return_value.geocode.side_effect = ConnectionError("Unexpected error")
         
         with pytest.raises(GeocodingError, match="Unexpected error during geocoding"):
             service.geocode_location("London,GB")
@@ -276,7 +276,20 @@ class TestLocationService:
         service = LocationService()
         
         # Mock unexpected error
-        mock_nominatim.return_value.reverse.side_effect = Exception("Unexpected error")
+        mock_nominatim.return_value.reverse.side_effect = ConnectionError("Unexpected error")
         
         with pytest.raises(GeocodingError, match="Unexpected error during reverse geocoding"):
             service.get_location_display_name(51.5074, -0.1278)
+
+    def test_normalize_location_too_long(self):
+        """Test that locations exceeding 256 characters are rejected."""
+        service = LocationService()
+        long_location = "X" * 300
+        with pytest.raises(InvalidLocationError, match="too long"):
+            service.normalize_location(long_location)
+
+    def test_normalize_location_empty(self):
+        """Test that empty location after stripping is rejected."""
+        service = LocationService()
+        with pytest.raises(InvalidLocationError, match="cannot be empty"):
+            service.normalize_location("   ")

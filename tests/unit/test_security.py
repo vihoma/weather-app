@@ -46,12 +46,12 @@ class TestSensitiveDataFilter:
         result = mask_sensitive_string(test_input)
         assert result == expected
 
-    def test_mask_sensitive_string_hash(self):
-        """Test masking of hash values."""
+    def test_hash_values_not_masked(self):
+        """Hash-like hex strings are NOT masked (they cause false positives)."""
         test_input = "md5_hash=5d41402abc4b2a76b9719d911017c592"
-        expected = "md5_hash=5d41...c592"
         result = mask_sensitive_string(test_input)
-        assert result == expected
+        # Hash patterns were removed — the input should pass through unchanged
+        assert result == test_input
 
     def test_mask_sensitive_string_no_match(self):
         """Test that non-sensitive strings are not modified."""
@@ -129,7 +129,7 @@ class TestSecureConfig:
 
     def test_store_api_key_failure(self, mock_keyring):
         """Test API key storage failure."""
-        mock_keyring.set_password.side_effect = Exception("Storage failed")
+        mock_keyring.set_password.side_effect = RuntimeError("Storage failed")
         mock_keyring.get_password.return_value = "test_value"
         mock_keyring.delete_password.return_value = None
 
