@@ -11,6 +11,9 @@ import os
 import sys
 
 import click
+
+import logfire
+
 from rich.console import Console
 from rich.prompt import Prompt
 from rich.traceback import install
@@ -34,6 +37,9 @@ from weather_app.services.ui_service import UIService
 
 # Global logger instance
 logger = None
+
+# Logfire configuration
+logfire.configure()
 
 
 def setup_api_key() -> bool:
