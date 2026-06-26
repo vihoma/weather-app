@@ -48,7 +48,8 @@ packages = [
     {include = "weather_app", from = "src"}
 ]
 
-
+[tool.logfire]
+pydantic_plugin_record = "all"
 
 [tool.pyrefly]
 python-version = "3.13"
