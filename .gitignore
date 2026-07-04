@@ -4,6 +4,7 @@
 venv/
 MagicMock/
 __pycache__/
+.agents/
 .cocoindex_code/
 .ruff_cache/
 .venv/
