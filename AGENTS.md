@@ -9,9 +9,8 @@ When wrapping up, always call:
 - **Run application**: `poetry run weather`
 - **Run tests**: `poetry run pytest tests/`
 - **Lint with ruff**: `poetry run ruff check src/`
-- **Format imports**: `poetry run isort src/`
-- **Type check**: `poetry run mypy src/` and `poetry run pyrefly src/`
 - **Format code**: `poetry run ruff format src/`
+- **Type check**: `poetry run pyrefly check src/`
 - **Build package**: `poetry build`, but do not run this command during
   development to avoid unnecessary builds and overwritten release builds.
 - **Install deps**: `poetry install`
@@ -31,7 +30,7 @@ When wrapping up, always call:
 
 ## Code Correctness Guidelines
 - Write unit tests for all public methods and critical paths, using pytest
-- Use type hints and mypy & pyrefly for static type checking
+- Use type hints and pyrefly for static type checking
 - Use ruff for linting and code formatting to maintain consistency
 - Ensure all tests pass before committing code
 - If available, use the prism-mcp server for weather-app for domain-specific
