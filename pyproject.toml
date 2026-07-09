@@ -77,6 +77,8 @@ python_classes = ["Test*"]
 python_functions = ["test_*"]
 addopts = [
     "-v",
+    "-p",
+    "no:logfire",
     "--strict-markers",
     "--strict-config",
     "--tb=short"

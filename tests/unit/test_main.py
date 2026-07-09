@@ -12,6 +12,13 @@ from weather_app.exceptions import (
 )
 
 
+@pytest.fixture(autouse=True)
+def mock_logfire_configuration():
+    """Prevent unit tests from configuring real Logfire exporters."""
+    with patch("weather_app.main._configure_logfire"):
+        yield
+
+
 class TestMainModule:
     """Test cases for main application module."""
 
@@ -23,7 +30,8 @@ class TestMainModule:
              patch('weather_app.main.setup_default_logging') as MockSetupLogging, \
              patch('weather_app.main.LoggingConfig') as MockLoggingConfig, \
              patch('weather_app.main.install') as MockInstall, \
-             patch('weather_app.main.log_with_context') as MockLogWithContext:
+             patch('weather_app.main.log_with_context') as MockLogWithContext, \
+             patch.dict('weather_app.main.os.environ', {'WEATHER_DEBUG': '0'}, clear=False):
     
             # Mock config
             mock_config = Mock()
@@ -54,6 +62,37 @@ class TestMainModule:
     
             # Verify logging
             assert MockLogWithContext.call_count >= 2  # Start and completion
+
+    @pytest.mark.asyncio
+    async def test_main_async_enables_show_locals_when_weather_debug_set(self):
+        """Test main_async enables Rich locals when WEATHER_DEBUG is set."""
+        with patch('weather_app.main.Config') as MockConfig, \
+             patch('weather_app.main.UIService') as MockUIService, \
+             patch('weather_app.main.setup_default_logging') as MockSetupLogging, \
+             patch('weather_app.main.LoggingConfig') as MockLoggingConfig, \
+             patch('weather_app.main.install') as MockInstall, \
+             patch('weather_app.main.log_with_context') as MockLogWithContext, \
+             patch.dict('weather_app.main.os.environ', {'WEATHER_DEBUG': '1'}, clear=False):
+
+            # Mock config
+            mock_config = Mock()
+            mock_config.validate_config.return_value = None
+            mock_config.use_async = True
+            MockConfig.return_value = mock_config
+
+            # Mock logger
+            mock_logger = Mock()
+            MockLoggingConfig.get_logger.return_value = mock_logger
+
+            # Mock UI service
+            mock_ui = AsyncMock()
+            mock_ui.run_async = AsyncMock()
+            MockUIService.return_value = mock_ui
+
+            await main_async()
+
+            MockInstall.assert_called_once_with(show_locals=True)
+            assert MockLogWithContext.call_count >= 2
 
     @pytest.mark.asyncio
     async def test_main_async_success_sync_mode(self):

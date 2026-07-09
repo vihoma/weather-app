@@ -37,9 +37,16 @@ from weather_app.services.ui_service import UIService
 
 # Global logger instance
 logger = None
+_logfire_configured = False
 
-# Logfire configuration
-logfire.configure()
+
+def _configure_logfire() -> None:
+    """Initialize Logfire once without polluting CLI stdout."""
+    global _logfire_configured
+    if _logfire_configured:
+        return
+    logfire.configure(console=False)
+    _logfire_configured = True
 
 
 def setup_api_key() -> bool:
@@ -85,6 +92,7 @@ def setup_api_key() -> bool:
 
 async def main_async() -> None:
     """Initialize and run the weather application in async mode."""
+    _configure_logfire()
     # Only expose local variables in tracebacks when WEATHER_DEBUG is set.
     # show_locals=True would leak API keys, tokens, and other secrets.
     install(
@@ -259,6 +267,7 @@ async def main_async() -> None:
 
 def main() -> None:
     """Initialize and run the weather application (sync wrapper)."""
+    _configure_logfire()
     # Check for setup command (legacy)
     if len(sys.argv) > 1 and sys.argv[1] == "--setup-api-key":
         success = setup_api_key()
