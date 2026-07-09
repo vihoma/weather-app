@@ -1,5 +1,7 @@
 """POSIX error codes and exception mapping for CLI."""
 
+from typing import ClassVar
+
 import click
 
 from weather_app.exceptions import (
@@ -56,27 +58,22 @@ def map_exception_to_exit_code(exception: Exception) -> int:
 class WeatherAppClickException(click.ClickException):
     """Base Click exception with POSIX exit codes."""
 
-    def __init__(self, message: str, exit_code: int = EXIT_GENERAL_ERROR) -> None:
-        super().__init__(message)
-        self.exit_code = exit_code
+    exit_code: ClassVar[int] = EXIT_GENERAL_ERROR
 
 
 class ConfigurationClickException(WeatherAppClickException):
     """Configuration error exception."""
 
-    def __init__(self, message: str) -> None:
-        super().__init__(message, exit_code=EXIT_CONFIG_ERROR)
+    exit_code = EXIT_CONFIG_ERROR
 
 
 class APIClickException(WeatherAppClickException):
     """API error exception."""
 
-    def __init__(self, message: str) -> None:
-        super().__init__(message, exit_code=EXIT_API_ERROR)
+    exit_code = EXIT_API_ERROR
 
 
 class LocationClickException(WeatherAppClickException):
     """Location error exception."""
 
-    def __init__(self, message: str) -> None:
-        super().__init__(message, exit_code=EXIT_LOCATION_ERROR)
+    exit_code = EXIT_LOCATION_ERROR
