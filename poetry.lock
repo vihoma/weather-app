@@ -1013,21 +1013,21 @@ files = [
 
 [[package]]
 name = "logfire"
-version = "4.37.0"
+version = "4.38.0"
 description = "The best Python observability tool! 🪵🔥"
 optional = false
 python-versions = ">=3.10"
 groups = ["main"]
 files = [
-    {file = "logfire-4.37.0-py3-none-any.whl", hash = "sha256:a20823e6dbb3204614a3ea5e79c91df42405c5112393ec9d8e34ef45b60d315f"},
-    {file = "logfire-4.37.0.tar.gz", hash = "sha256:7ee0cb64b59c356a41a1701fb84597037f8db1fa15df7a3715ef363e5a1de06a"},
+    {file = "logfire-4.38.0-py3-none-any.whl", hash = "sha256:da4bffd43190930d0b889e06c596c0a7fce1c485a51de862ad9ff0d5033ecfb9"},
+    {file = "logfire-4.38.0.tar.gz", hash = "sha256:da62f7616f3411098cf5fb087f9ff24f54886a9087a238fe0e5fae8bbd609717"},
 ]
 
 [package.dependencies]
 executing = ">=2.0.1"
-opentelemetry-exporter-otlp-proto-http = ">=1.39.0,<1.43.0"
+opentelemetry-exporter-otlp-proto-http = ">=1.39.0,<1.44.0"
 opentelemetry-instrumentation = ">=0.41b0"
-opentelemetry-sdk = ">=1.39.0,<1.43.0"
+opentelemetry-sdk = ">=1.39.0,<1.44.0"
 protobuf = ">=4.23.4"
 rich = ">=13.4.2"
 typing-extensions = ">=4.1.0"
@@ -2531,4 +2531,4 @@ propcache = ">=0.2.1"
 [metadata]
 lock-version = "2.1"
 python-versions = ">=3.13"
-content-hash = "3b4fabebcc0357e91dc4fae115824bb7413f2b32dddc0a73e52149765ad1fe90"
+content-hash = "f66b29363c99c0c9d4c5037f5b7d36cec7b7b0eacda46a27d925e395272c583c"
