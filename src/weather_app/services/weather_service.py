@@ -1,7 +1,7 @@
 """Core weather data operations using PyOWM."""
 
 import logging
-from datetime import datetime, timezone
+from datetime import UTC, datetime
 from typing import Any, cast
 
 from cachetools import TTLCache
@@ -12,6 +12,7 @@ from pyowm.utils.config import get_default_config
 from ..config import Config
 from ..exceptions import APIRequestError, LocationNotFoundError
 from ..models.weather_data import WeatherData
+from ..observability import weather_fetch_span
 from ..utils import sanitize_string_for_logging
 
 logger = logging.getLogger(__name__)
@@ -65,66 +66,77 @@ class WeatherService:
             WeatherData: Parsed weather data
 
         """
-        # Create cache key
-        cache_key = f"{location}:{units}"
+        with weather_fetch_span("sync", units) as span:
+            # Create cache key
+            cache_key = f"{location}:{units}"
 
-        # Check cache first
-        if cache_key in self.cache:
+            # Check cache first
+            if cache_key in self.cache:
+                span.set_attribute("cache_outcome", "hit")
+                span.set_attribute("outcome", "success")
+                logger.info(
+                    "Returning cached weather data for: %s",
+                    sanitize_string_for_logging(location),
+                )
+                return self.cache[cache_key]
+
+            span.set_attribute("cache_outcome", "miss")
             logger.info(
-                "Returning cached weather data for: %s",
+                "Fetching fresh weather data for location: %s with units: %s",
                 sanitize_string_for_logging(location),
+                units,
             )
-            return self.cache[cache_key]
 
-        logger.info(
-            "Fetching fresh weather data for location: %s with units: %s",
-            sanitize_string_for_logging(location),
-            units,
-        )
+            try:
+                logger.debug(
+                    "Calling weather_at_place for location: %s",
+                    sanitize_string_for_logging(location),
+                )
+                observation = self.weather_manager.weather_at_place(location)
+                if observation is None:
+                    raise LocationNotFoundError(
+                        f"Location '{location}' not found. Please check the spelling and format (City,CC)."
+                    )
+                weather = observation.weather
+                logger.debug(
+                    "Successfully retrieved weather data for %s",
+                    sanitize_string_for_logging(location),
+                )
 
-        try:
-            logger.debug(
-                "Calling weather_at_place for location: %s",
-                sanitize_string_for_logging(location),
-            )
-            observation = self.weather_manager.weather_at_place(location)
-            if observation is None:
+                parsed_data = self._parse_weather_data(location, weather, units)
+
+                # Cache the result
+                self.cache[cache_key] = parsed_data
+                self._cache_metadata[cache_key] = datetime.now(UTC)
+                span.set_attribute("outcome", "success")
+                logger.info(
+                    "Weather data cached successfully for %s",
+                    sanitize_string_for_logging(location),
+                )
+
+                return parsed_data
+
+            except LocationNotFoundError:
+                span.set_attribute("outcome", "failure")
+                span.set_attribute("failure_category", "location_not_found")
+                raise
+            except NotFoundError as e:
+                span.set_attribute("outcome", "failure")
+                span.set_attribute("failure_category", "location_not_found")
+                logger.warning(
+                    "Location not found: %s", sanitize_string_for_logging(location)
+                )
                 raise LocationNotFoundError(
                     f"Location '{location}' not found. Please check the spelling and format (City,CC)."
+                ) from e
+            except PyOWMError as e:
+                span.set_attribute("outcome", "failure")
+                span.set_attribute("failure_category", "api_request")
+                logger.exception(
+                    "API request failed for %s",
+                    sanitize_string_for_logging(location),
                 )
-            weather = observation.weather
-            logger.debug(
-                "Successfully retrieved weather data for %s",
-                sanitize_string_for_logging(location),
-            )
-
-            parsed_data = self._parse_weather_data(location, weather, units)
-
-            # Cache the result
-            self.cache[cache_key] = parsed_data
-            self._cache_metadata[cache_key] = datetime.now(timezone.utc)
-            logger.info(
-                "Weather data cached successfully for %s",
-                sanitize_string_for_logging(location),
-            )
-
-            return parsed_data
-
-        except NotFoundError as e:
-            logger.warning(
-                "Location not found: %s", sanitize_string_for_logging(location)
-            )
-            raise LocationNotFoundError(
-                f"Location '{location}' not found. Please check the spelling and format (City,CC)."
-            ) from e
-        except PyOWMError as e:
-            logger.error(
-                "API request failed for %s: %s",
-                sanitize_string_for_logging(location),
-                e,
-                exc_info=True,
-            )
-            raise APIRequestError(f"Failed to fetch weather data: {e}") from e
+                raise APIRequestError(f"Failed to fetch weather data: {e}") from e
 
     def _parse_weather_data(
         self, location: str, weather: Any, units: str

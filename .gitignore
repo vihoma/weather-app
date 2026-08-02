@@ -28,3 +28,6 @@ weather_app.log.json
 # CocoIndex Code (ccc)
 /.cocoindex_code/
 /.opencode/package-lock.json
+
+# Bug Hunter artifacts
+/.bug-hunter/

@@ -1,9 +1,8 @@
 """Async weather data operations using aiohttp and OpenWeatherMap API."""
 
-import asyncio
 import logging
-from datetime import datetime, timezone
-from typing import Any, Dict, Optional
+from datetime import UTC, datetime
+from typing import Any, Self
 
 import aiohttp
 from async_timeout import timeout
@@ -18,6 +17,7 @@ from ..exceptions import (
     RateLimitError,
 )
 from ..models.weather_data import WeatherData
+from ..observability import weather_fetch_span
 from ..utils import sanitize_string_for_logging
 
 logger = logging.getLogger(__name__)
@@ -54,7 +54,7 @@ class AsyncWeatherService:
         self._cache_metadata: dict[str, datetime] = {}
 
         # Shared aiohttp session for connection reuse
-        self._session: Optional[aiohttp.ClientSession] = None
+        self._session: aiohttp.ClientSession | None = None
 
         logger.debug("AsyncWeatherService initialized successfully with caching")
 
@@ -73,53 +73,71 @@ class AsyncWeatherService:
             WeatherData: Parsed weather data
 
         """
-        # Create cache key
-        cache_key = f"{location}:{units}"
+        with weather_fetch_span("async", units) as span:
+            # Create cache key
+            cache_key = f"{location}:{units}"
 
-        # Check cache first
-        if cache_key in self.cache:
+            # Check cache first
+            if cache_key in self.cache:
+                span.set_attribute("cache_outcome", "hit")
+                span.set_attribute("outcome", "success")
+                logger.info(
+                    "Returning cached weather data for: %s",
+                    sanitize_string_for_logging(location),
+                )
+                return self.cache[cache_key]
+
+            span.set_attribute("cache_outcome", "miss")
             logger.info(
-                "Returning cached weather data for: %s",
+                "Fetching fresh weather data for location: %s with units: %s",
                 sanitize_string_for_logging(location),
-            )
-            return self.cache[cache_key]
-
-        logger.info(
-            "Fetching fresh weather data for location: %s with units: %s",
-            sanitize_string_for_logging(location),
-            units,
-        )
-
-        try:
-            weather_data = await self._fetch_weather_data(location, units)
-
-            # Cache the result
-            self.cache[cache_key] = weather_data
-            self._cache_metadata[cache_key] = datetime.now(timezone.utc)
-            logger.info(
-                "Weather data cached successfully for %s",
-                sanitize_string_for_logging(location),
+                units,
             )
 
-            return weather_data
+            try:
+                weather_data = await self._fetch_weather_data(location, units)
 
-        except (
-            LocationNotFoundError,
-            APIRequestError,
-            NetworkError,
-            RateLimitError,
-            DataParsingError,
-        ):
-            # Re-raise specific exceptions that we already handle
-            raise
-        except Exception as e:
-            logger.error(
-                "Unexpected error fetching weather data for %s: %s",
-                sanitize_string_for_logging(location),
-                e,
-                exc_info=True,
-            )
-            raise APIRequestError(f"Unexpected error fetching weather data: {e}") from e
+                # Cache the result
+                self.cache[cache_key] = weather_data
+                self._cache_metadata[cache_key] = datetime.now(UTC)
+                span.set_attribute("outcome", "success")
+                logger.info(
+                    "Weather data cached successfully for %s",
+                    sanitize_string_for_logging(location),
+                )
+
+                return weather_data
+
+            except LocationNotFoundError:
+                span.set_attribute("outcome", "failure")
+                span.set_attribute("failure_category", "location_not_found")
+                raise
+            except NetworkError:
+                span.set_attribute("outcome", "failure")
+                span.set_attribute("failure_category", "network")
+                raise
+            except RateLimitError:
+                span.set_attribute("outcome", "failure")
+                span.set_attribute("failure_category", "rate_limited")
+                raise
+            except APIRequestError:
+                span.set_attribute("outcome", "failure")
+                span.set_attribute("failure_category", "api_request")
+                raise
+            except DataParsingError:
+                span.set_attribute("outcome", "failure")
+                span.set_attribute("failure_category", "data_parsing")
+                raise
+            except Exception as e:
+                span.set_attribute("outcome", "failure")
+                span.set_attribute("failure_category", "unexpected")
+                logger.exception(
+                    "Unexpected error fetching weather data for %s",
+                    sanitize_string_for_logging(location),
+                )
+                raise APIRequestError(
+                    f"Unexpected error fetching weather data: {e}"
+                ) from e
 
     async def _fetch_weather_data(self, location: str, units: str) -> WeatherData:
         """Fetch weather data from OpenWeatherMap API."""
@@ -128,7 +146,7 @@ class AsyncWeatherService:
         # (``appid``). The free-tier API does not support bearer-token or
         # ``x-api-key`` header authentication.  This means the key appears in
         # request URLs — mitigated by HTTPS encryption in transit.
-        params: Dict[str, str] = {"appid": self.api_key, "units": units}
+        params: dict[str, str] = {"appid": self.api_key, "units": units}
 
         if self._is_coordinates(location):
             lat, lon = location.split(",")
@@ -148,7 +166,7 @@ class AsyncWeatherService:
                 async with session.get(url, params=params) as response:
                     return await self._handle_response(response, location, units)
 
-        except asyncio.TimeoutError:
+        except TimeoutError:
             logger.error(
                 "Request timeout for location: %s",
                 sanitize_string_for_logging(location),
@@ -208,7 +226,7 @@ class AsyncWeatherService:
             return False
 
     def _parse_weather_data(
-        self, location: str, data: Dict[str, Any], units: str
+        self, location: str, data: dict[str, Any], units: str
     ) -> WeatherData:
         """Convert OpenWeatherMap API response to WeatherData model."""
         try:
@@ -241,7 +259,7 @@ class AsyncWeatherService:
             )
 
         except (KeyError, TypeError, IndexError) as e:
-            logger.error("Failed to parse weather data: %s", e, exc_info=True)
+            logger.exception("Failed to parse weather data")
             raise DataParsingError(f"Failed to parse weather data: {e}")
 
     async def _ensure_session(self) -> aiohttp.ClientSession:
@@ -268,7 +286,7 @@ class AsyncWeatherService:
         if hasattr(self, "config") and self.config.cache_persist:
             self._save_cache_to_disk(self.config.cache_file)
 
-    async def __aenter__(self) -> "AsyncWeatherService":
+    async def __aenter__(self) -> Self:
         """Enter async context manager."""
         return self
 

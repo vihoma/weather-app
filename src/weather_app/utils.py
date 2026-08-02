@@ -55,7 +55,4 @@ def validate_api_key_format(api_key: str) -> bool:
         return False
 
     # Check for common invalid patterns
-    if re.search(r"[\s\n\r\t]", api_key):
-        return False
-
-    return True
+    return not re.search(r"[\s\n\r\t]", api_key)

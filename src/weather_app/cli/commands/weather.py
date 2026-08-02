@@ -154,7 +154,7 @@ def weather_command(
     except click.BadParameter as e:
         log_command_failure(logger, ctx, e, level=logging.WARNING)
         raise  # Re-raise click.BadParameter to preserve its exit code
-    except Exception as e:
+    except Exception as e:  # noqa: BLE001
         log_command_failure(logger, ctx, e, exc_info=True)
         raise click.ClickException(f"Unexpected error: {e}")
 

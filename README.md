@@ -107,6 +107,35 @@ log_format: "json"                # text or json (default: text)
 - `LOG_FILE`: Path to log file - default: `weather_app.log` or `weather_app.json`
   (depends on `LOG_FORMAT`)
 - `LOG_FORMAT`: Format of logs (`text` or `json`) - default : `text`
+- `LOGFIRE_TOKEN`: Optional Logfire write token. When it is set in the process
+  environment, telemetry is exported remotely; when it is absent, Logfire does
+  not export remotely.
+- `LOGFIRE_ENVIRONMENT`: Deployment environment label for Logfire - default:
+  `development`
+
+### Observability (Logfire)
+
+Logfire is configured once per process with the service name `weather-app`.
+Remote export is opt-in: provide `LOGFIRE_TOKEN` through a deployment secret
+manager or process environment only. **Never put a Logfire write token in a
+repository file, YAML configuration, or `.weather.env`.**
+
+`LOGFIRE_ENVIRONMENT` labels telemetry by deployment environment. The app also
+collects Logfire's default system metrics, covering process and host resource
+utilization. This is operational telemetry; it does not add request-level
+network tracing.
+
+Privacy boundaries are deliberate:
+
+- Application spans record only the request mode, unit system, cache outcome,
+  success/failure outcome, and a fixed failure category. They never include a
+  location, API key, URL query string, or exception message.
+- Sensitive values in standard logging records are masked at handler
+  boundaries before they reach the Logfire logging handler. Do not treat this
+  as permission to log credentials or other secrets.
+- Automatic aiohttp client tracing is intentionally disabled because the
+  OpenWeatherMap `appid` is a URL query parameter. Enabling it could expose
+  the API key in HTTP telemetry.
 
 ### Configuration Precedence
 

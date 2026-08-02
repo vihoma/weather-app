@@ -2,7 +2,7 @@
 
 import logging
 import re
-from typing import Any, Optional, Tuple, cast
+from typing import Any, cast
 
 from geopy.exc import GeocoderServiceError, GeocoderTimedOut, GeocoderUnavailable
 from geopy.geocoders import Nominatim
@@ -40,10 +40,7 @@ class LocationService:
             return True
 
         # Check for city,country format
-        if self._is_city_country_format(location):
-            return True
-
-        return False
+        return bool(self._is_city_country_format(location))
 
     def _is_coordinate_format(self, location: str) -> bool:
         """Check if location is in coordinate format."""
@@ -91,7 +88,7 @@ class LocationService:
 
         return sanitized
 
-    def geocode_location(self, location: str) -> Optional[Tuple[float, float]]:
+    def geocode_location(self, location: str) -> tuple[float, float] | None:
         """Geocode a location string to coordinates.
 
         Args:
@@ -144,13 +141,11 @@ class LocationService:
             raise NetworkError(
                 "Geocoding service unavailable. Please check your internet connection."
             ) from e
-        except (ValueError, TypeError) as e:
-            logger.error(
-                "Invalid coordinate format during geocoding: %s", e, exc_info=True
-            )
+        except (ValueError, TypeError):
+            logger.exception("Invalid coordinate format during geocoding")
             return None
         except (ConnectionError, OSError, RuntimeError) as e:
-            logger.error("Unexpected error during geocoding: %s", e, exc_info=True)
+            logger.exception("Unexpected error during geocoding")
             raise GeocodingError(f"Unexpected error during geocoding: {e}") from e
 
     def normalize_location(self, location: str) -> str:
@@ -187,7 +182,7 @@ class LocationService:
 
     def get_location_display_name(
         self, latitude: float, longitude: float
-    ) -> Optional[str]:
+    ) -> str | None:
         """Reverse geocode coordinates to get display name.
 
         Args:
@@ -212,13 +207,11 @@ class LocationService:
         except (GeocoderUnavailable, GeocoderServiceError):
             logger.warning("Reverse geocoding service unavailable")
             return None
-        except (ValueError, TypeError) as e:
-            logger.error(
-                "Invalid coordinate format in reverse geocoding: %s", e, exc_info=True
-            )
+        except (ValueError, TypeError):
+            logger.exception("Invalid coordinate format in reverse geocoding")
             return None
         except (ConnectionError, OSError, RuntimeError) as e:
-            logger.error("Unexpected error in reverse geocoding: %s", e, exc_info=True)
+            logger.exception("Unexpected error in reverse geocoding")
             raise GeocodingError(
                 f"Unexpected error during reverse geocoding: {e}"
             ) from e

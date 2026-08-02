@@ -47,9 +47,6 @@ jobs:
       - name: Run Ruff format check
         run: poetry run ruff format --check src/
 
-      #- name: Run mypy
-      #  run: poetry run mypy src/
-
       - name: Run Pyrefly
         run: poetry run pyrefly check src/
 

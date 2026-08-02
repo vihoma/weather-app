@@ -15,14 +15,15 @@ from weather_app.cli.commands.version import version_command
 
 # Import subcommands
 from weather_app.cli.commands.weather import weather_command
-from weather_app.cli.help_formatter import apply_preserve_epilog_formatting
 from weather_app.cli.config_override import apply_cli_overrides
+from weather_app.cli.help_formatter import apply_preserve_epilog_formatting
 from weather_app.config import Config
 from weather_app.logging_config import (
     LoggingConfig,
     log_with_context,
     setup_default_logging,
 )
+from weather_app.observability import configure_logfire
 
 logger = logging.getLogger(__name__)
 
@@ -76,6 +77,7 @@ def _bootstrap_subcommand_logging(ctx: click.Context) -> None:
         return
 
     config = _create_effective_config(root_ctx)
+    configure_logfire()
     setup_default_logging(config, enable_console=False)
 
     command_logger = LoggingConfig.get_logger(__name__)

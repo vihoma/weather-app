@@ -33,7 +33,6 @@ Examples:
 )
 def cache_group() -> None:
     """Group for cache management commands."""
-    pass
 
 
 @cache_group.command(name="clear", help="Clear the cache file.")

@@ -1,7 +1,7 @@
 """Rich-based user interface components with async support."""
 
 import asyncio
-from typing import Union, cast
+from typing import cast
 
 from rich.console import Console
 from rich.progress import Progress, SpinnerColumn, TextColumn
@@ -40,7 +40,7 @@ class UIService:
             self.config.validate_config()
         self.use_async = use_async
 
-        self.weather_service: Union[AsyncWeatherService, WeatherService]
+        self.weather_service: AsyncWeatherService | WeatherService
         if use_async:
             self.weather_service = AsyncWeatherService(self.config)
         else:
@@ -274,9 +274,10 @@ class UIService:
         self.console.print(table)
 
         self.query_history.append(data)
-        if len(self.query_history) > 1:
-            if Confirm.ask("\n📜 Show comparison with previous query?"):
-                self._show_history_comparison()
+        if len(self.query_history) > 1 and Confirm.ask(
+            "\n📜 Show comparison with previous query?"
+        ):
+            self._show_history_comparison()
 
     def _show_history_comparison(self) -> None:
         """Show comparison between current and previous query."""

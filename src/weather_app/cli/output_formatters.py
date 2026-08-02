@@ -5,7 +5,7 @@ into various output formats (TUI, JSON, Markdown).
 """
 
 import abc
-from typing import Dict, Type
+from typing import ClassVar
 
 from weather_app.models.weather_data import WeatherData
 
@@ -23,13 +23,12 @@ class BaseFormatter(abc.ABC):
         Returns:
             Formatted string representation.
         """
-        pass
 
 
 class FormatterFactory:
     """Factory for obtaining formatter instances based on output format."""
 
-    _formatters: Dict[str, Type[BaseFormatter]] = {}
+    _formatters: ClassVar[dict[str, type[BaseFormatter]]] = {}
 
     @classmethod
     def _load_formatters(cls) -> None:
@@ -42,7 +41,7 @@ class FormatterFactory:
         from weather_app.cli.formatters.markdown_formatter import MarkdownFormatter
         from weather_app.cli.formatters.tui_formatter import TUIFormatter
 
-        formatter_map: Dict[str, Type[BaseFormatter]] = {
+        formatter_map: dict[str, type[BaseFormatter]] = {
             "tui": TUIFormatter,
             "json": JSONFormatter,
             "markdown": MarkdownFormatter,

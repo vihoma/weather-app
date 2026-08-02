@@ -1,6 +1,6 @@
 """Data models for weather information."""
 
-from typing import ClassVar, Optional
+from typing import ClassVar
 
 from pydantic import BaseModel, ConfigDict
 
@@ -22,12 +22,12 @@ class WeatherData(BaseModel):
     feels_like: float
     humidity: int
     wind_speed: float
-    wind_direction_deg: Optional[float]
-    precipitation_probability: Optional[int]
-    clouds: Optional[int]
-    visibility_distance: Optional[float]
+    wind_direction_deg: float | None
+    precipitation_probability: int | None
+    clouds: int | None
+    visibility_distance: float | None
     pressure_hpa: float
-    icon_code: Optional[int] = None
+    icon_code: int | None = None
 
     WEATHER_EMOJI_MAP: ClassVar[dict[str, str]] = {
         "clear": "☀️",

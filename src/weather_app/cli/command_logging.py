@@ -62,6 +62,7 @@ def log_command_failure(
         level,
         "CLI command failed",
         exc_info=exc_info,
+        telemetry_redact_fields=frozenset({"error_message"}),
         **_command_context(ctx),
         error_type=type(error).__name__,
         error_message=str(error),

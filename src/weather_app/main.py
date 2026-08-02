@@ -11,9 +11,6 @@ import os
 import sys
 
 import click
-
-import logfire
-
 from rich.console import Console
 from rich.prompt import Prompt
 from rich.traceback import install
@@ -27,26 +24,17 @@ from weather_app.exceptions import (
     LocationNotFoundError,
     WeatherAppError,
 )
-from weather_app.security import KeyringUnavailableError, SecurityError
 from weather_app.logging_config import (
     LoggingConfig,
     log_with_context,
     setup_default_logging,
 )
+from weather_app.observability import configure_logfire
+from weather_app.security import KeyringUnavailableError, SecurityError
 from weather_app.services.ui_service import UIService
 
 # Global logger instance
 logger = None
-_logfire_configured = False
-
-
-def _configure_logfire() -> None:
-    """Initialize Logfire once without polluting CLI stdout."""
-    global _logfire_configured
-    if _logfire_configured:
-        return
-    logfire.configure(console=False)
-    _logfire_configured = True
 
 
 def setup_api_key() -> bool:
@@ -60,7 +48,8 @@ def setup_api_key() -> bool:
 
     if not config.is_keyring_available():
         console.print(
-            "\n[yellow]⚠️  Secure keyring storage is not available on this system[/yellow]",
+            "\n[yellow]⚠️  Secure keyring storage is not available on this ",
+            "system[/yellow]",
             "\nPlease use one of these alternatives:",
             "  • Set OWM_API_KEY environment variable",
             "  • Create .weather.env file with your API key",
@@ -75,13 +64,16 @@ def setup_api_key() -> bool:
         api_key = Prompt.ask("\nEnter your OpenWeatherMap API key", password=True)
 
         if not api_key:
-            console.print("\n[yellow]❌ No API key provided. Setup cancelled.[/yellow]")
+            console.print(
+                "\n[yellow]❌", "No API key provided. ", "Setup cancelled.[/yellow]"
+            )
             return False
 
         config.store_api_key(api_key)
         console.print("\n[green]✅ API key stored securely in keyring![/green]")
         console.print(
-            "\nYou can now run the weather app without setting environment variables."
+            "\nYou can now run the weather app without setting environment ",
+            "variables.",
         )
         return True
 
@@ -92,7 +84,7 @@ def setup_api_key() -> bool:
 
 async def main_async() -> None:
     """Initialize and run the weather application in async mode."""
-    _configure_logfire()
+    configure_logfire()
     # Only expose local variables in tracebacks when WEATHER_DEBUG is set.
     # show_locals=True would leak API keys, tokens, and other secrets.
     install(
@@ -102,7 +94,8 @@ async def main_async() -> None:
     # Set up configuration and logging
     config = Config()
 
-    # First-run setup: prompt for API key storage if none found and keyring available
+    # First-run setup: prompt for API key storage if none found and keyring
+    # available
     if not config.api_key and config.is_keyring_available():
         console = Console()
         console.print("\n[bold yellow]🔑 No API key found[/bold yellow]")
@@ -121,7 +114,7 @@ async def main_async() -> None:
                     config = Config()
                 else:
                     console.print(
-                        "\n[yellow]Continuing without API key setup...[/yellow]"
+                        "\n[yellow]", "Continuing without API key setup...", "[/yellow]"
                     )
         except KeyboardInterrupt:
             console.print("\n[yellow]Setup cancelled by user.[/yellow]")
@@ -236,7 +229,7 @@ async def main_async() -> None:
             "[blue]Please check system resources and dependencies[/blue] ⚙️",
             sep="\n",
         )
-    except Exception as e:
+    except Exception as e:  # noqa: BLE001
         log_with_context(
             logger,
             logging.ERROR,
@@ -267,7 +260,7 @@ async def main_async() -> None:
 
 def main() -> None:
     """Initialize and run the weather application (sync wrapper)."""
-    _configure_logfire()
+    configure_logfire()
     # Check for setup command (legacy)
     if len(sys.argv) > 1 and sys.argv[1] == "--setup-api-key":
         success = setup_api_key()
@@ -284,7 +277,7 @@ def main() -> None:
     except click.ClickException as e:
         # Click handles its own exceptions with proper exit codes
         sys.exit(e.exit_code)
-    except Exception as e:
+    except Exception as e:  # noqa: BLE001
         # Unexpected errors
         import traceback
 

@@ -15,7 +15,7 @@ from weather_app.exceptions import (
 @pytest.fixture(autouse=True)
 def mock_logfire_configuration():
     """Prevent unit tests from configuring real Logfire exporters."""
-    with patch("weather_app.main._configure_logfire"):
+    with patch("weather_app.main.configure_logfire"):
         yield
 
 

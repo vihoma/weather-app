@@ -6,7 +6,7 @@ and sensitive data masking for logging.
 
 import logging
 import re
-from typing import Dict, Optional
+from collections.abc import Mapping
 
 import keyring
 from keyring.errors import KeyringError
@@ -15,13 +15,9 @@ from keyring.errors import KeyringError
 class SecurityError(Exception):
     """Base exception for security-related errors."""
 
-    pass
-
 
 class KeyringUnavailableError(SecurityError):
     """Raised when the system keyring is not available."""
-
-    pass
 
 
 class SensitiveDataFilter(logging.Filter):
@@ -52,16 +48,57 @@ class SensitiveDataFilter(logging.Filter):
             record.msg = self._mask_sensitive_data(str(record.msg))
 
         if hasattr(record, "args") and record.args:
-            # Convert args to string and mask sensitive data
-            masked_args: list[object] = []
-            for arg in record.args:
-                if isinstance(arg, str):
-                    masked_args.append(self._mask_sensitive_data(arg))
-                else:
-                    masked_args.append(arg)
-            record.args = tuple(masked_args)
+            if isinstance(record.args, Mapping):
+                record.args = {
+                    key: self._sanitize_value(value, key=key)
+                    for key, value in record.args.items()
+                }
+            else:
+                record.args = tuple(self._sanitize_value(arg) for arg in record.args)
+
+        standard_record_attributes = logging.makeLogRecord({}).__dict__
+        for key, value in record.__dict__.items():
+            if key not in standard_record_attributes:
+                record.__dict__[key] = self._sanitize_value(value, key=str(key))
 
         return True
+
+    def _sanitize_value(self, value: object, key: str = "") -> object:
+        """Recursively mask sensitive values in structured log context."""
+        if self._is_sensitive_key(key):
+            return self._mask_sensitive_value(value)
+
+        if isinstance(value, dict):
+            return {
+                item_key: self._sanitize_value(item_value, key=str(item_key))
+                for item_key, item_value in value.items()
+            }
+        if isinstance(value, list):
+            return [self._sanitize_value(item) for item in value]
+        if isinstance(value, tuple):
+            return tuple(self._sanitize_value(item) for item in value)
+        if isinstance(value, set):
+            return {self._sanitize_value(item) for item in value}
+        if isinstance(value, frozenset):
+            return frozenset(self._sanitize_value(item) for item in value)
+        if isinstance(value, str):
+            return self._mask_sensitive_data(value)
+        return value
+
+    @staticmethod
+    def _is_sensitive_key(key: str) -> bool:
+        """Return whether a structured log key identifies a secret."""
+        normalized_key = key.replace("_", "").replace("-", "").lower()
+        return any(
+            marker in normalized_key
+            for marker in ("apikey", "password", "token", "secret")
+        )
+
+    def _mask_sensitive_value(self, value: object) -> str:
+        """Mask a sensitive structured value without exposing its contents."""
+        if not isinstance(value, str) or len(value) <= 8:
+            return "***"
+        return f"{value[:4]}...{value[-4:]}"
 
     def _mask_sensitive_data(self, text: str) -> str:
         """Mask sensitive data in text."""
@@ -144,7 +181,7 @@ class SecureConfig:
         except (KeyringError, PermissionError, OSError, RuntimeError) as e:
             raise SecurityError(f"Failed to store API key: {e}") from e
 
-    def get_api_key(self, service_name: str = "openweathermap") -> Optional[str]:
+    def get_api_key(self, service_name: str = "openweathermap") -> str | None:
         """Retrieve an API key from secure storage.
 
         Args:
@@ -183,7 +220,7 @@ class SecureConfig:
         except (KeyringError, PermissionError, OSError) as e:
             raise SecurityError(f"Failed to delete API key: {e}") from e
 
-    def list_stored_keys(self) -> Dict[str, str]:
+    def list_stored_keys(self) -> dict[str, str]:
         """List all stored API keys (returns masked versions for security).
 
         Returns:
@@ -214,11 +251,22 @@ def setup_secure_logging() -> None:
         # Don't add duplicate filters
         if not any(isinstance(f, SensitiveDataFilter) for f in logger.filters):
             logger.addFilter(sensitive_filter)
+        _add_sensitive_filter_to_handlers(logger, sensitive_filter)
 
     # Also add to root logger
     root_logger = logging.getLogger()
     if not any(isinstance(f, SensitiveDataFilter) for f in root_logger.filters):
         root_logger.addFilter(sensitive_filter)
+    _add_sensitive_filter_to_handlers(root_logger, sensitive_filter)
+
+
+def _add_sensitive_filter_to_handlers(
+    logger: logging.Logger, sensitive_filter: SensitiveDataFilter
+) -> None:
+    """Attach the sensitive-data filter at each handler boundary."""
+    for handler in logger.handlers:
+        if not any(isinstance(f, SensitiveDataFilter) for f in handler.filters):
+            handler.addFilter(sensitive_filter)
 
 
 def mask_sensitive_string(text: str) -> str:

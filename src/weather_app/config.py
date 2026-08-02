@@ -21,7 +21,7 @@ Key points:
 import logging
 import os
 from pathlib import Path
-from typing import Any, Dict, Optional
+from typing import Any
 
 import yaml
 from dotenv import dotenv_values
@@ -54,7 +54,7 @@ class Config(BaseSettings):
     # ---------------------------------------------------------------------
     # Raw configuration values – names match the historic environment vars
     # ---------------------------------------------------------------------
-    OWM_API_KEY: Optional[str] = Field(default=None)
+    OWM_API_KEY: str | None = Field(default=None)
     OWM_UNITS: str = Field(default="metric")
     CACHE_TTL: int = Field(default=600)
     REQUEST_TIMEOUT: int = Field(default=30, ge=1)
@@ -62,15 +62,15 @@ class Config(BaseSettings):
     LOG_LEVEL: str = Field(default="INFO")
     LOG_FORMAT: str = Field(default="text")
     CACHE_DIR: str = Field(default_factory=_default_cache_dir)
-    CACHE_FILE: Optional[str] = Field(default=None)
-    LOG_FILE: Optional[str] = Field(default=None)
+    CACHE_FILE: str | None = Field(default=None)
+    LOG_FILE: str | None = Field(default=None)
     CACHE_PERSIST: bool = Field(default=False)
 
     # ---------------------------------------------------------------------
     # Compatibility helpers (private attributes used by the legacy API)
     # ---------------------------------------------------------------------
     _secure: SecureConfig = PrivateAttr(default_factory=SecureConfig)
-    _api_key: Optional[str] = PrivateAttr(default=None)
+    _api_key: str | None = PrivateAttr(default=None)
 
     model_config = SettingsConfigDict(env_file=None, extra="ignore")
 
@@ -106,7 +106,7 @@ class Config(BaseSettings):
     @classmethod
     def _yaml_settings_source(
         cls, settings: BaseSettings | None = None
-    ) -> Dict[str, Any]:
+    ) -> dict[str, Any]:
         """Load configuration from the first existing ``.weather.yaml`` file.
 
         The function returns a dictionary that Pydantic will treat as if the values
@@ -121,7 +121,7 @@ class Config(BaseSettings):
             if path.is_file():
                 with open(path, "r", encoding="utf-8") as f:
                     data = yaml.safe_load(f) or {}
-                result: Dict[str, Any] = {}
+                result: dict[str, Any] = {}
                 known_fields = set(cls.model_fields.keys())
                 for k, v in data.items():
                     upper_key = k.upper()
@@ -138,7 +138,7 @@ class Config(BaseSettings):
     @classmethod
     def _env_file_settings_source(
         cls, settings: BaseSettings | None = None
-    ) -> Dict[str, Any]:
+    ) -> dict[str, Any]:
         """Load configuration from the first existing ``.weather.env`` file.
 
         Uses ``dotenv_values`` to parse the file without mutating ``os.environ``,
@@ -172,14 +172,14 @@ class Config(BaseSettings):
         return bool(v)
 
     @field_validator("CACHE_FILE", mode="before")
-    def _default_cache_file(cls, v: Optional[str], info: Any) -> str:
+    def _default_cache_file(cls, v: str | None, info: Any) -> str:
         if v:
             return v
         cache_dir = info.data.get("CACHE_DIR") or _default_cache_dir()
         return os.path.join(cache_dir, "weather_app_cache.json")
 
     @field_validator("LOG_FILE", mode="before")
-    def _default_log_file(cls, v: Optional[str], info: Any) -> str:
+    def _default_log_file(cls, v: str | None, info: Any) -> str:
         if v:
             return v
         cache_dir = info.data.get("CACHE_DIR") or _default_cache_dir()
@@ -210,7 +210,7 @@ class Config(BaseSettings):
     # Public property façade – identical to the original implementation
     # ---------------------------------------------------------------------
     @property
-    def api_key(self) -> Optional[str]:
+    def api_key(self) -> str | None:
         return self._api_key
 
     @api_key.setter
@@ -227,7 +227,7 @@ class Config(BaseSettings):
         return self.LOG_LEVEL
 
     @property
-    def log_file(self) -> Optional[str]:
+    def log_file(self) -> str | None:
         """Return the configured log file path (may be None)."""
         return self.LOG_FILE
 
@@ -248,7 +248,7 @@ class Config(BaseSettings):
     # Lower‑case read‑only accessors for all configuration fields
     # ---------------------------------------------------------------------
     @property
-    def owm_api_key(self) -> Optional[str]:
+    def owm_api_key(self) -> str | None:
         """Return the OpenWeatherMap API key (may be None)."""
         return self.OWM_API_KEY
 

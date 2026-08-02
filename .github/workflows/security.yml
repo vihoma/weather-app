@@ -42,7 +42,8 @@ jobs:
       - name: Install dependencies
         run: |
           python -m pip install --upgrade pip
-          pip install pip-audit
-          pip install -r requirements.txt
+          pip install poetry
+          poetry install --all-groups --no-root
+          poetry run pip install pip-audit
       - name: Run pip-audit
-        run: pip-audit -r requirements.txt
+        run: poetry run pip-audit

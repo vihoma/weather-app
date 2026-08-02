@@ -8,7 +8,7 @@ This module eliminates the duplicate ``_load_cache_from_disk`` /
 import json
 import logging
 import os
-from datetime import datetime, timedelta, timezone
+from datetime import UTC, datetime, timedelta
 from pathlib import Path
 from typing import Any
 
@@ -59,7 +59,7 @@ def load_cache_from_disk(
         with open(cache_path, "r", encoding="utf-8") as f:
             cache_data = json.load(f)
 
-        now = datetime.now(timezone.utc)
+        now = datetime.now(UTC)
         ttl_delta = timedelta(seconds=cache_ttl)
         loaded = 0
         skipped_expired = 0
@@ -78,7 +78,7 @@ def load_cache_from_disk(
                 try:
                     fetched_at = datetime.fromisoformat(fetched_at_str)
                     if fetched_at.tzinfo is None:
-                        fetched_at = fetched_at.replace(tzinfo=timezone.utc)
+                        fetched_at = fetched_at.replace(tzinfo=UTC)
                     if now - fetched_at > ttl_delta:
                         skipped_expired += 1
                         continue
@@ -101,7 +101,7 @@ def load_cache_from_disk(
             skipped_expired,
             skipped_legacy,
         )
-    except (json.JSONDecodeError, IOError, PermissionError) as e:
+    except (OSError, json.JSONDecodeError, PermissionError) as e:
         logger.warning("Failed to load cache from %s: %s", cache_file_path, e)
 
 
@@ -142,7 +142,7 @@ def save_cache_to_disk(
 
         cache_path.parent.mkdir(parents=True, exist_ok=True)
 
-        now = datetime.now(timezone.utc)
+        now = datetime.now(UTC)
         ttl = cache_ttl
 
         cache_data: dict[str, dict[str, Any]] = {}
@@ -161,13 +161,13 @@ def save_cache_to_disk(
             with open(tmp_path, "w", encoding="utf-8") as f:
                 json.dump(cache_data, f, indent=2)
             os.replace(tmp_path, cache_path)
-        except (IOError, PermissionError, OSError):
+        except (PermissionError, OSError):
             try:
                 tmp_path.unlink(missing_ok=True)
-            except (IOError, PermissionError, OSError):
+            except (PermissionError, OSError):
                 pass
             raise
 
         logger.debug("Saved %d cache items to %s", len(cache_data), cache_path)
-    except (IOError, PermissionError, OSError) as e:
+    except (PermissionError, OSError) as e:
         logger.warning("Failed to save cache to %s: %s", cache_file_path, e)

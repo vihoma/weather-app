@@ -2,7 +2,6 @@
 
 import os
 from pathlib import Path
-from typing import List, Optional, Tuple
 
 import click
 import yaml
@@ -33,10 +32,9 @@ Examples:
 )
 def config_group() -> None:
     """Group for configuration commands."""
-    pass
 
 
-def _get_yaml_config_path() -> Optional[Path]:
+def _get_yaml_config_path() -> Path | None:
     """Find which YAML config file is being used, if any.
 
     Returns:
@@ -52,7 +50,7 @@ def _get_yaml_config_path() -> Optional[Path]:
     return None
 
 
-def _get_env_var_status(config_field: str) -> Tuple[bool, Optional[str]]:
+def _get_env_var_status(config_field: str) -> tuple[bool, str | None]:
     """Check if an environment variable is set for a config field.
 
     Args:
@@ -77,7 +75,7 @@ def _get_env_var_status(config_field: str) -> Tuple[bool, Optional[str]]:
     return True, masked
 
 
-def _get_keyring_status(config: Config) -> Tuple[bool, Optional[str]]:
+def _get_keyring_status(config: Config) -> tuple[bool, str | None]:
     """Check if API key is stored in keyring.
 
     Args:
@@ -101,7 +99,7 @@ def _get_keyring_status(config: Config) -> Tuple[bool, Optional[str]]:
     return False, None
 
 
-def _get_source_hint(config_field: str, config: Config) -> List[str]:
+def _get_source_hint(config_field: str, config: Config) -> list[str]:
     """Generate source hints for a configuration field.
 
     Args:
@@ -127,7 +125,7 @@ def _get_source_hint(config_field: str, config: Config) -> List[str]:
             pass
 
     # Check environment variable
-    env_set, env_value = _get_env_var_status(config_field)
+    env_set, _env_value = _get_env_var_status(config_field)
     if env_set:
         hints.append("env")
 
@@ -224,7 +222,7 @@ def config_show(ctx: click.Context) -> None:
         console.print("  • Environment variables: [dim]None set[/dim]")
 
     # Keyring status
-    has_keyring, masked_key = _get_keyring_status(config)
+    has_keyring, _masked_key = _get_keyring_status(config)
     if has_keyring:
         console.print("  • Keyring storage: [green]Available[/green] (API key stored)")
     else:
@@ -275,7 +273,7 @@ def config_sources(ctx: click.Context) -> None:
         try:
             with open(yaml_path, "r", encoding="utf-8") as f:
                 yaml_data = yaml.safe_load(f) or {}
-            yaml_fields = [k for k in yaml_data.keys()]
+            yaml_fields = [k for k in yaml_data]
             console.print(f"   Contains fields: {', '.join(yaml_fields)}")
         except (OSError, PermissionError) as e:
             console.print(f"   [red]Error reading YAML: {e}[/red]")

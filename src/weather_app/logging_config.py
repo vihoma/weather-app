@@ -1,16 +1,23 @@
-"""Logging configuration for the Weather Application with structured logging support."""
+"""Logging configuration with structured logging support."""
 
+import copy
 import logging
 import logging.handlers
+from collections.abc import Mapping
 from pathlib import Path
 from typing import TYPE_CHECKING, Any, Optional
 
+import logfire
+
 from weather_app.security import setup_secure_logging
+
+_module_logger = logging.getLogger(__name__)
 
 if TYPE_CHECKING:
     from weather_app.config import Config
 
-# Try to import python-json-logger, fallback to standard logging if not available
+# Try to import python-json-logger, fallback to standard logging if not
+# available.
 try:
     from pythonjsonlogger import json as jsonlogger
 
@@ -21,14 +28,15 @@ except ImportError:
 
 
 class LoggingConfig:
-    """Configure application logging with structured JSON formatting."""
+    """Configure application logging with structured formatting."""
 
     def __init__(
         self,
         log_level: int = logging.INFO,
-        log_file: Optional[str] = None,
+        log_file: str | None = None,
         log_format: str = "text",
         enable_console: bool = True,
+        enable_logfire: bool = True,
     ):
         """Initialize logging configuration.
 
@@ -43,9 +51,10 @@ class LoggingConfig:
         self.log_file = log_file
         self.log_format = log_format.lower()
         self.enable_console = enable_console
+        self.enable_logfire = enable_logfire
 
     def setup_logging(self) -> None:
-        """Configure the root logger with console and optional file handlers."""
+        """Configure the root logger with console and optional handlers."""
         # Configure root logger
         root_logger = logging.getLogger()
         root_logger.setLevel(self.log_level)
@@ -68,9 +77,17 @@ class LoggingConfig:
             console_handler.setFormatter(console_formatter)
             root_logger.addHandler(console_handler)
 
+        if self.enable_logfire:
+            logfire_handler = logfire.LogfireLoggingHandler()
+            logfire_handler.setLevel(self.log_level)
+            logfire_handler.addFilter(LogfireTelemetryFilter())
+            root_logger.addHandler(logfire_handler)
+
         # File handler (if specified)
         if self.log_file:
             self._setup_file_handler(root_logger, file_formatter)
+
+        setup_secure_logging()
 
     def _create_text_formatter(
         self, include_file_info: bool = False
@@ -129,7 +146,7 @@ class LoggingConfig:
             root_logger.addHandler(file_handler)
 
         except (OSError, PermissionError) as e:
-            logging.warning(f"Failed to setup file logging: {e}")
+            _module_logger.warning("Failed to setup file logging: %s", e)
 
     @classmethod
     def get_logger(cls, name: str) -> logging.Logger:
@@ -150,6 +167,7 @@ def log_with_context(
     level: int,
     message: str,
     exc_info: bool = False,
+    telemetry_redact_fields: frozenset[str] = frozenset(),
     **context: Any,
 ) -> None:
     """Log a message with structured context data.
@@ -159,19 +177,30 @@ def log_with_context(
         level: Logging level
         message: Log message
         exc_info: Whether to include exception info
+        telemetry_redact_fields: Context keys excluded from Logfire telemetry
         **context: Additional context data to include in log
 
     """
+    extra_data: dict[str, Any] = {"context": context} if context else {}
+    if telemetry_redact_fields:
+        extra_data["_logfire_redact_fields"] = telemetry_redact_fields
+        extra_data["_logfire_event_message"] = message
+
     if _root_uses_json_formatter() and logger.isEnabledFor(level):
         # For JSON logging, include context as extra data
-        extra_data = {"context": context} if context else {}
         logger.log(level, message, extra=extra_data, exc_info=exc_info, stacklevel=2)
     else:
         # For text logging, append context to message
         if context:
             context_str = " ".join(f"{k}={v}" for k, v in context.items())
             message = f"{message} [{context_str}]"
-        logger.log(level, message, exc_info=exc_info, stacklevel=2)
+        logger.log(
+            level,
+            message,
+            extra=extra_data,
+            exc_info=exc_info,
+            stacklevel=2,
+        )
 
 
 def _root_uses_json_formatter() -> bool:
@@ -203,7 +232,8 @@ def setup_default_logging(
     if config:
         # Convert string log level to numeric value
         log_level = getattr(logging, config.log_level.upper(), logging.INFO)
-        # Use weather_app.json as default if JSON logging is enabled and no custom log file specified
+        # Use weather_app.json as default if JSON logging is enabled and no
+        # custom log file specified
         log_file = config.log_file
         if log_file is None and config.log_format == "json":
             log_file = "weather_app.json"
@@ -223,5 +253,105 @@ def setup_default_logging(
 
     logging_config.setup_logging()
 
-    # Set up secure logging with sensitive data filtering
-    setup_secure_logging()
+
+class LogfireTelemetryFilter(logging.Filter):
+    """Create a safe telemetry-only copy of failure log records."""
+
+    _SAFE_FAILURE_FIELDS = frozenset(
+        {
+            "category",
+            "error_category",
+            "error_class",
+            "error_code",
+            "error_type",
+            "failure_category",
+            "failure_type",
+            "outcome",
+            "status",
+            "status_code",
+        }
+    )
+    _UNSAFE_FAILURE_FIELDS = frozenset(
+        {
+            "address",
+            "coordinates",
+            "error",
+            "error_detail",
+            "error_details",
+            "error_message",
+            "exception",
+            "exception_detail",
+            "exception_details",
+            "exception_message",
+            "latitude",
+            "location",
+            "locations",
+            "longitude",
+            "place",
+            "query",
+            "stack",
+            "stack_info",
+            "stacktrace",
+            "traceback",
+        }
+    )
+    _STANDARD_RECORD_FIELDS = frozenset(logging.makeLogRecord({}).__dict__)
+    _FAILURE_MESSAGE = "Weather application failure"
+
+    def filter(self, record: logging.LogRecord) -> bool | logging.LogRecord:
+        """Return a Logfire-safe copy when the record represents a failure."""
+        if not self._is_failure_record(record):
+            return True
+
+        sanitized_record = copy.copy(record)
+        for key in tuple(sanitized_record.__dict__):
+            if key not in self._STANDARD_RECORD_FIELDS:
+                sanitized_record.__dict__.pop(key, None)
+
+        safe_context = self._safe_failure_context(record)
+        if safe_context:
+            sanitized_record.context = safe_context
+
+        sanitized_record.msg = self._FAILURE_MESSAGE
+        sanitized_record.args = ()
+        sanitized_record.exc_info = None
+        sanitized_record.exc_text = None
+        sanitized_record.stack_info = None
+        return sanitized_record
+
+    def _is_failure_record(self, record: logging.LogRecord) -> bool:
+        """Return whether a record can expose failure diagnostics."""
+        if (
+            record.levelno >= logging.ERROR
+            or record.exc_info is not None
+            or record.stack_info is not None
+            or bool(getattr(record, "_logfire_redact_fields", frozenset()))
+        ):
+            return True
+
+        context = getattr(record, "context", {})
+        context_fields = set(context) if isinstance(context, Mapping) else set()
+        record_fields = {
+            key for key in record.__dict__ if key not in self._STANDARD_RECORD_FIELDS
+        }
+        failure_fields = self._SAFE_FAILURE_FIELDS | self._UNSAFE_FAILURE_FIELDS
+        return bool((context_fields | record_fields) & failure_fields)
+
+    def _safe_failure_context(self, record: logging.LogRecord) -> dict[str, Any]:
+        """Keep only explicit, non-diagnostic failure classifications."""
+        context = getattr(record, "context", {})
+        safe_context = (
+            {
+                key: value
+                for key, value in context.items()
+                if key in self._SAFE_FAILURE_FIELDS
+            }
+            if isinstance(context, Mapping)
+            else {}
+        )
+
+        for key in self._SAFE_FAILURE_FIELDS:
+            if key in record.__dict__:
+                safe_context[key] = record.__dict__[key]
+
+        return safe_context
