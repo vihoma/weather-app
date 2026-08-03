@@ -1,6 +1,7 @@
 """Process-local Logfire observability initialization."""
 
 import os
+import sys
 from collections.abc import Iterator
 from contextlib import contextmanager
 from threading import Lock
@@ -47,4 +48,4 @@ def weather_fetch_span(
     try:
         yield span
     finally:
-        span.__exit__(None, None, None)
+        span.__exit__(*sys.exc_info())

@@ -111,12 +111,13 @@ def cache_status(ctx: click.Context) -> None:
             if num_entries > 3:
                 sample_str += f" ... (+{num_entries - 3} more)"
             table.add_row("Sample keys", sample_str)
-        except (json.JSONDecodeError, OSError) as e:
+        except (json.JSONDecodeError, OSError, UnicodeDecodeError) as e:
             file_readable = False
             table.add_row("File readable", f"No ({e})")
     else:
         table.add_row("File size", "N/A")
         table.add_row("Number of cache entries", "N/A")
+        file_readable = False
 
     console.print(table)
     log_command_success(

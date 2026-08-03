@@ -55,7 +55,6 @@ def apply_cli_overrides(config: Config, **kwargs: Any) -> None:
         overrides["CACHE_PERSIST"] = True
     elif cache_persist is False:
         overrides["CACHE_PERSIST"] = False
-        overrides["CACHE_TTL"] = 0
 
     # Apply overrides with validation via model_validate
     if overrides:

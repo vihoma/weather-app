@@ -121,4 +121,4 @@ class TestWeatherFetchSpans:
             "outcome": "failure",
             "failure_category": "network",
         }
-        assert span.exit_arguments == (None, None, None)
+        assert span.exit_arguments[0] is NetworkError
