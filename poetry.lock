@@ -1013,14 +1013,14 @@ files = [
 
 [[package]]
 name = "logfire"
-version = "4.39.0"
+version = "4.40.0"
 description = "The best Python observability tool! 🪵🔥"
 optional = false
 python-versions = ">=3.10"
 groups = ["main"]
 files = [
-    {file = "logfire-4.39.0-py3-none-any.whl", hash = "sha256:e6046e03ce45098c15a9dbf42ced8b95dfcb60cc1f3600a6250c8f515755be5f"},
-    {file = "logfire-4.39.0.tar.gz", hash = "sha256:7291ae695a145c21b4fa9baea2ffaf42b23c79a08e1f3edcef5a4cad41867a0d"},
+    {file = "logfire-4.40.0-py3-none-any.whl", hash = "sha256:0ac2c950968812f27ee68ccec4a362230acffaffb28f04945ee07729d5866fa0"},
+    {file = "logfire-4.40.0.tar.gz", hash = "sha256:f50f9637f9b5cc3eb5f8526e473effa1992d45056c89adc7c821ee7ab2520c75"},
 ]
 
 [package.dependencies]
@@ -2586,4 +2586,4 @@ propcache = ">=0.2.1"
 [metadata]
 lock-version = "2.1"
 python-versions = ">=3.13"
-content-hash = "0ffbe1541955c08a3cf5cf0deb4bd282b99c3f9e5bc15357bb4de92fb5bf08bd"
+content-hash = "b0ad2da2188e36d77810e632bce0160c5ea738ccef9a250f75bae3f1d2372c63"
