@@ -3,7 +3,7 @@ async-timeout
 cachetools
 geopy
 keyring
-logfire[system-metrics]
+logfire[aiohttp-client]
 pydantic
 pydantic-settings
 python-dotenv

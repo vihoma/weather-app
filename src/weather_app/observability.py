@@ -8,9 +8,29 @@ from threading import Lock
 from typing import Literal
 
 import logfire
+from yarl import URL
 
 _configuration_lock = Lock()
 _logfire_configured = False
+
+
+def mask_url(url: URL) -> str:
+    """Mask sensitive query parameters in a URL."""
+    sensitive_keys = {
+        "apikey",
+        "appid",
+        "api_key",
+        "api_secret",
+        "password",
+        "token",
+        "username",
+    }
+
+    masked_query = {
+        key: "*****" if key in sensitive_keys else value
+        for key, value in url.query.items()
+    }
+    return str(url.with_query(masked_query))
 
 
 def configure_logfire() -> None:
@@ -21,16 +41,13 @@ def configure_logfire() -> None:
         return
 
     with _configuration_lock:
-        if _logfire_configured:
-            return
-
         logfire.configure(
             service_name="weather-app",
             environment=os.environ.get("LOGFIRE_ENVIRONMENT", "development"),
             console=False,
             send_to_logfire="if-token-present",
         )
-        logfire.instrument_system_metrics()
+        logfire.instrument_aiohttp_client(url_filter=mask_url)
         _logfire_configured = True
 
 
