@@ -1,4 +1,3 @@
-#!/usr/bin/env python3
 """Main entry point for the Weather Application.
 
 This module initializes the application and handles top-level exceptions.
