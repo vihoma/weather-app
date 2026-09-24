@@ -6,6 +6,7 @@ MagicMock/
 __pycache__/
 .agents/
 .cocoindex_code/
+.codebase-memory/
 .ruff_cache/
 .venv/
 .vscode/
