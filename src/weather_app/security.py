@@ -59,7 +59,7 @@ class SensitiveDataFilter(logging.Filter):
         standard_record_attributes = logging.makeLogRecord({}).__dict__
         for key, value in record.__dict__.items():
             if key not in standard_record_attributes:
-                record.__dict__[key] = self._sanitize_value(value, key=str(key))
+                record.__dict__[key] = self._sanitize_value(value, key=key)
 
         return True
 
@@ -173,7 +173,8 @@ class SecureConfig:
 
         if not self._keyring_available:
             raise KeyringUnavailableError(
-                "System keyring is not available. Please use environment variables or config files."
+                "System keyring is not available."
+                + "Please use environment variables or config files."
             )
 
         try:
@@ -233,7 +234,8 @@ class SecureConfig:
         if not self._keyring_available:
             raise KeyringUnavailableError("System keyring is not available")
 
-        # Note: keyring doesn't have a built-in way to list all keys for a service
+        # Note: keyring doesn't have a built-in way to list all keys for a
+        # service
         # This is a limitation of the keyring API
         return {}
 

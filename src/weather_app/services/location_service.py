@@ -4,10 +4,18 @@ import logging
 import re
 from typing import Any, cast
 
-from geopy.exc import GeocoderServiceError, GeocoderTimedOut, GeocoderUnavailable
+from geopy.exc import (
+    GeocoderServiceError,
+    GeocoderTimedOut,
+    GeocoderUnavailable,
+)
 from geopy.geocoders import Nominatim
 
-from ..exceptions import GeocodingError, InvalidLocationError, NetworkError
+from ..exceptions import (
+    GeocodingError,
+    InvalidLocationError,
+    NetworkError,
+)
 
 logger = logging.getLogger(__name__)
 
@@ -22,7 +30,11 @@ class LocationService:
             timeout: Timeout in seconds for geocoding requests (default: 10)
 
         """
-        self.geolocator = Nominatim(user_agent="weather_app", timeout=timeout)
+        timeout_object = cast(Any, timeout)
+        self.geolocator = Nominatim(
+            user_agent="weather_app",
+            timeout=timeout_object,
+        )
         self.timeout = timeout
 
     def validate_location_format(self, location: str) -> bool:
@@ -40,11 +52,16 @@ class LocationService:
             return True
 
         # Check for city,country format
-        return bool(self._is_city_country_format(location))
+        return self._is_city_country_format(location)
 
     def _is_coordinate_format(self, location: str) -> bool:
         """Check if location is in coordinate format."""
-        coord_pattern = r"^[-+]?([1-8]?\d(\.\d+)?|90(\.0+)?),\s*[-+]?(180(\.0+)?|((1[0-7]\d)|([1-9]?\d))(\.\d+)?)$"
+        coord_pattern_string = (
+            r"^[-+]?([1-8]?\d(\.\d+)?|90(\.0+)?),\s*[-+]?"
+            + r"(180(\.0+)?|((1[0-7]\d)|([1-9]?\d))(\.\d+)?)$"
+        )
+        # coord_pattern = r"^[-+]?([1-8]?\d(\.\d+)?|90(\.0+)?),\s*[-+]?(180(\.0+)?|((1[0-7]\d)|([1-9]?\d))(\.\d+)?)$"  # ignore: line-too-long
+        coord_pattern = re.compile(coord_pattern_string)
         return bool(re.match(coord_pattern, location.strip()))
 
     def _is_city_country_format(self, location: str) -> bool:
@@ -139,7 +156,8 @@ class LocationService:
         except (GeocoderUnavailable, GeocoderServiceError) as e:
             logger.warning("Geocoding service unavailable: %s", e)
             raise NetworkError(
-                "Geocoding service unavailable. Please check your internet connection."
+                "Geocoding service unavailable. "
+                + "Please check your internet connection."
             ) from e
         except (ValueError, TypeError):
             logger.exception("Invalid coordinate format during geocoding")

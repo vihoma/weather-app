@@ -1,6 +1,6 @@
 [project]
 name = "weather-app"
-version = "0.7.20"
+version = "0.7.21"
 description = "A CLI weather app using OpenWeatherMap API, written in Python 3"
 authors = [
     {name = "Lord Sohron",email = "29570082+vihoma@users.noreply.github.com"}
@@ -25,6 +25,10 @@ dependencies = [
     "logfire[aiohttp-client] (>=4.40.0,<5.0.0)"
 ]
 
+[project.scripts]
+# This is the main script entry point for the weather app
+weather = "weather_app.main:main"
+
 [dependency-groups]
 dev = [
     "bandit (>=1.9.4,<2.0.0)",
@@ -38,10 +42,6 @@ dev = [
     "types-cachetools (>=7.0.0,<8.0.0)"
 ]
 
-[project.scripts]
-# This is the main script entry point for the weather app
-weather = "weather_app.main:main"
-
 [tool.poetry]
 packages = [
     {include = "weather_app", from = "src"}
@@ -49,13 +49,6 @@ packages = [
 
 [tool.logfire]
 pydantic_plugin_record = "all"
-
-[tool.pyrefly]
-python-version = "3.13"
-project-includes = [
-    "**/*.py*",
-    "**/*.ipynb",
-]
 
 [tool.mypy]
 python_version = "3.13"
@@ -65,7 +58,6 @@ warn_unused_configs = true
 module = [
     "geopy.*",
     "pyowm.*",
-    "yaml",
 ]
 ignore_missing_imports = true
 
@@ -95,6 +87,17 @@ markers = [
 [tool.bandit]
 test-targets = ["src/weather_app"]
 skips = ["B101", "B110"]
+
+[tool.pyrefly]
+python-version = "3.13.0"
+ignore-missing-imports = [
+    "geopy.*",
+    "pyowm.*",
+]
+project-includes = [
+    "src/weather_app/**/*.py*",
+    "src/weather_app/**/*.ipynb",
+]
 
 [build-system]
 requires = ["poetry-core>=2.0.0,<3.0.0"]

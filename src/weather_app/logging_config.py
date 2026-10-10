@@ -24,7 +24,7 @@ try:
     JSON_LOGGER_AVAILABLE = True
 except ImportError:
     JSON_LOGGER_AVAILABLE = False
-    jsonlogger = None  # type: ignore
+    jsonlogger = None
 
 
 class LoggingConfig:
