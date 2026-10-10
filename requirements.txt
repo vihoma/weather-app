@@ -2,11 +2,11 @@ aiohttp
 async-timeout
 cachetools
 geopy
+click
 keyring
 logfire[aiohttp-client]
 pydantic
 pydantic-settings
-python-dotenv
 python-json-logger
 pyowm
 PyYAML
