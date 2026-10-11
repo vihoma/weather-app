@@ -4,7 +4,7 @@ cachetools
 geopy
 click
 keyring
-logfire[aiohttp-client]
+logfire[aiohttp-client,system-metrics]
 pydantic
 pydantic-settings
 python-json-logger

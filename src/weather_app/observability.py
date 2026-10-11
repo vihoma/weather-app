@@ -48,6 +48,7 @@ def configure_logfire() -> None:
             send_to_logfire="if-token-present",
         )
         logfire.instrument_aiohttp_client(url_filter=mask_url)
+        logfire.instrument_system_metrics()
         _logfire_configured = True
 
 

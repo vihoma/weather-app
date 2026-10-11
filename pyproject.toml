@@ -22,7 +22,7 @@ dependencies = [
     "pydantic (>=2.13.4,<3.0.0)",
     "pydantic-settings (>=2.15.0,<3.0.0)",
     "click (>=8.4.2,<10.0.0)",
-    "logfire[aiohttp-client] (>=4.40.0,<5.0.0)"
+    "logfire[aiohttp-client,system-metrics] (>=4.40.0,<6.0.0)"
 ]
 
 [project.scripts]

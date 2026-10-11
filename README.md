@@ -120,10 +120,11 @@ Remote export is opt-in: provide `LOGFIRE_TOKEN` through a deployment secret
 manager or process environment only. **Never put a Logfire write token in a
 repository file, YAML configuration, or `.weather.env`.**
 
-`LOGFIRE_ENVIRONMENT` labels telemetry by deployment environment. The app also
-collects Logfire's default system metrics, covering process and host resource
-utilization. This is operational telemetry; it does not add request-level
-network tracing.
+`LOGFIRE_ENVIRONMENT` labels telemetry by deployment environment. The app
+enables Logfire's default system metrics, covering process and host resource
+utilization; when `LOGFIRE_TOKEN` is set, these metrics are exported remotely
+along with logs and spans. This is operational telemetry; it does not add
+request-level network tracing.
 
 Privacy boundaries are deliberate:
 
@@ -133,9 +134,10 @@ Privacy boundaries are deliberate:
 - Sensitive values in standard logging records are masked at handler
   boundaries before they reach the Logfire logging handler. Do not treat this
   as permission to log credentials or other secrets.
-- Automatic aiohttp client tracing is intentionally disabled because the
-  OpenWeatherMap `appid` is a URL query parameter. Enabling it could expose
-  the API key in HTTP telemetry.
+- Automatic aiohttp client tracing is enabled, but sensitive query parameters
+  (including the OpenWeatherMap `appid`) are replaced with `*****` by a URL
+  masking filter before they reach telemetry, so the API key is never exported
+  in clear text.
 
 ### Configuration Precedence
 
