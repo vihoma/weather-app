@@ -273,14 +273,14 @@ yaml = ["PyYAML"]
 
 [[package]]
 name = "cachetools"
-version = "7.2.6"
+version = "7.2.8"
 description = "Extensible memoizing collections and decorators"
 optional = false
 python-versions = ">=3.10"
 groups = ["main"]
 files = [
-    {file = "cachetools-7.2.6-py3-none-any.whl", hash = "sha256:8722e08fc36ae0838a9a0a2ab9935554720de3343a62dad7aae7c595854c8623"},
-    {file = "cachetools-7.2.6.tar.gz", hash = "sha256:1096513bdeed468ba505df3d123e4578a5a22c955f4a9ba3912fd71f3f95363a"},
+    {file = "cachetools-7.2.8-py3-none-any.whl", hash = "sha256:09b04a85741d0019b3fb7d02b7ee9933a422fa6923af92a0fd63b893b695830c"},
+    {file = "cachetools-7.2.8.tar.gz", hash = "sha256:3f9b146b2160975da273e7c23ec882f3996b65df608150d52083c07de0682075"},
 ]
 
 [[package]]
@@ -2750,4 +2750,4 @@ propcache = ">=0.2.1"
 [metadata]
 lock-version = "2.1"
 python-versions = ">=3.13"
-content-hash = "28c2b767f780ad4d543bb7413fa50381f088bd0f15fc61849e796099458e139a"
+content-hash = "c5e49667d4a87e78277d0fc60730668ca1a786cff4c03d31dcdb7b9a61afdb04"
